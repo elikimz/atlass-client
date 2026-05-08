@@ -18,61 +18,70 @@ export default function Layout() {
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background font-sans">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gray-900 text-white transition-all duration-300 flex flex-col`}>
-        <div className="p-4 border-b border-gray-700">
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-sidebar text-white transition-all duration-300 flex flex-col`}>
+        <div className="p-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold">AC</div>
-            {sidebarOpen && <span className="font-bold text-lg">Atlas Capture</span>}
+            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center font-bold text-sm">AC</div>
+            {sidebarOpen && (
+              <div>
+                <span className="font-bold text-sm block leading-none">Atlas Capture</span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-wider">Labels</span>
+              </div>
+            )}
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive(item.path)
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-800'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              {sidebarOpen && <span>{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
+        <div className="px-4 mb-4">
+          {sidebarOpen && <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 px-2">Navigation</p>}
+          <nav className="space-y-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
+                  isActive(item.path)
+                    ? 'bg-sidebar-active text-white'
+                    : 'text-gray-400 hover:bg-sidebar-hover hover:text-white'
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        <div className="p-4 border-t border-gray-700">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            {sidebarOpen ? '←' : '→'}
-          </button>
+        <div className="mt-auto p-4 border-t border-gray-800">
+          <div className="flex items-center gap-3 px-2 py-3">
+            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-xs">KF</div>
+            {sidebarOpen && (
+              <div className="overflow-hidden">
+                <p className="text-xs font-bold truncate">kim ff</p>
+                <p className="text-[10px] text-gray-500 truncate">elijahkimani1293@gmail.com</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Atlas Capture</h1>
-          <button
-            onClick={() => {
-              localStorage.removeItem('access_token')
-              window.location.href = '/login'
-            }}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            Sign Out
-          </button>
+        <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-gray-600">
+              ☰
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-400">🔔</span>
+          </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto bg-background">
           <Outlet />
         </div>
       </div>

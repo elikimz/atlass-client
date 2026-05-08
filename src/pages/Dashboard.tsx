@@ -31,71 +31,81 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back!</h2>
-        <p className="text-gray-600">Here's your progress at a glance</p>
+    <div className="p-12 max-w-5xl mx-auto">
+      <div className="mb-10">
+        <h2 className="text-3xl font-bold text-text-primary mb-1">Welcome, kim!</h2>
+        <p className="text-gray-500 text-sm">Here's what you need to do to start earning.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Footage Labeled</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{data?.footage_labeled_min || 0}</p>
-              <p className="text-gray-500 text-xs mt-1">minutes</p>
+      {/* Your Journey Card */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 mb-10">
+        <h3 className="text-lg font-bold text-text-primary mb-8">Your Journey</h3>
+        
+        <div className="space-y-12">
+          {/* Step 1 */}
+          <div className="flex items-start gap-6 relative">
+            <div className="absolute left-5 top-10 bottom-[-48px] w-[1px] bg-gray-100"></div>
+            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-primary font-bold text-sm z-10">1</div>
+            <div className="flex-1 bg-blue-50/30 border border-blue-100 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-bold text-text-primary">Complete Training</h4>
+                  <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase">Next Step</span>
+                </div>
+                <span className="text-gray-400">📖</span>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">Learn how to label videos accurately. Takes about 15 minutes.</p>
+              <button className="bg-primary hover:bg-primary-hover text-white text-sm font-bold py-2.5 px-6 rounded-lg transition flex items-center gap-2">
+                Start Training <span>→</span>
+              </button>
             </div>
-            <div className="text-4xl">📹</div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Approved Roles</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{data?.approved_roles || 'None'}</p>
-              <p className="text-gray-500 text-xs mt-1">yet</p>
+          {/* Step 2 */}
+          <div className="flex items-start gap-6 relative">
+            <div className="absolute left-5 top-10 bottom-[-48px] w-[1px] bg-gray-100"></div>
+            <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 font-bold text-sm z-10">2</div>
+            <div className="flex-1 p-2">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-bold text-gray-400">Set Up Payment</h4>
+                <span className="text-gray-300">💳</span>
+              </div>
+              <p className="text-sm text-gray-400">Learn how payments work and add your payment details.</p>
             </div>
-            <div className="text-4xl">✓</div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Certifications</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{data?.certifications_earned || 0}</p>
-              <p className="text-gray-500 text-xs mt-1">earned</p>
+          {/* Step 3 */}
+          <div className="flex items-start gap-6">
+            <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 font-bold text-sm">3</div>
+            <div className="flex-1 p-2">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="font-bold text-gray-400">Do Labeling Tasks</h4>
+                <span className="text-gray-300">💼</span>
+              </div>
+              <p className="text-sm text-gray-400">Browse and complete available labeling tasks to earn money.</p>
             </div>
-            <div className="text-4xl">🎓</div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Your Journey</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">1</div>
-            <div>
-              <p className="font-semibold text-gray-900">Complete Training</p>
-              <p className="text-sm text-gray-600">Finish the certification course</p>
-            </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Footage Labeled</p>
+            <p className="text-2xl font-bold text-text-primary">0 min</p>
+            <p className="text-[10px] text-gray-400 mt-1">Total footage processed</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold">2</div>
-            <div>
-              <p className="font-semibold text-gray-900">Start Labeling</p>
-              <p className="text-sm text-gray-600">Begin your first task</p>
-            </div>
+          <div className="w-10 h-10 bg-gray-50 rounded flex items-center justify-center text-gray-400">🕒</div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Approved Roles</p>
+            <p className="text-2xl font-bold text-text-primary">None yet</p>
+            <p className="text-[10px] text-gray-400 mt-1">Certifications earned</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold">3</div>
-            <div>
-              <p className="font-semibold text-gray-900">Get Paid</p>
-              <p className="text-sm text-gray-600">Receive weekly payments</p>
-            </div>
-          </div>
+          <div className="w-10 h-10 bg-gray-50 rounded flex items-center justify-center text-gray-400">🏅</div>
         </div>
       </div>
     </div>
