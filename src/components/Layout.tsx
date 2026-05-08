@@ -1,9 +1,21 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Layout() {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024
+      setIsMobile(mobile)
+      if (mobile) setSidebarOpen(false)
+      else setSidebarOpen(true)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -18,36 +30,51 @@ export default function Layout() {
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <div className="flex h-screen bg-background font-sans">
+    <div className="flex h-screen bg-[#F8FAFC] font-sans overflow-hidden">
+      {/* Sidebar Overlay for Mobile */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-sidebar text-white transition-all duration-300 flex flex-col`}>
-        <div className="p-6">
+      <div className={`
+        ${sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0'} 
+        fixed lg:relative z-50 h-full bg-[#0B1120] text-white transition-all duration-300 flex flex-col
+      `}>
+        <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center font-bold text-sm">AC</div>
-            {sidebarOpen && (
-              <div>
+            <div className="w-8 h-8 bg-[#5B5FFF] rounded flex items-center justify-center font-bold text-sm shrink-0">AC</div>
+            {(sidebarOpen || isMobile) && (
+              <div className="overflow-hidden whitespace-nowrap">
                 <span className="font-bold text-sm block leading-none">Atlas Capture</span>
                 <span className="text-[10px] text-gray-400 uppercase tracking-wider">Labels</span>
               </div>
             )}
           </div>
+          {isMobile && sidebarOpen && (
+            <button onClick={() => setSidebarOpen(false)} className="text-gray-400 hover:text-white">✕</button>
+          )}
         </div>
 
-        <div className="px-4 mb-4">
-          {sidebarOpen && <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 px-2">Navigation</p>}
+        <div className="px-4 mb-4 flex-1 overflow-y-auto">
+          {(sidebarOpen || isMobile) && <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-4 px-2">Navigation</p>}
           <nav className="space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => isMobile && setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded transition-colors ${
                   isActive(item.path)
-                    ? 'bg-sidebar-active text-white'
-                    : 'text-gray-400 hover:bg-sidebar-hover hover:text-white'
+                    ? 'bg-[#1E293B] text-white'
+                    : 'text-gray-400 hover:bg-[#1E293B] hover:text-white'
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
-                {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                <span className="text-lg shrink-0">{item.icon}</span>
+                {(sidebarOpen || isMobile) && <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>}
               </Link>
             ))}
           </nav>
@@ -55,8 +82,8 @@ export default function Layout() {
 
         <div className="mt-auto p-4 border-t border-gray-800">
           <div className="flex items-center gap-3 px-2 py-3">
-            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-xs">KF</div>
-            {sidebarOpen && (
+            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-xs shrink-0">KF</div>
+            {(sidebarOpen || isMobile) && (
               <div className="overflow-hidden">
                 <p className="text-xs font-bold truncate">kim ff</p>
                 <p className="text-[10px] text-gray-500 truncate">elijahkimani1293@gmail.com</p>
@@ -67,22 +94,30 @@ export default function Layout() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
+        <div className="bg-white border-b border-gray-100 px-4 lg:px-8 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-gray-600">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)} 
+              className="text-gray-400 hover:text-gray-600 p-1"
+            >
               ☰
             </button>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-gray-400">🔔</span>
+            <button className="text-gray-400 hover:text-gray-600 relative">
+              🔔
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto bg-background">
-          <Outlet />
+        <div className="flex-1 overflow-auto bg-[#F8FAFC]">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </div>
       </div>
     </div>

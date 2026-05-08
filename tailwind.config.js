@@ -24,7 +24,14 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+      },
+      boxShadow: {
+        'card': '0 8px 30px rgb(0,0,0,0.04)',
+      },
+      borderRadius: {
+        'xl': '0.75rem',
+        '2xl': '1rem',
       }
     },
   },
