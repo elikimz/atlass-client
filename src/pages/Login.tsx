@@ -26,157 +26,157 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (val
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center py-12 px-4 font-sans">
+    <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 16px', fontFamily: 'Inter, sans-serif', color: '#0F1729' }}>
       {/* Logo */}
-      <div className="mb-8 flex items-center gap-2">
-        <div className="w-8 h-8 bg-[#5B5FFF] rounded flex items-center justify-center text-white font-bold text-sm">AC</div>
-        <span className="text-xl font-bold text-[#0F1729]">Atlas Capture</span>
+      <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ width: '32px', height: '32px', backgroundColor: '#5B5FFF', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
+          <span style={{ margin: 'auto' }}>AC</span>
+        </div>
+        <span style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '-0.025em' }}>Atlas Capture</span>
       </div>
 
       {/* Main Card */}
-      <div className="w-full max-w-[540px] bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-        <div className="p-8 lg:p-12">
+      <div style={{ width: '100%', maxWidth: '540px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #F1F5F9', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+        <div style={{ padding: '48px' }}>
           {/* Badge */}
-          <div className="flex justify-center mb-6">
-            <span className="bg-blue-50 text-[#5B5FFF] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-              ✨ Now Hiring Worldwide
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+            <span style={{ backgroundColor: '#EFF6FF', color: '#5B5FFF', fontSize: '10px', fontWeight: 'bold', padding: '4px 12px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px', border: '1px solid #DBEAFE' }}>
+              <span style={{ width: '4px', height: '4px', backgroundColor: '#5B5FFF', borderRadius: '50%' }}></span>
+              Now Hiring Worldwide
             </span>
           </div>
 
           {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-2xl lg:text-3xl font-bold text-[#0F1729] leading-tight mb-4">
-              Help Train the Next Generation of <br className="hidden sm:block" />
-              <span className="text-[#5B5FFF]">Breakthrough AI</span>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', lineHeight: '1.1', marginBottom: '16px', letterSpacing: '-0.025em' }}>
+              Help Train the Next Generation of <br />
+              <span style={{ color: '#5B5FFF' }}>Breakthrough AI</span>
             </h1>
-            <p className="text-gray-500 text-sm max-w-[400px] mx-auto">
+            <p style={{ color: '#64748B', fontSize: '14px', maxWidth: '380px', margin: '0 auto', lineHeight: '1.6' }}>
               Get paid to complete simple tasks from home. Join thousands of contributors helping build the future of AI.
             </p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-4 mb-10">
-            <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <p className="text-lg font-bold text-[#0F1729]">10,000+</p>
-              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Contributors</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '40px' }}>
+            <div style={{ textAlign: 'center', padding: '16px 8px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #F1F5F9' }}>
+              <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>10,000+</p>
+              <p style={{ fontSize: '9px', color: '#94A3B8', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em', marginTop: '2px' }}>Contributors</p>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <p className="text-lg font-bold text-[#0F1729]">$2M+</p>
-              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Paid Out</p>
+            <div style={{ textAlign: 'center', padding: '16px 8px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #F1F5F9' }}>
+              <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>$2M+</p>
+              <p style={{ fontSize: '9px', color: '#94A3B8', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em', marginTop: '2px' }}>Paid Out</p>
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <p className="text-lg font-bold text-[#0F1729]">100+</p>
-              <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Cities</p>
+            <div style={{ textAlign: 'center', padding: '16px 8px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #F1F5F9' }}>
+              <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>100+</p>
+              <p style={{ fontSize: '9px', color: '#94A3B8', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '0.1em', marginTop: '2px' }}>Cities</p>
             </div>
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
-            <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
-              <span className="text-blue-500 text-sm">💰</span>
-              <span className="text-xs font-bold text-[#0F1729]">Competitive Pay</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
-              <span className="text-blue-500 text-sm">🕒</span>
-              <span className="text-xs font-bold text-[#0F1729]">Flexible Hours</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
-              <span className="text-blue-500 text-sm">🌐</span>
-              <span className="text-xs font-bold text-[#0F1729]">Work Anywhere</span>
-            </div>
-            <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
-              <span className="text-blue-500 text-sm">🛡️</span>
-              <span className="text-xs font-bold text-[#0F1729]">Weekly Payouts</span>
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '40px' }}>
+            {[
+              { icon: '💰', label: 'Competitive Pay' },
+              { icon: '🕒', label: 'Flexible Hours' },
+              { icon: '🌐', label: 'Work Anywhere' },
+              { icon: '🛡️', label: 'Weekly Payouts' }
+            ].map((feature, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', backgroundColor: 'white', border: '1px solid #F1F5F9', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
+                <span style={{ fontSize: '16px' }}>{feature.icon}</span>
+                <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{feature.label}</span>
+              </div>
+            ))}
           </div>
 
           {/* Onboarding Badges */}
-          <div className="flex justify-center gap-6 mb-8">
-            <span className="text-[10px] font-bold text-teal-500 flex items-center gap-1 uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> No experience required
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '40px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#059669', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <span style={{ width: '6px', height: '6px', backgroundColor: '#10B981', borderRadius: '50%' }}></span> No experience required
             </span>
-            <span className="text-[10px] font-bold text-teal-500 flex items-center gap-1 uppercase tracking-wider">
-              <span className="w-1.5 h-1.5 bg-teal-500 rounded-full"></span> Quick onboarding
+            <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#059669', display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <span style={{ width: '6px', height: '6px', backgroundColor: '#10B981', borderRadius: '50%' }}></span> Quick onboarding
             </span>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
-              <label className="block text-[13px] font-bold text-[#0F1729] mb-2">Email</label>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', marginLeft: '4px' }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition text-sm shadow-sm"
+                style={{ width: '100%', padding: '14px 16px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                 required
               />
             </div>
 
-            <div className="flex items-center gap-3 py-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '4px 0', marginLeft: '4px' }}>
               <input
                 type="checkbox"
                 id="student"
                 checked={isStudent}
                 onChange={(e) => setIsStudent(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 text-[#5B5FFF] focus:ring-[#5B5FFF]"
+                style={{ width: '20px', height: '20px', borderRadius: '6px', border: '1px solid #CBD5E1', cursor: 'pointer' }}
               />
-              <label htmlFor="student" className="text-xs font-medium text-gray-600 cursor-pointer">
+              <label htmlFor="student" style={{ fontSize: '13px', fontWeight: '500', color: '#475569', cursor: 'pointer', userSelect: 'none' }}>
                 I'm a Philippines college/university student
               </label>
             </div>
 
-            {error && <div className="text-red-600 text-xs bg-red-50 p-3 rounded-lg border border-red-100">{error}</div>}
+            {error && <div style={{ color: '#DC2626', fontSize: '12px', backgroundColor: '#FEF2F2', padding: '16px', borderRadius: '12px', border: '1px solid #FEE2E2', fontWeight: '500' }}>{error}</div>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#5B5FFF] hover:bg-[#4A4ED9] text-white font-bold py-3.5 rounded-xl transition disabled:opacity-50 text-sm shadow-md flex items-center justify-center gap-2"
+              style={{ width: '100%', backgroundColor: '#5B5FFF', color: 'white', fontWeight: 'bold', padding: '16px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 20px rgba(91,95,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
             >
-              {loading ? 'Sending...' : 'Start Earning Today'} <span>→</span>
+              {loading ? 'Sending...' : 'Start Earning Today'} 
+              <span style={{ fontSize: '18px' }}>→</span>
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-[10px] text-gray-400 px-4 leading-relaxed">
-              By continuing, you agree to our <span className="underline cursor-pointer">Terms of Service</span> and <span className="underline cursor-pointer">Privacy Policy</span>.
+          <div style={{ marginTop: '32px', textAlign: 'center' }}>
+            <p style={{ fontSize: '11px', color: '#94A3B8', padding: '0 24px', lineHeight: '1.6' }}>
+              By continuing, you agree to our <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Terms of Service</span> and <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Privacy Policy</span>.
             </p>
           </div>
         </div>
       </div>
 
       {/* Testimonial Card */}
-      <div className="w-full max-w-[540px] mt-6 bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
-        <div className="flex items-center gap-1 mb-4">
-          <span className="text-blue-500 text-xl">❝</span>
-          <div className="flex gap-0.5">
+      <div style={{ width: '100%', maxWidth: '540px', marginTop: '24px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #F1F5F9', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', padding: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '20px' }}>
+          <span style={{ color: '#5B5FFF', fontSize: '24px', fontFamily: 'serif' }}>"</span>
+          <div style={{ display: 'flex', gap: '2px' }}>
             {[1, 2, 3, 4, 5].map((i) => (
-              <span key={i} className="text-yellow-400 text-sm">★</span>
+              <span key={i} style={{ color: '#FBBF24', fontSize: '14px' }}>★</span>
             ))}
           </div>
         </div>
-        <p className="text-sm font-medium text-[#0F1729] leading-relaxed mb-6">
+        <p style={{ fontSize: '16px', fontWeight: 'bold', lineHeight: '1.6', marginBottom: '32px' }}>
           "What started as extra cash on weekends turned into my full time thing."
         </p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-xs">🇮🇳</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ width: '40px', height: '40px', backgroundColor: '#F8FAFC', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', border: '1px solid #F1F5F9' }}>🇮🇳</div>
             <div>
-              <p className="text-xs font-bold text-[#0F1729]">Rajesh S.</p>
-              <p className="text-[10px] text-gray-500">Mumbai, India</p>
+              <p style={{ fontSize: '14px', fontWeight: 'bold', margin: 0 }}>Rajesh S.</p>
+              <p style={{ fontSize: '11px', color: '#64748B', fontWeight: '500', margin: 0 }}>Mumbai, India</p>
             </div>
           </div>
-          <div className="bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-            <p className="text-[10px] font-bold text-[#0F1729]">Earned $30k+</p>
+          <div style={{ backgroundColor: '#F8FAFC', padding: '6px 16px', borderRadius: '9999px', border: '1px solid #F1F5F9' }}>
+            <p style={{ fontSize: '11px', fontBold: 'bold', color: '#5B5FFF', margin: 0 }}>Earned $30k+</p>
           </div>
         </div>
       </div>
 
       {/* Footer Link */}
-      <div className="mt-8">
-        <a href="#" className="text-xs font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1">
-          Learn more about Atlas Capture <span>↗</span>
+      <div style={{ marginTop: '40px', marginBottom: '48px' }}>
+        <a href="#" style={{ fontSize: '13px', fontWeight: 'bold', color: '#94A3B8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          Learn more about Atlas Capture 
+          <span>↗</span>
         </a>
       </div>
     </div>
