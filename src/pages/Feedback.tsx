@@ -69,17 +69,17 @@ export default function Feedback() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {evaluations.map((eval) => (
-            <div key={eval.id} style={{
+          {evaluations.map((evaluation) => (
+            <div key={evaluation.id} style={{
               ...card,
               padding: '16px 20px',
               border: '1px solid #e5e7eb',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
             }}>
               <div>
-                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>{eval.name}</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>{evaluation.name}</h3>
                 <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>
-                  Episodes: {eval.episodes_completed} • Passing: {eval.episodes_passing_audit}
+                  Episodes: {evaluation.episodes_completed} • Passing: {evaluation.episodes_passing_audit}
                 </p>
               </div>
               <button style={{
