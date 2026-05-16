@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import OTPVerify from './pages/OTPVerify'
 import Dashboard from './pages/Dashboard'
 import Training from './pages/Training'
+import LearningHub from './pages/LearningHub'
 import Tasks from './pages/Tasks'
 import Referrals from './pages/Referrals'
 import Payments from './pages/Payments'
@@ -22,7 +23,14 @@ function App() {
   }, [])
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -30,17 +38,18 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
         <Route path="/verify" element={<OTPVerify setIsAuthenticated={setIsAuthenticated} />} />
-        
         {isAuthenticated ? (
-          <Route element={<Layout />}>
+          <Route element={<Layout setIsAuthenticated={setIsAuthenticated} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/training" element={<Training />} />
+            <Route path="/training/hub" element={<LearningHub />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/feedback" element={<Feedback />} />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
           </Route>
         ) : (
           <Route path="*" element={<Navigate to="/login" />} />

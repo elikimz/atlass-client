@@ -1,145 +1,139 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 
-interface ReferralCode {
-  code: string
-  signups: number
-  trained: number
-  earned: number
-}
-
-interface ReferralSummary {
+interface ReferralData {
   earnings: number
   users_referred: number
-  passed_training: number
+  trained: number
+  codes: Array<{ code: string; signups: number; trained: number; earned: number }>
+}
+
+const card: React.CSSProperties = {
+  backgroundColor: 'white',
+  borderRadius: '10px',
+  border: '1px solid #e5e7eb',
+  padding: '24px',
 }
 
 export default function Referrals() {
-  const [summary, setSummary] = useState<ReferralSummary | null>(null)
-  const [codes, setCodes] = useState<ReferralCode[]>([])
+  const [data, setData] = useState<ReferralData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [newCode, setNewCode] = useState('')
-  const [showAddCode, setShowAddCode] = useState(false)
+  const [copied, setCopied] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [summaryRes, codesRes] = await Promise.all([
-          api.get('/referrals/summary'),
-          api.get('/referrals/codes'),
-        ])
-        setSummary(summaryRes.data)
-        setCodes(codesRes.data)
-      } catch (error) {
-        console.error('Failed to fetch referrals:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
+    api.get('/referrals/overview')
+      .then((r) => setData(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
-  const handleAddCode = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      await api.post('/referrals/codes', { code: newCode })
-      setNewCode('')
-      setShowAddCode(false)
-      // Refresh codes
-      const response = await api.get('/referrals/codes')
-      setCodes(response.data)
-    } catch (error) {
-      console.error('Failed to add referral code:', error)
-    }
+  const handleCopy = (code: string) => {
+    navigator.clipboard.writeText(code)
+    setCopied(code)
+    setTimeout(() => setCopied(null), 2000)
   }
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    )
   }
 
+  const stats = [
+    { label: 'Earnings', value: `$${data?.earnings.toFixed(2) || '0.00'}`, icon: '💵', color: '#22c55e' },
+    { label: 'Users Referred', value: data?.users_referred || 0, icon: '👥', color: '#3b82f6' },
+    { label: 'Passed Training', value: data?.trained || 0, icon: '✓', color: '#8b5cf6' },
+  ]
+
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Referral Program</h2>
-        <p className="text-gray-600">Earn money by referring friends</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Header */}
+      <div>
+        <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Referrals</h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Earn money by referring friends to Adpulse AI</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600 text-sm font-medium">Total Earnings</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">${summary?.earnings.toFixed(2) || '0.00'}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600 text-sm font-medium">Users Referred</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{summary?.users_referred || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600 text-sm font-medium">Passed Training</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{summary?.passed_training || 0}</p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Your Referral Codes</h3>
-          <button
-            onClick={() => setShowAddCode(!showAddCode)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-          >
-            + Add Code
-          </button>
-        </div>
-
-        {showAddCode && (
-          <form onSubmit={handleAddCode} className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newCode}
-                onChange={(e) => setNewCode(e.target.value)}
-                placeholder="Enter referral code"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-              >
-                Add
-              </button>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        {stats.map((stat) => (
+          <div key={stat.label} style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {stat.label}
+              </span>
+              <span style={{ fontSize: '20px' }}>{stat.icon}</span>
             </div>
-          </form>
-        )}
+            <p style={{ fontSize: '28px', fontWeight: 700, color: stat.color, margin: '0 0 4px' }}>
+              {stat.value}
+            </p>
+            <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>Total {stat.label.toLowerCase()}</p>
+          </div>
+        ))}
+      </div>
 
-        <div className="space-y-4">
-          {codes.map((code) => (
-            <div key={code.code} className="border border-gray-200 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <code className="bg-gray-100 px-3 py-1 rounded font-mono font-semibold text-gray-900">{code.code}</code>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Copy</button>
+      {/* Referral codes */}
+      <div style={card}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Your Referral Codes</h2>
+        {data?.codes && data.codes.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {data.codes.map((code) => (
+              <div key={code.code} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', border: '1px solid #e5e7eb', borderRadius: '8px', backgroundColor: '#f9fafb' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 2px', fontFamily: 'monospace' }}>
+                    {code.code}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
+                    {code.signups} signups • {code.trained} trained • ${code.earned.toFixed(2)} earned
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleCopy(code.code)}
+                  style={{
+                    padding: '6px 12px', fontSize: '12px', fontWeight: 600,
+                    backgroundColor: copied === code.code ? '#dcfce7' : '#f0f4ff',
+                    color: copied === code.code ? '#16a34a' : '#6366f1',
+                    border: 'none', borderRadius: '6px', cursor: 'pointer', whiteSpace: 'nowrap',
+                  }}
+                >
+                  {copied === code.code ? '✓ Copied' : 'Copy'}
+                </button>
               </div>
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-600">Signups</p>
-                  <p className="font-bold text-gray-900">{code.signups}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Trained</p>
-                  <p className="font-bold text-gray-900">{code.trained}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600">Earned</p>
-                  <p className="font-bold text-gray-900">${code.earned.toFixed(2)}</p>
-                </div>
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>No referral codes yet. Generate one to get started.</p>
+        )}
+        <button style={{
+          marginTop: '12px', width: '100%', padding: '10px', fontSize: '13px', fontWeight: 600,
+          backgroundColor: 'white', color: '#6366f1', border: '2px dashed #6366f1', borderRadius: '8px', cursor: 'pointer',
+        }}>
+          + Add Another Code
+        </button>
+      </div>
+
+      {/* How it works */}
+      <div style={card}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>How It Works</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { num: '1', title: 'Share Your Code', desc: 'Send your referral code to friends and colleagues.' },
+            { num: '2', title: 'They Sign Up', desc: 'Your friends use your code to create an account.' },
+            { num: '3', title: 'They Complete Training', desc: 'Once they finish training, you earn a bonus.' },
+            { num: '4', title: 'Get Paid', desc: 'Earn $X for each friend who completes training.' },
+          ].map((step) => (
+            <div key={step.num} style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#ede9fe', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+                {step.num}
+              </div>
+              <div>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{step.title}</p>
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{step.desc}</p>
               </div>
             </div>
           ))}
         </div>
-
-        {codes.length === 0 && (
-          <p className="text-gray-600 text-center py-8">No referral codes yet. Create one to get started!</p>
-        )}
       </div>
     </div>
   )

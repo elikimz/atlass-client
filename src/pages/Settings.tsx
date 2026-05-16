@@ -2,229 +2,230 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
-interface UserProfile {
-  first_name: string | null
-  last_name: string | null
+interface Profile {
+  first_name: string
+  last_name: string
   email: string
 }
 
-export default function Settings() {
-  const [profile, setProfile] = useState<UserProfile | null>(null)
+const card: React.CSSProperties = {
+  backgroundColor: 'white',
+  borderRadius: '10px',
+  border: '1px solid #e5e7eb',
+  padding: '24px',
+}
+
+export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (v: boolean) => void }) {
+  const navigate = useNavigate()
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
-  const [formData, setFormData] = useState({ first_name: '', last_name: '' })
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const navigate = useNavigate()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await api.get('/settings/profile')
-        setProfile(response.data)
-        setFormData({
-          first_name: response.data.first_name || '',
-          last_name: response.data.last_name || '',
-        })
-      } catch (error) {
-        console.error('Failed to fetch profile:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProfile()
+    api.get('/settings/profile')
+      .then((r) => {
+        setProfile(r.data)
+        setFirstName(r.data.first_name || '')
+        setLastName(r.data.last_name || '')
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSave = async () => {
     setSaving(true)
-    setError('')
-    setSuccess('')
-
     try {
-      const response = await api.put('/settings/profile', formData)
-      setProfile(response.data)
+      await api.put('/settings/profile', { first_name: firstName, last_name: lastName })
+      setProfile({ ...profile!, first_name: firstName, last_name: lastName })
       setEditing(false)
-      setSuccess('Profile updated successfully!')
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to update profile')
+      localStorage.setItem('user_first_name', firstName)
+      localStorage.setItem('user_last_name', lastName)
+    } catch (err) {
+      console.error(err)
     } finally {
       setSaving(false)
     }
   }
 
+  const handleSignOut = () => {
+    localStorage.removeItem('access_token')
+    setIsAuthenticated(false)
+    navigate('/login')
+  }
+
   const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    if (window.confirm('Are you sure? This cannot be undone.')) {
       try {
         await api.delete('/settings/account')
-        localStorage.removeItem('access_token')
-        navigate('/login')
-      } catch (err: any) {
-        setError(err.response?.data?.detail || 'Failed to delete account')
+        handleSignOut()
+      } catch (err) {
+        console.error(err)
       }
     }
   }
 
-  const handleSignOut = () => {
-    localStorage.removeItem('access_token')
-    navigate('/login')
-  }
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B5FFF]"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Settings</h1>
-        <p className="text-gray-600">Manage your account settings and preferences.</p>
+        <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Settings</h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Manage your account and preferences.</p>
       </div>
 
-      {/* Alerts */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-          {success}
-        </div>
-      )}
-
       {/* Profile Section */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">👤</span>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Profile</h2>
-              <p className="text-sm text-gray-600">Your personal information</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setEditing(!editing)}
-            className="text-[#5B5FFF] hover:text-[#4A4FD9] font-semibold text-sm"
-          >
-            {editing ? 'Cancel' : 'Edit'}
-          </button>
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '18px' }}>👤</span>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Profile</h2>
         </div>
 
         {editing ? (
-          <form onSubmit={handleSaveProfile} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
-                <input
-                  type="text"
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B5FFF] focus:border-transparent outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
-                <input
-                  type="text"
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B5FFF] focus:border-transparent outline-none"
-                />
-              </div>
-            </div>
-
+          <form onSubmit={(e) => { e.preventDefault(); handleSave() }} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>First Name</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                style={{
+                  width: '100%', padding: '8px 12px', fontSize: '14px', border: '1px solid #d1d5db', borderRadius: '7px',
+                  outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>Last Name</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                style={{
+                  width: '100%', padding: '8px 12px', fontSize: '14px', border: '1px solid #d1d5db', borderRadius: '7px',
+                  outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>Email</label>
               <input
                 type="email"
                 value={profile?.email || ''}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+                style={{
+                  width: '100%', padding: '8px 12px', fontSize: '14px', border: '1px solid #d1d5db', borderRadius: '7px',
+                  backgroundColor: '#f9fafb', color: '#9ca3af', cursor: 'not-allowed', boxSizing: 'border-box',
+                }}
               />
-              <p className="text-xs text-gray-500 mt-2">Contact support to update your email address.</p>
+              <p style={{ fontSize: '11px', color: '#9ca3af', margin: '4px 0 0' }}>Contact support to update your email address.</p>
             </div>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2 bg-[#5B5FFF] text-white font-semibold rounded-lg hover:bg-[#4A4FD9] transition-colors disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+                  backgroundColor: '#6366f1', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
+                }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                style={{
+                  padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+                  backgroundColor: 'white', color: '#374151', border: '1px solid #d1d5db', borderRadius: '7px', cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         ) : (
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-              <p className="text-gray-600 text-sm font-medium">Email</p>
-              <p className="text-gray-900 font-semibold mt-1">{profile?.email}</p>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', margin: '0 0 4px' }}>First Name</p>
+              <p style={{ fontSize: '14px', color: '#111827', margin: 0 }}>{profile?.first_name || 'Not set'}</p>
             </div>
             <div>
-              <p className="text-gray-600 text-sm font-medium">First Name</p>
-              <p className="text-gray-900 font-semibold mt-1">{profile?.first_name || 'Not set'}</p>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', margin: '0 0 4px' }}>Last Name</p>
+              <p style={{ fontSize: '14px', color: '#111827', margin: 0 }}>{profile?.last_name || 'Not set'}</p>
             </div>
             <div>
-              <p className="text-gray-600 text-sm font-medium">Last Name</p>
-              <p className="text-gray-900 font-semibold mt-1">{profile?.last_name || 'Not set'}</p>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', margin: '0 0 4px' }}>Email</p>
+              <p style={{ fontSize: '14px', color: '#111827', margin: 0 }}>{profile?.email}</p>
             </div>
+            <button
+              onClick={() => setEditing(true)}
+              style={{
+                alignSelf: 'flex-start', padding: '6px 12px', fontSize: '12px', fontWeight: 600,
+                backgroundColor: '#f0f4ff', color: '#6366f1', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              }}
+            >
+              Edit Profile
+            </button>
           </div>
         )}
       </div>
 
       {/* Discord Section */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-2xl">💬</span>
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '18px' }}>💬</span>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Discord</h2>
-            <p className="text-sm text-gray-600">Connect for support and announcements</p>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Discord</h2>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Connect for support and announcements</p>
           </div>
         </div>
-
-        <p className="text-gray-600 mb-4">Join our Discord server for support, announcements, and to connect with the team.</p>
-        <button className="px-6 py-2 bg-[#5B5FFF] text-white font-semibold rounded-lg hover:bg-[#4A4FD9] transition-colors">
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 12px' }}>Join our Discord server for support, announcements, and to connect with the team.</p>
+        <button style={{
+          padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+          backgroundColor: '#6366f1', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
+        }}>
           Connect Discord
         </button>
       </div>
 
       {/* Account Section */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-2xl">🔐</span>
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '18px' }}>🔐</span>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Account</h2>
-            <p className="text-sm text-gray-600">Manage your account settings</p>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Account</h2>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Manage your account settings</p>
           </div>
         </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-            <div>
-              <p className="font-semibold text-gray-900">Email Notifications</p>
-              <p className="text-sm text-gray-600">Receive updates about new tasks and platform announcements.</p>
-            </div>
-            <button className="px-4 py-2 text-[#5B5FFF] font-semibold hover:bg-blue-50 rounded-lg transition-colors">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ paddingBottom: '12px', borderBottom: '1px solid #f3f4f6' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Email Notifications</p>
+            <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 8px' }}>Receive updates about new tasks and platform announcements.</p>
+            <button style={{
+              padding: '6px 12px', fontSize: '12px', fontWeight: 600,
+              backgroundColor: '#f0f4ff', color: '#6366f1', border: 'none', borderRadius: '6px', cursor: 'pointer',
+            }}>
               Manage
             </button>
           </div>
-
-          <div className="pt-4">
-            <p className="font-semibold text-gray-900 mb-2">Delete Account</p>
-            <p className="text-sm text-gray-600 mb-4">Permanently delete your account and personal data.</p>
+          <div>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Delete Account</p>
+            <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 8px' }}>Permanently delete your account and personal data.</p>
             <button
               onClick={handleDeleteAccount}
-              className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+              style={{
+                padding: '6px 12px', fontSize: '12px', fontWeight: 600,
+                backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              }}
             >
               Delete Account
             </button>
@@ -233,25 +234,30 @@ export default function Settings() {
       </div>
 
       {/* Session Section */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-2xl">📱</span>
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '18px' }}>📱</span>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Session</h2>
-            <p className="text-sm text-gray-600">Your current session information</p>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Session</h2>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Your current session information</p>
           </div>
         </div>
-
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             onClick={handleSignOut}
-            className="w-full px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+            style={{
+              width: '100%', padding: '8px 12px', fontSize: '13px', fontWeight: 600,
+              backgroundColor: 'white', color: '#374151', border: '1px solid #d1d5db', borderRadius: '7px', cursor: 'pointer',
+            }}
           >
             Sign out this session
           </button>
           <button
             onClick={handleSignOut}
-            className="w-full px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+            style={{
+              width: '100%', padding: '8px 12px', fontSize: '13px', fontWeight: 600,
+              backgroundColor: 'white', color: '#374151', border: '1px solid #d1d5db', borderRadius: '7px', cursor: 'pointer',
+            }}
           >
             Sign out all sessions
           </button>

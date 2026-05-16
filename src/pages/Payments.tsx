@@ -13,122 +13,148 @@ interface PaymentHistory {
   status: string
 }
 
+const card: React.CSSProperties = {
+  backgroundColor: 'white',
+  borderRadius: '10px',
+  border: '1px solid #e5e7eb',
+  padding: '24px',
+}
+
 export default function Payments() {
   const [overview, setOverview] = useState<PaymentOverview | null>(null)
   const [history, setHistory] = useState<PaymentHistory[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [overviewRes, historyRes] = await Promise.all([
-          api.get('/payments/overview'),
-          api.get('/payments/history'),
-        ])
+    Promise.all([
+      api.get('/payments/overview'),
+      api.get('/payments/history'),
+    ])
+      .then(([overviewRes, historyRes]) => {
         setOverview(overviewRes.data)
         setHistory(historyRes.data)
-      } catch (error) {
-        console.error('Failed to fetch payments:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B5FFF]"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     )
   }
 
+  const stats = [
+    { label: 'Total Paid', value: `$${overview?.total_paid.toFixed(2) || '0.00'}`, icon: '💵', color: '#22c55e' },
+    { label: 'Previous Unpaid', value: `$${overview?.previous_unpaid.toFixed(2) || '0.00'}`, icon: '⏳', color: '#f59e0b' },
+    { label: 'Pending', value: `$${overview?.current_pending.toFixed(2) || '0.00'}`, icon: '📅', color: '#f59e0b' },
+  ]
+
+  const statusBadge = (status: string) => {
+    if (status === 'paid') return { label: 'Paid', color: '#16a34a', bg: '#dcfce7' }
+    if (status === 'pending') return { label: 'Pending', color: '#b45309', bg: '#fef3c7' }
+    return { label: 'In Progress', color: '#2563eb', bg: '#dbeafe' }
+  }
+
   return (
-    <div className="space-y-8">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Payments</h1>
-        <p className="text-gray-600">Manage your payment method and view your earnings.</p>
+        <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Payments</h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Manage your payment method and view your earnings.</p>
       </div>
 
-      {/* Payment Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Paid</h3>
-            <span className="text-2xl">💵</span>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        {stats.map((stat) => (
+          <div key={stat.label} style={card}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {stat.label}
+              </span>
+              <span style={{ fontSize: '20px' }}>{stat.icon}</span>
+            </div>
+            <p style={{ fontSize: '28px', fontWeight: 700, color: stat.color, margin: '0 0 4px' }}>
+              {stat.value}
+            </p>
+            <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>Total {stat.label.toLowerCase()}</p>
           </div>
-          <p className="text-3xl font-bold text-green-600">${overview?.total_paid.toFixed(2) || '0.00'}</p>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Previous Unpaid</h3>
-            <span className="text-2xl">⏳</span>
-          </div>
-          <p className="text-3xl font-bold text-gray-900">${overview?.previous_unpaid.toFixed(2) || '0.00'}</p>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Pending</h3>
-            <span className="text-2xl">📅</span>
-          </div>
-          <p className="text-3xl font-bold text-yellow-600">${overview?.current_pending.toFixed(2) || '0.00'}</p>
-        </div>
+        ))}
       </div>
 
-      {/* Payment Method Section */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Method</h2>
-        <p className="text-gray-600 mb-6">How you'll receive your earnings</p>
-
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-          <p className="text-gray-700 mb-4">You can choose between crypto (USDC/USDT) or Wise bank transfer.</p>
-          <button className="px-6 py-2 bg-[#5B5FFF] text-white font-semibold rounded-lg hover:bg-[#4A4FD9] transition-colors">
+      {/* Payment Method */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '18px' }}>💳</span>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Payment Method</h2>
+        </div>
+        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px', margin: 0 }}>How you'll receive your earnings</p>
+        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: '#1e3a8a', marginBottom: '12px', margin: '0 0 12px' }}>
+            You can choose between crypto (USDC/USDT) or Wise bank transfer.
+          </p>
+          <button style={{
+            padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+            backgroundColor: '#6366f1', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
+          }}>
             Set Up Payment Method
           </button>
         </div>
       </div>
 
       {/* Payment History */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment History</h2>
-
+      <div style={card}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Payment History</h2>
         {history.length > 0 ? (
-          <div className="space-y-4">
-            {history.map((payment, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <div>
-                  <p className="font-semibold text-gray-900">{payment.period}</p>
-                  <p className="text-sm text-gray-600 mt-1">Status: {payment.status}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {history.map((payment, i) => {
+              const badge = statusBadge(payment.status)
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{payment.period}</p>
+                    <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Status: {payment.status}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
+                      ${payment.amount.toFixed(2)}
+                    </p>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: badge.color, backgroundColor: badge.bg, padding: '2px 8px', borderRadius: '20px' }}>
+                      {badge.label}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-gray-900">${payment.amount.toFixed(2)}</p>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${
-                    payment.status === 'paid'
-                      ? 'bg-green-100 text-green-800'
-                      : payment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {payment.status === 'in_progress' ? 'In Progress' : payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No payment history yet</p>
-            <p className="text-gray-500 text-sm mt-2">Complete tasks to start earning</p>
+          <div style={{ textAlign: 'center', padding: '32px 24px' }}>
+            <p style={{ fontSize: '16px', fontWeight: 600, color: '#6b7280', margin: '0 0 4px' }}>No payment history yet</p>
+            <p style={{ fontSize: '14px', color: '#9ca3af', margin: 0 }}>Complete tasks to start earning</p>
           </div>
         )}
+      </div>
+
+      {/* Requirements */}
+      <div style={card}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Requirements for Payment</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {[
+            'Complete training certification',
+            'Maintain quality score above 85%',
+            'Complete at least 10 tasks',
+            'Verify payment method',
+          ].map((req, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span style={{ fontSize: '14px', color: '#374151' }}>{req}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

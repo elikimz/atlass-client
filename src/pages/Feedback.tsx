@@ -8,88 +8,113 @@ interface Evaluation {
   episodes_passing_audit: string
 }
 
+const card: React.CSSProperties = {
+  backgroundColor: 'white',
+  borderRadius: '10px',
+  border: '1px solid #e5e7eb',
+  padding: '24px',
+}
+
 export default function Feedback() {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchEvaluations = async () => {
-      try {
-        const response = await api.get('/feedback/evaluations')
-        setEvaluations(response.data)
-      } catch (error) {
-        console.error('Failed to fetch evaluations:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchEvaluations()
+    api.get('/feedback/evaluations')
+      .then((r) => setEvaluations(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    )
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Feedback & Evaluations</h2>
-        <p className="text-gray-600">Track your evaluation progress and audit results</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Header */}
+      <div>
+        <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Feedback & Audits</h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>View your labeling quality feedback and audit results.</p>
       </div>
 
-      <div className="space-y-6">
-        {evaluations.map((evaluation) => (
-          <div key={evaluation.id} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">{evaluation.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">Track your progress through this evaluation tier</p>
-              </div>
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                In Progress
-              </span>
-            </div>
+      {/* Campaign Audit Feedback */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Campaign Audit Feedback</h2>
+          <button style={{
+            padding: '6px 12px', fontSize: '12px', fontWeight: 600,
+            backgroundColor: '#6366f1', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer',
+          }}>
+            Open
+          </button>
+        </div>
+        <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Detailed feedback on your recent labeling submissions</p>
+      </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-600 text-sm font-medium">Episodes Completed</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{evaluation.episodes_completed}</p>
-                <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: '0%' }}
-                  ></div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-gray-600 text-sm font-medium">Passing Audit</p>
-                <p className="text-2xl font-bold text-gray-900 mt-2">{evaluation.episodes_passing_audit}</p>
-                <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-600 h-2 rounded-full"
-                    style={{ width: '0%' }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-3">Feedback</h4>
-              <p className="text-gray-600 text-sm">
-                Complete episodes to receive detailed feedback on your labeling accuracy and quality.
-              </p>
-            </div>
+      {/* Evaluations */}
+      {evaluations.length === 0 ? (
+        <div style={{ ...card, textAlign: 'center', padding: '48px 24px' }}>
+          <div style={{ width: '52px', height: '52px', backgroundColor: '#f0f4ff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
           </div>
-        ))}
-      </div>
-
-      {evaluations.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-          <p className="text-blue-900 font-semibold mb-2">No evaluations available yet</p>
-          <p className="text-blue-700">Start labeling tasks to receive evaluations</p>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 6px' }}>No evaluations yet</p>
+          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Complete tasks to receive feedback</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {evaluations.map((eval) => (
+            <div key={eval.id} style={{
+              ...card,
+              padding: '16px 20px',
+              border: '1px solid #e5e7eb',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
+            }}>
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>{eval.name}</h3>
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>
+                  Episodes: {eval.episodes_completed} • Passing: {eval.episodes_passing_audit}
+                </p>
+              </div>
+              <button style={{
+                padding: '6px 12px', fontSize: '12px', fontWeight: 600,
+                backgroundColor: '#f0f4ff', color: '#6366f1', border: 'none', borderRadius: '6px', cursor: 'pointer',
+              }}>
+                View Details
+              </button>
+            </div>
+          ))}
         </div>
       )}
+
+      {/* Quality Tips */}
+      <div style={card}>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Tips to Improve Quality</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { title: 'Watch Carefully', desc: 'Review each segment multiple times before labeling.' },
+            { title: 'Follow Guidelines', desc: 'Refer to the learning hub for category definitions.' },
+            { title: 'Be Consistent', desc: 'Apply the same standards to all your labels.' },
+            { title: 'Ask Questions', desc: 'Use the support channel if you\'re unsure about a label.' },
+          ].map((tip, i) => (
+            <div key={i} style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#ede9fe', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+                {i + 1}
+              </div>
+              <div>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{tip.title}</p>
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{tip.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

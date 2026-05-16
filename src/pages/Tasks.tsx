@@ -7,74 +7,85 @@ interface Task {
   status: string
 }
 
+const card: React.CSSProperties = {
+  backgroundColor: 'white',
+  borderRadius: '10px',
+  border: '1px solid #e5e7eb',
+  padding: '24px',
+}
+
 export default function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await api.get('/tasks')
-        setTasks(response.data)
-      } catch (error) {
-        console.error('Failed to fetch tasks:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchTasks()
+    api.get('/tasks')
+      .then((r) => setTasks(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    )
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Available Tasks</h2>
-        <p className="text-gray-600">Complete training to unlock tasks and start earning</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Header */}
+      <div>
+        <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Available Tasks</h1>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Complete training to unlock tasks and start earning</p>
       </div>
 
-      <div className="space-y-4">
-        {tasks.map((task) => (
-          <div key={task.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900">{task.name}</h3>
-                <p className="text-gray-600 text-sm mt-1">Complete training to access labeling tasks</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  task.status === 'locked'
-                    ? 'bg-gray-100 text-gray-800'
-                    : task.status === 'available'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {task.status === 'locked' ? '🔒 Locked' : task.status === 'available' ? '✓ Available' : 'Active'}
-                </span>
-                <button
-                  disabled={task.status === 'locked'}
-                  className={`px-6 py-2 rounded-lg font-semibold transition ${
-                    task.status === 'locked'
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
-                  }`}
-                >
-                  {task.status === 'locked' ? 'Locked' : 'Start Task'}
-                </button>
-              </div>
-            </div>
+      {/* Tasks list */}
+      {tasks.length === 0 ? (
+        <div style={{ ...card, textAlign: 'center', padding: '48px 24px' }}>
+          <div style={{ width: '52px', height: '52px', backgroundColor: '#f0f4ff', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1v22M4.22 4.22l15.56 15.56M1 12h22M4.22 19.78L19.78 4.22"/>
+            </svg>
           </div>
-        ))}
-      </div>
-
-      {tasks.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-          <p className="text-blue-900 font-semibold mb-2">No tasks available yet</p>
-          <p className="text-blue-700">Complete your training to unlock tasks</p>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 6px' }}>No tasks available yet</p>
+          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Complete your training to unlock tasks</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {tasks.map((task) => {
+            const isLocked = task.status === 'locked'
+            const statusBadge = isLocked ? { label: 'Locked', color: '#9ca3af', bg: '#f3f4f6' } : { label: 'Available', color: '#16a34a', bg: '#dcfce7' }
+            return (
+              <div key={task.id} style={{
+                ...card,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '16px 20px',
+              }}>
+                <div>
+                  <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>{task.name}</h3>
+                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Complete training to access labeling tasks</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: statusBadge.color, backgroundColor: statusBadge.bg, padding: '4px 10px', borderRadius: '20px' }}>
+                    {isLocked && '🔒 '}{statusBadge.label}
+                  </span>
+                  <button
+                    disabled={isLocked}
+                    style={{
+                      padding: '7px 16px', fontSize: '13px', fontWeight: 600,
+                      backgroundColor: isLocked ? '#f3f4f6' : '#6366f1',
+                      color: isLocked ? '#9ca3af' : 'white',
+                      border: 'none', borderRadius: '7px', cursor: isLocked ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {isLocked ? 'Locked' : 'Start Task'}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
