@@ -44,7 +44,7 @@ export default function Layout() {
         ${sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0'} 
         fixed lg:relative z-50 h-full bg-[#0B1120] text-white transition-all duration-300 flex flex-col
       `}>
-        <div className="p-6 flex items-center justify-between">
+        <div className="p-6 flex items-center justify-between border-b border-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-[#5B5FFF] rounded flex items-center justify-center font-bold text-sm shrink-0">AC</div>
             {(sidebarOpen || isMobile) && (
@@ -82,7 +82,7 @@ export default function Layout() {
 
         <div className="mt-auto p-4 border-t border-gray-800">
           <div className="flex items-center gap-3 px-2 py-3">
-            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center text-xs shrink-0">KF</div>
+            <div className="w-8 h-8 bg-gradient-to-br from-[#5B5FFF] to-[#4A4FD9] rounded-full flex items-center justify-center text-xs shrink-0 font-bold text-white">KF</div>
             {(sidebarOpen || isMobile) && (
               <div className="overflow-hidden">
                 <p className="text-xs font-bold truncate">kim ff</p>
@@ -96,11 +96,11 @@ export default function Layout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-100 px-4 lg:px-8 py-4 flex items-center justify-between shrink-0">
+        <div className="bg-white border-b border-gray-200 px-4 lg:px-8 py-4 flex items-center justify-between shrink-0 shadow-sm">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="text-gray-400 hover:text-gray-600 p-1"
+              className="text-gray-600 hover:text-gray-900 p-1 lg:hidden"
             >
               ☰
             </button>
@@ -115,7 +115,7 @@ export default function Layout() {
 
         {/* Content Area */}
         <div className="flex-1 overflow-auto bg-[#F8FAFC]">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto p-4 lg:p-8">
             <Outlet />
           </div>
         </div>

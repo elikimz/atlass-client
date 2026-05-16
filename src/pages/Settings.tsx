@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 interface UserProfile {
@@ -12,7 +13,10 @@ export default function Settings() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [formData, setFormData] = useState({ first_name: '', last_name: '' })
-  const [discordUsername, setDiscordUsername] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -35,12 +39,20 @@ export default function Settings() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
+    setError('')
+    setSuccess('')
+
     try {
       const response = await api.put('/settings/profile', formData)
       setProfile(response.data)
       setEditing(false)
-    } catch (error) {
-      console.error('Failed to update profile:', error)
+      setSuccess('Profile updated successfully!')
+      setTimeout(() => setSuccess(''), 3000)
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to update profile')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -49,138 +61,200 @@ export default function Settings() {
       try {
         await api.delete('/settings/account')
         localStorage.removeItem('access_token')
-        window.location.href = '/login'
-      } catch (error) {
-        console.error('Failed to delete account:', error)
+        navigate('/login')
+      } catch (err: any) {
+        setError(err.response?.data?.detail || 'Failed to delete account')
       }
     }
   }
 
+  const handleSignOut = () => {
+    localStorage.removeItem('access_token')
+    navigate('/login')
+  }
+
   if (loading) {
-    return <div className="p-8">Loading...</div>
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#5B5FFF]"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Settings</h2>
-        <p className="text-gray-600">Manage your account and preferences</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Settings</h1>
+        <p className="text-gray-600">Manage your account settings and preferences.</p>
       </div>
 
-      <div className="space-y-6">
-        {/* Profile Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Profile</h3>
-            <button
-              onClick={() => setEditing(!editing)}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
-              {editing ? 'Cancel' : 'Edit'}
-            </button>
-          </div>
+      {/* Alerts */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+          {success}
+        </div>
+      )}
 
-          {editing ? (
-            <form onSubmit={handleSaveProfile} className="space-y-4">
+      {/* Profile Section */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">👤</span>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Profile</h2>
+              <p className="text-sm text-gray-600">Your personal information</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setEditing(!editing)}
+            className="text-[#5B5FFF] hover:text-[#4A4FD9] font-semibold text-sm"
+          >
+            {editing ? 'Cancel' : 'Edit'}
+          </button>
+        </div>
+
+        {editing ? (
+          <form onSubmit={handleSaveProfile} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
                 <input
                   type="text"
                   value={formData.first_name}
                   onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B5FFF] focus:border-transparent outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
                 <input
                   type="text"
                   value={formData.last_name}
                   onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5B5FFF] focus:border-transparent outline-none"
                 />
               </div>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-              >
-                Save Changes
-              </button>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Email</p>
-                <p className="text-gray-900 font-semibold mt-1">{profile?.email}</p>
-              </div>
-              <div>
-                <p className="text-gray-600 text-sm font-medium">First Name</p>
-                <p className="text-gray-900 font-semibold mt-1">{profile?.first_name || 'Not set'}</p>
-              </div>
-              <div>
-                <p className="text-gray-600 text-sm font-medium">Last Name</p>
-                <p className="text-gray-900 font-semibold mt-1">{profile?.last_name || 'Not set'}</p>
-              </div>
             </div>
-          )}
-        </div>
 
-        {/* Discord Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Connected Accounts</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🎮</span>
-                <div>
-                  <p className="font-semibold text-gray-900">Discord</p>
-                  <p className="text-sm text-gray-600">Connect your Discord account for community updates</p>
-                </div>
-              </div>
-              <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                Connect
-              </button>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={profile?.email || ''}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-500 mt-2">Contact support to update your email address.</p>
             </div>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-6 py-2 bg-[#5B5FFF] text-white font-semibold rounded-lg hover:bg-[#4A4FD9] transition-colors disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Email</p>
+              <p className="text-gray-900 font-semibold mt-1">{profile?.email}</p>
+            </div>
+            <div>
+              <p className="text-gray-600 text-sm font-medium">First Name</p>
+              <p className="text-gray-900 font-semibold mt-1">{profile?.first_name || 'Not set'}</p>
+            </div>
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Last Name</p>
+              <p className="text-gray-900 font-semibold mt-1">{profile?.last_name || 'Not set'}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Discord Section */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-2xl">💬</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Discord</h2>
+            <p className="text-sm text-gray-600">Connect for support and announcements</p>
           </div>
         </div>
 
-        {/* Account Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Account</h3>
-          <div className="space-y-4">
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-900 font-semibold mb-2">Danger Zone</p>
-              <p className="text-red-700 text-sm mb-4">Permanently delete your account and all associated data</p>
-              <button
-                onClick={handleDeleteAccount}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition"
-              >
-                Delete Account
-              </button>
-            </div>
+        <p className="text-gray-600 mb-4">Join our Discord server for support, announcements, and to connect with the team.</p>
+        <button className="px-6 py-2 bg-[#5B5FFF] text-white font-semibold rounded-lg hover:bg-[#4A4FD9] transition-colors">
+          Connect Discord
+        </button>
+      </div>
+
+      {/* Account Section */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-2xl">🔐</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Account</h2>
+            <p className="text-sm text-gray-600">Manage your account settings</p>
           </div>
         </div>
 
-        {/* Session Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Session</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div>
-                <p className="font-semibold text-gray-900">Current Session</p>
-                <p className="text-sm text-gray-600">Browser: Chrome • Last active: Just now</p>
-              </div>
-              <button
-                onClick={() => {
-                  localStorage.removeItem('access_token')
-                  window.location.href = '/login'
-                }}
-                className="text-red-600 hover:text-red-700 font-medium text-sm"
-              >
-                Sign Out
-              </button>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+            <div>
+              <p className="font-semibold text-gray-900">Email Notifications</p>
+              <p className="text-sm text-gray-600">Receive updates about new tasks and platform announcements.</p>
             </div>
+            <button className="px-4 py-2 text-[#5B5FFF] font-semibold hover:bg-blue-50 rounded-lg transition-colors">
+              Manage
+            </button>
           </div>
+
+          <div className="pt-4">
+            <p className="font-semibold text-gray-900 mb-2">Delete Account</p>
+            <p className="text-sm text-gray-600 mb-4">Permanently delete your account and personal data.</p>
+            <button
+              onClick={handleDeleteAccount}
+              className="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Session Section */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-2xl">📱</span>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Session</h2>
+            <p className="text-sm text-gray-600">Your current session information</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            onClick={handleSignOut}
+            className="w-full px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Sign out this session
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="w-full px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Sign out all sessions
+          </button>
         </div>
       </div>
     </div>
