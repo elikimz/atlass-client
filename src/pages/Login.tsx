@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
-export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (value: boolean) => void }) {
+export default function Login({ }: { setIsAuthenticated: (value: boolean) => void }) {
   const [email, setEmail] = useState('')
   const [isStudent, setIsStudent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -29,7 +29,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (val
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 16px', fontFamily: 'Inter, sans-serif', color: '#0F1729' }}>
       {/* Logo */}
       <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{ width: '32px', height: '32px', backgroundColor: '#5B5FFF', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
+        <div style={{ width: '32px', height: '32px', backgroundColor: '#5B5FFF', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>
           <span style={{ margin: 'auto' }}>AC</span>
         </div>
         <span style={{ fontSize: '20px', fontWeight: 'bold', letterSpacing: '-0.025em' }}>Atlas Capture</span>
@@ -167,7 +167,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (val
             </div>
           </div>
           <div style={{ backgroundColor: '#F8FAFC', padding: '6px 16px', borderRadius: '9999px', border: '1px solid #F1F5F9' }}>
-            <p style={{ fontSize: '11px', fontBold: 'bold', color: '#5B5FFF', margin: 0 }}>Earned $30k+</p>
+            <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#5B5FFF', margin: 0 }}>Earned $30k+</p>
           </div>
         </div>
       </div>
