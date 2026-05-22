@@ -17,22 +17,30 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!email || !acceptedTerms) return
+    
     setLoading(true)
     setError('')
+    
     try {
-      await api.post('/auth/login', {
-        first_name: isRegistering ? firstName : undefined,
-        last_name: isRegistering ? lastName : undefined,
-        email,
-        ...(isRegistering && referralCode.trim() ? { referral_code: referralCode.trim() } : {}),
-      })
-      localStorage.setItem('email', email)
+      const payload: any = { email: email.trim() }
+      if (isRegistering) {
+        payload.first_name = firstName.trim()
+        payload.last_name = lastName.trim()
+        if (referralCode.trim()) {
+          payload.referral_code = referralCode.trim()
+        }
+      }
+
+      await api.post('/auth/login', payload)
+      localStorage.setItem('email', email.trim())
       navigate('/verify')
     } catch (err: any) {
+      console.error('Login error:', err)
       const detail = err.response?.data?.detail
-      if (detail === "Account not found. Please provide your first and last name to register.") {
+      if (detail && detail.includes("provide your first and last name")) {
         setIsRegistering(true)
-        setError("Account not found. Please fill in your details to register.")
+        setError("Account not found. Please enter your name to register.")
       } else {
         setError(detail || 'Failed to send code. Please try again.')
       }
