@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 interface DashboardData {
@@ -9,22 +8,23 @@ interface DashboardData {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1200)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768)
-      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1200)
+      setWindowWidth(window.innerWidth)
     }
     window.addEventListener('resize', handleResize)
+    
     api.get('/dashboard/summary')
       .then((r) => setData(r.data))
       .catch(console.error)
       .finally(() => setLoading(false))
+    
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
@@ -39,293 +39,234 @@ export default function Dashboard() {
     )
   }
 
-  const stats = [
-    {
-      label: 'Total Customers',
-      value: '5,423',
-      trend: '16% this month',
-      trendUp: true,
-      icon: (
-        <div style={{ width: isMobile ? '60px' : '84px', height: isMobile ? '60px' : '84px', borderRadius: '50%', backgroundColor: '#D3FFE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width={isMobile ? "30" : "42"} height={isMobile ? "30" : "42"} viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </div>
-      )
-    },
-    {
-      label: 'Members',
-      value: '1,893',
-      trend: '1% this month',
-      trendUp: false,
-      icon: (
-        <div style={{ width: isMobile ? '60px' : '84px', height: isMobile ? '60px' : '84px', borderRadius: '50%', backgroundColor: '#D3FFE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width={isMobile ? "30" : "42"} height={isMobile ? "30" : "42"} viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>
-          </svg>
-        </div>
-      )
-    },
-    {
-      label: 'Active Now',
-      value: '189',
-      icon: (
-        <div style={{ width: isMobile ? '60px' : '84px', height: isMobile ? '60px' : '84px', borderRadius: '50%', backgroundColor: '#D3FFE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width={isMobile ? "30" : "42"} height={isMobile ? "30" : "42"} viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-          </svg>
-        </div>
-      ),
-      avatars: true
-    }
+  const firstName = localStorage.getItem('user_first_name') || 'John'
+
+  const availableBalance = 124.50
+  const totalEarned = 1245.30
+  const videosWatched = 186
+  const totalRewards = 125.80
+
+  const earningsData = [
+    { day: 'Mon', value: 100 },
+    { day: 'Tue', value: 220 },
+    { day: 'Wed', value: 150 },
+    { day: 'Thu', value: 300 },
+    { day: 'Fri', value: 450 },
+    { day: 'Sat', value: 350 },
+    { day: 'Sun', value: 600 },
   ]
 
-  const customers = [
-    { name: 'Jane Cooper', company: 'Microsoft', phone: '(225) 555-0118', email: 'jane@microsoft.com', country: 'United States', status: 'Active' },
-    { name: 'Floyd Miles', company: 'Yahoo', phone: '(205) 555-0100', email: 'floyd@yahoo.com', country: 'Kiribati', status: 'Inactive' },
-    { name: 'Ronald Richards', company: 'Adobe', phone: '(302) 555-0107', email: 'ronald@adobe.com', country: 'Israel', status: 'Inactive' },
-    { name: 'Marvin McKinney', company: 'Tesla', phone: '(252) 555-0126', email: 'marvin@tesla.com', country: 'Iran', status: 'Active' },
-    { name: 'Jerome Bell', company: 'Google', phone: '(603) 555-0123', email: 'jerome@google.com', country: 'Reunion', status: 'Active' },
-    { name: 'Kathryn Murphy', company: 'Microsoft', phone: '(406) 555-0120', email: 'kathryn@microsoft.com', country: 'Curaçao', status: 'Active' },
-    { name: 'Jacob Jones', company: 'Yahoo', phone: '(209) 555-0104', email: 'jacob@yahoo.com', country: 'Brazil', status: 'Active' },
-    { name: 'Kristin Watson', company: 'Facebook', phone: '(212) 555-0110', email: 'kristin@facebook.com', country: 'Åland Islands', status: 'Active' },
-  ]
-
-  const journeySteps = [
-    {
-      num: 1,
-      title: 'Complete Training',
-      badge: { label: 'Next Step', color: '#5932EA', bg: '#F2EFFF' },
-      desc: 'Learn how to label videos accurately.',
-      cta: { label: 'Start Training', onClick: () => navigate('/training') },
-    },
-    {
-      num: 2,
-      title: 'Set Up Payment',
-      desc: 'Add your payment details.',
-    },
-    {
-      num: 3,
-      title: 'Do Labeling Tasks',
-      desc: 'Complete tasks to earn money.',
-    },
-  ]
+  const maxValue = Math.max(...earningsData.map(d => d.value))
+  const chartHeight = 200
+  const chartWidth = isMobile ? windowWidth - 70 : windowWidth - 100
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '24px' : '40px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
-      {/* Stats Grid */}
-      <div style={{
-        display: 'grid', 
-        gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)'), 
-        gap: '20px',
-        backgroundColor: 'white', borderRadius: '30px', padding: isMobile ? '20px' : '30px',
-        boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.5)'
-      }}>
-        {stats.map((stat, i) => (
-          <div key={stat.label} style={{
-            display: 'flex', alignItems: 'center', gap: '20px',
-            padding: isMobile ? '10px 0' : '0 30px',
-            borderRight: (!isMobile && !isTablet && i < stats.length - 1) ? '1px solid #F0F0F0' : 'none',
-            borderBottom: (isMobile && i < stats.length - 1) ? '1px solid #F0F0F0' : 'none',
-          }}>
-            {stat.icon}
-            <div>
-              <div style={{ fontSize: '14px', color: '#ACACAC', marginBottom: '4px' }}>{stat.label}</div>
-              <div style={{ fontSize: isMobile ? '24px' : '32px', fontWeight: 600, color: '#333333' }}>{stat.value}</div>
-              {stat.trend && (
-                <div style={{ fontSize: '12px', color: stat.trendUp ? '#00AC4F' : '#D0004B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ transform: stat.trendUp ? 'rotate(0deg)' : 'rotate(180deg)' }}>
-                    <polyline points="18 15 12 9 6 15"/>
-                  </svg>
-                  <span style={{ fontWeight: 600 }}>{stat.trend.split(' ')[0]}</span>
-                  <span style={{ color: '#292D32' }}>{stat.trend.split(' ').slice(1).join(' ')}</span>
-                </div>
-              )}
-              {stat.avatars && (
-                <div style={{ display: 'flex', marginTop: '4px' }}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <div key={n} style={{
-                      width: '24px', height: '24px', borderRadius: '50%', border: '2px solid white',
-                      backgroundColor: '#E0E0E0', marginLeft: n > 1 ? '-8px' : '0'
-                    }} />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      <div>
+        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'black', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          Dashboard
+          <span style={{ fontSize: '24px' }}>✨</span>
+        </h1>
+        <p style={{ fontSize: '14px', color: '#757575', margin: 0 }}>Welcome back, {firstName}! Here's your overview.</p>
       </div>
 
-      {/* Journey Quick View */}
       <div style={{
-        backgroundColor: 'white', borderRadius: '30px', padding: isMobile ? '20px' : '30px',
-        boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.5)',
-        display: 'flex', flexDirection: isMobile ? 'column' : 'row', 
-        alignItems: isMobile ? 'flex-start' : 'center', 
-        justifyContent: 'space-between', gap: '20px'
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(2, 1fr)',
+        gap: '16px',
       }}>
-        <div>
-          <h2 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: 600, color: 'black', margin: '0 0 4px' }}>Your Journey</h2>
-          <p style={{ fontSize: '14px', color: '#16C098', margin: 0 }}>Progress to earning</p>
-        </div>
-        <div style={{ 
-          display: 'flex', flexDirection: isMobile ? 'column' : 'row', 
-          gap: isMobile ? '16px' : '20px', width: isMobile ? '100%' : 'auto' 
+        <div style={{
+          backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
         }}>
-          {journeySteps.map((step) => (
-            <div key={step.num} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '32px', height: '32px', borderRadius: '50%',
-                backgroundColor: step.num === 1 ? '#5932EA' : '#F0F0F0',
-                color: step.num === 1 ? 'white' : '#9197B3',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '14px', fontWeight: 600, flexShrink: 0
-              }}>{step.num}</div>
-              <div style={{ fontSize: '14px', fontWeight: 500, color: '#292D32' }}>{step.title}</div>
-              {step.cta && (
-                <button onClick={step.cta.onClick} style={{
-                  backgroundColor: '#5932EA', color: 'white', border: 'none',
-                  padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer',
-                  marginLeft: 'auto'
-                }}>Start</button>
-              )}
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '8px' }}>Available Balance</div>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: 'black' }}>${availableBalance}</div>
+          </div>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '12px',
+            backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
+        }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '8px' }}>Total Earned</div>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: 'black' }}>${totalEarned}</div>
+          </div>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '12px',
+            backgroundColor: '#D3FFE7', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
+        }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '8px' }}>Videos Watched</div>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: 'black' }}>{videosWatched}</div>
+          </div>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '12px',
+            backgroundColor: '#D4E8FF', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4A90E2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex',
+          alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer',
+        }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '8px' }}>Total Rewards</div>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: 'black' }}>${totalRewards}</div>
+          </div>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '12px',
+            backgroundColor: '#FFE8D1', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div style={{
+        backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: 0 }}>Earnings Overview</h2>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '8px 12px', backgroundColor: '#F9FBFF', borderRadius: '8px',
+            fontSize: '12px', color: '#757575', cursor: 'pointer'
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            This Week
+          </div>
+        </div>
+
+        <div style={{ position: 'relative', height: chartHeight + 40, marginBottom: '20px' }}>
+          <svg width="100%" height={chartHeight + 40} style={{ position: 'absolute', top: 0, left: 0 }}>
+            <text x="30" y="20" fontSize="12" fill="#B5B7C0">$600</text>
+            <text x="30" y={chartHeight / 2 + 5} fontSize="12" fill="#B5B7C0">$400</text>
+            <text x="30" y={chartHeight - 5} fontSize="12" fill="#B5B7C0">$0</text>
+            <line x1="50" y1="15" x2="100%" y2="15" stroke="#F0F0F0" strokeWidth="1" />
+            <line x1="50" y1={chartHeight / 2 + 20} x2="100%" y2={chartHeight / 2 + 20} stroke="#F0F0F0" strokeWidth="1" />
+            <polyline
+              points={earningsData.map((d, i) => {
+                const x = 50 + (i / (earningsData.length - 1)) * (chartWidth > 0 ? chartWidth : 200)
+                const y = chartHeight - (d.value / maxValue) * (chartHeight - 40) + 20
+                return `${x},${y}`
+              }).join(' ')}
+              fill="none"
+              stroke="#5932EA"
+              strokeWidth="2"
+            />
+            {earningsData.map((d, i) => {
+              const x = 50 + (i / (earningsData.length - 1)) * (chartWidth > 0 ? chartWidth : 200)
+              const y = chartHeight - (d.value / maxValue) * (chartHeight - 40) + 20
+              return (
+                <circle key={i} cx={x} cy={y} r="5" fill="white" stroke="#5932EA" strokeWidth="2" />
+              )
+            })}
+          </svg>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-around', paddingLeft: '50px', paddingRight: '20px' }}>
+            {earningsData.map((d) => (
+              <span key={d.day} style={{ fontSize: '12px', color: '#B5B7C0' }}>{d.day}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{
+        backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)',
+      }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 20px' }}>Quick Summary</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {[
+            { label: 'Available Balance', value: `$${availableBalance}`, icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            ) },
+            { label: 'Total Earned', value: `$${totalEarned}`, icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/>
+              </svg>
+            ) },
+            { label: 'Videos Watched', value: videosWatched, icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A90E2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            ) },
+            { label: 'Total Rewards', value: `$${totalRewards}`, icon: (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/>
+              </svg>
+            ) },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: i < 3 ? '16px' : '0', borderBottom: i < 3 ? '1px solid #F0F0F0' : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#F9FBFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {item.icon}
+                </div>
+                <span style={{ fontSize: '14px', color: '#292D32', fontWeight: 500 }}>{item.label}</span>
+              </div>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'black' }}>{item.value}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Real Stats Grid */}
-      <div style={{
-        display: 'grid', 
-        gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)'), 
-        gap: '20px'
-      }}>
-        <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.3)' }}>
-          <div style={{ fontSize: '12px', color: '#ACACAC', marginBottom: '8px', textTransform: 'uppercase' }}>Footage Labeled</div>
-          <div style={{ fontSize: '24px', fontWeight: 600, color: '#333333' }}>{data?.footage_labeled_min ?? '0'} min</div>
-        </div>
-        <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.3)' }}>
-          <div style={{ fontSize: '12px', color: '#ACACAC', marginBottom: '8px', textTransform: 'uppercase' }}>Approved Roles</div>
-          <div style={{ fontSize: '24px', fontWeight: 600, color: '#333333' }}>{data?.approved_roles ?? 'None'}</div>
-        </div>
-        <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.3)' }}>
-          <div style={{ fontSize: '12px', color: '#ACACAC', marginBottom: '8px', textTransform: 'uppercase' }}>Certifications</div>
-          <div style={{ fontSize: '24px', fontWeight: 600, color: '#333333' }}>{data?.certifications_earned ?? '0'}</div>
-        </div>
-      </div>
-
-      {/* Customers Table Card */}
-      <div style={{
-        backgroundColor: 'white', borderRadius: '30px', padding: isMobile ? '20px' : '30px',
-        boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.5)',
-        overflow: 'hidden'
-      }}>
-        <div style={{ 
-          display: 'flex', flexDirection: isMobile ? 'column' : 'row', 
-          alignItems: isMobile ? 'flex-start' : 'center', 
-          justifyContent: 'space-between', gap: '20px', marginBottom: '40px' 
+      {data && (
+        <div style={{
+          backgroundColor: 'white', borderRadius: '16px', padding: '20px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)',
         }}>
-          <div>
-            <h2 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 600, color: 'black', margin: '0 0 7px' }}>All Customers</h2>
-            <p style={{ fontSize: '14px', color: '#16C098', margin: 0 }}>Active Members</p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: '15px', width: isMobile ? '100%' : 'auto' }}>
-            <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
-              <input
-                type="text"
-                placeholder="Search"
-                style={{
-                  width: isMobile ? '100%' : '154px', padding: '7px 10px 7px 35px',
-                  backgroundColor: '#F9FBFF', border: 'none', borderRadius: '10px',
-                  fontSize: '12px', color: '#B5B7C0', outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              />
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7E7E7E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}>
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 16px' }}>Your Progress</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', color: '#757575' }}>Footage Labeled</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'black' }}>{data.footage_labeled_min} min</span>
             </div>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              backgroundColor: '#F9FBFF', padding: '7px 15px', borderRadius: '10px',
-              fontSize: '12px', color: '#7E7E7E', cursor: 'pointer', width: isMobile ? '100%' : 'auto',
-              justifyContent: 'center', boxSizing: 'border-box'
-            }}>
-              <span>Short by : <span style={{ color: '#3D3C42', fontWeight: 600 }}>Newest</span></span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', color: '#757575' }}>Approved Roles</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'black' }}>{data.approved_roles || 'None'}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '14px', color: '#757575' }}>Certifications</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'black' }}>{data.certifications_earned}</span>
             </div>
           </div>
         </div>
-
-        {/* Scrollable Table Container */}
-        <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #EEEEEE', textAlign: 'left' }}>
-                <th style={{ padding: '0 0 14px', fontSize: '14px', fontWeight: 500, color: '#B5B7C0' }}>Customer Name</th>
-                <th style={{ padding: '0 0 14px', fontSize: '14px', fontWeight: 500, color: '#B5B7C0' }}>Company</th>
-                <th style={{ padding: '0 0 14px', fontSize: '14px', fontWeight: 500, color: '#B5B7C0' }}>Phone Number</th>
-                <th style={{ padding: '0 0 14px', fontSize: '14px', fontWeight: 500, color: '#B5B7C0' }}>Email</th>
-                <th style={{ padding: '0 0 14px', fontSize: '14px', fontWeight: 500, color: '#B5B7C0' }}>Country</th>
-                <th style={{ padding: '0 0 14px', fontSize: '14px', fontWeight: 500, color: '#B5B7C0', textAlign: 'center' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {customers.map((customer, i) => (
-                <tr key={i} style={{ borderBottom: i < customers.length - 1 ? '1px solid #EEEEEE' : 'none' }}>
-                  <td style={{ padding: '20px 0', fontSize: '14px', fontWeight: 500, color: '#292D32' }}>{customer.name}</td>
-                  <td style={{ padding: '20px 0', fontSize: '14px', fontWeight: 500, color: '#292D32' }}>{customer.company}</td>
-                  <td style={{ padding: '20px 0', fontSize: '14px', fontWeight: 500, color: '#292D32' }}>{customer.phone}</td>
-                  <td style={{ padding: '20px 0', fontSize: '14px', fontWeight: 500, color: '#292D32' }}>{customer.email}</td>
-                  <td style={{ padding: '20px 0', fontSize: '14px', fontWeight: 500, color: '#292D32' }}>{customer.country}</td>
-                  <td style={{ padding: '20px 0', textAlign: 'center' }}>
-                    <span style={{
-                      padding: '4px 12px', borderRadius: '4px', fontSize: '14px', fontWeight: 500,
-                      backgroundColor: customer.status === 'Active' ? '#D3FFE7' : '#FFC5C5',
-                      color: customer.status === 'Active' ? '#008767' : '#DF0404',
-                      border: `1px solid ${customer.status === 'Active' ? '#00B087' : '#DF0404'}`,
-                      display: 'inline-block', width: '80px'
-                    }}>
-                      {customer.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div style={{ 
-          display: 'flex', flexDirection: isMobile ? 'column' : 'row', 
-          alignItems: 'center', justifyContent: 'space-between', 
-          gap: '20px', marginTop: '30px' 
-        }}>
-          <p style={{ fontSize: '14px', color: '#B5B7C0', textAlign: isMobile ? 'center' : 'left' }}>
-            Showing data 1 to 8 of  256K entries
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #EEEEEE', backgroundColor: '#F5F5F5', color: '#404B52', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            {[1, 2, 3, 4].map((n) => (
-              <button key={n} style={{
-                width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #EEEEEE',
-                backgroundColor: n === 1 ? '#5932EA' : '#F5F5F5',
-                color: n === 1 ? 'white' : '#404B52',
-                fontSize: '12px', fontWeight: 600, cursor: 'pointer'
-              }}>{n}</button>
-            ))}
-            <span style={{ color: '#404B52' }}>...</span>
-            <button style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #EEEEEE', backgroundColor: '#F5F5F5', color: '#404B52', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>40</button>
-            <button style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid #EEEEEE', backgroundColor: '#F5F5F5', color: '#404B52', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }
