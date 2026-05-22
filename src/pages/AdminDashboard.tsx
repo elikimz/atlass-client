@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import axios from 'axios'
 
 interface VideoTask {
   id: number
@@ -9,6 +10,9 @@ interface VideoTask {
   reward_amount: number
   created_at: string
 }
+
+const CLOUDINARY_UPLOAD_PRESET = "task_images";
+const CLOUDINARY_CLOUD_NAME = "doste1wr0";
 
 export default function AdminDashboard() {
   const [videos, setVideos] = useState<VideoTask[]>([])
@@ -74,16 +78,24 @@ export default function AdminDashboard() {
     setUploading(true)
 
     try {
-      const uploadFormData = new FormData()
-      uploadFormData.append('title', formData.title)
-      uploadFormData.append('description', formData.description)
-      uploadFormData.append('reward_amount', formData.reward_amount.toString())
-      uploadFormData.append('file', formData.file)
-
-      await api.post('/admin/upload-video', uploadFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      // 1. Upload to Cloudinary
+      const cloudinaryData = new FormData()
+      cloudinaryData.append('file', formData.file)
+      cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+      
+      const cloudinaryRes = await axios.post(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+        cloudinaryData
+      )
+      
+      const videoUrl = cloudinaryRes.data.secure_url
+      
+      // 2. Save to Backend
+      await api.post('/admin/create-video-task', {
+        title: formData.title,
+        description: formData.description,
+        reward_amount: formData.reward_amount,
+        video_url: videoUrl
       })
 
       setSuccess(`Video "${formData.title}" uploaded successfully!`)
@@ -101,7 +113,7 @@ export default function AdminDashboard() {
       // Refresh videos list
       await fetchVideos()
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to upload video')
+      setError(err.response?.data?.detail || err.message || 'Failed to upload video')
       console.error(err)
     } finally {
       setUploading(false)
