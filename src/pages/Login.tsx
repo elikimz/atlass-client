@@ -203,16 +203,16 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
           <button
             type="submit"
-            disabled={loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms}
+            disabled={loading || !email || !acceptedTerms || (isRegistering && (!firstName || !lastName))}
             style={{
               width: '100%', padding: '16px',
               fontSize: '16px', fontWeight: 600,
-              backgroundColor: (loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms) ? '#E2E8F0' : '#5932EA',
+              backgroundColor: (loading || !email || !acceptedTerms || (isRegistering && (!firstName || !lastName))) ? '#E2E8F0' : '#5932EA',
               color: 'white', border: 'none', borderRadius: '14px',
-              cursor: (loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms) ? 'not-allowed' : 'pointer',
+              cursor: (loading || !email || !acceptedTerms || (isRegistering && (!firstName || !lastName))) ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.3s ease',
-              boxShadow: (loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms) ? 'none' : '0px 12px 30px rgba(89, 50, 234, 0.3)',
+              boxShadow: (loading || !email || !acceptedTerms || (isRegistering && (!firstName || !lastName))) ? 'none' : '0px 12px 30px rgba(89, 50, 234, 0.3)',
             }}
           >
             {loading ? 'Sending code...' : (
