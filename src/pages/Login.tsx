@@ -5,6 +5,7 @@ import api from '../services/api'
 export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: boolean) => void }) {
   // Use prop to satisfy linting
   if (false) console.log(setIsAuthenticated);
+  const [isRegistering, setIsRegistering] = useState(false)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -20,15 +21,21 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     setError('')
     try {
       await api.post('/auth/login', {
-        first_name: firstName,
-        last_name: lastName,
+        first_name: isRegistering ? firstName : undefined,
+        last_name: isRegistering ? lastName : undefined,
         email,
-        ...(referralCode.trim() ? { referral_code: referralCode.trim() } : {}),
+        ...(isRegistering && referralCode.trim() ? { referral_code: referralCode.trim() } : {}),
       })
       localStorage.setItem('email', email)
       navigate('/verify')
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to send code. Please try again.')
+      const detail = err.response?.data?.detail
+      if (detail === "Account not found. Please provide your first and last name to register.") {
+        setIsRegistering(true)
+        setError("Account not found. Please fill in your details to register.")
+      } else {
+        setError(detail || 'Failed to send code. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -93,41 +100,45 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
         border: '1px solid rgba(255, 255, 255, 0.8)',
       }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0F172A', textAlign: 'center', marginBottom: '12px', letterSpacing: '-0.02em' }}>
-          Get Started
+          {isRegistering ? 'Create Account' : 'Welcome Back'}
         </h1>
         <p style={{ fontSize: '15px', color: '#64748B', textAlign: 'center', marginBottom: '36px', lineHeight: 1.6 }}>
-          Join the community and start building the future of AI today.
+          {isRegistering 
+            ? 'Join the community and start building the future of AI today.' 
+            : 'Sign in with your email to access your dashboard.'}
         </p>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div>
-              <label style={labelStyle}>First Name</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Elijah"
-                required
-                style={inputStyle}
-                onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
-                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
-              />
+          {isRegistering && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <label style={labelStyle}>First Name</label>
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Elijah"
+                  required
+                  style={inputStyle}
+                  onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+                  onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Last Name</label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Kimani"
+                  required
+                  style={inputStyle}
+                  onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+                  onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+                />
+              </div>
             </div>
-            <div>
-              <label style={labelStyle}>Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Kimani"
-                required
-                style={inputStyle}
-                onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
-                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
-              />
-            </div>
-          </div>
+          )}
 
           <label style={labelStyle}>Email Address</label>
           <input
@@ -141,18 +152,22 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
             onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
           />
 
-          <label style={labelStyle}>
-            Referral Code <span style={{ fontWeight: 400, color: '#94A3B8' }}>(Optional)</span>
-          </label>
-          <input
-            type="text"
-            value={referralCode}
-            onChange={(e) => setReferralCode(e.target.value)}
-            placeholder="Enter code"
-            style={inputStyle}
-            onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
-            onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
-          />
+          {isRegistering && (
+            <>
+              <label style={labelStyle}>
+                Referral Code <span style={{ fontWeight: 400, color: '#94A3B8' }}>(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                placeholder="Enter code"
+                style={inputStyle}
+                onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+              />
+            </>
+          )}
 
           {/* Terms and Conditions Checkbox */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '32px', cursor: 'pointer' }} onClick={() => setAcceptedTerms(!acceptedTerms)}>
@@ -188,21 +203,21 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
           <button
             type="submit"
-            disabled={loading || !firstName || !lastName || !email || !acceptedTerms}
+            disabled={loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms}
             style={{
               width: '100%', padding: '16px',
               fontSize: '16px', fontWeight: 600,
-              backgroundColor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? '#E2E8F0' : '#5932EA',
+              backgroundColor: (loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms) ? '#E2E8F0' : '#5932EA',
               color: 'white', border: 'none', borderRadius: '14px',
-              cursor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? 'not-allowed' : 'pointer',
+              cursor: (loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms) ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
               transition: 'all 0.3s ease',
-              boxShadow: (loading || !firstName || !lastName || !email || !acceptedTerms) ? 'none' : '0px 12px 30px rgba(89, 50, 234, 0.3)',
+              boxShadow: (loading || (isRegistering && (!firstName || !lastName)) || !email || !acceptedTerms) ? 'none' : '0px 12px 30px rgba(89, 50, 234, 0.3)',
             }}
           >
             {loading ? 'Sending code...' : (
               <>
-                Continue
+                {isRegistering ? 'Create Account' : 'Sign In'}
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                 </svg>
@@ -214,7 +229,14 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
       <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
         <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
-          Already have an account? <a href="#" style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600 }}>Sign In</a>
+          {isRegistering ? 'Already have an account?' : "Don't have an account?"} 
+          <a 
+            href="#" 
+            onClick={(e) => { e.preventDefault(); setIsRegistering(!isRegistering); setError(''); }}
+            style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600, marginLeft: '4px' }}
+          >
+            {isRegistering ? 'Sign In' : 'Create Account'}
+          </a>
         </p>
         <button 
           onClick={() => {
