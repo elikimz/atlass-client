@@ -7,18 +7,32 @@ interface DashboardData {
   certifications_earned: number
 }
 
+interface UserData {
+  first_name: string
+  last_name: string
+  email: string
+}
+
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
+  const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
-    api.get('/dashboard/summary')
-      .then((r) => setData(r.data))
-      .catch(console.error)
+    
+    // Fetch dashboard summary and user info in parallel
+    Promise.all([
+      api.get('/dashboard/summary'),
+      api.get('/auth/me')
+    ]).then(([summaryRes, userRes]) => {
+      setData(summaryRes.data)
+      setUser(userRes.data)
+    }).catch(console.error)
       .finally(() => setLoading(false))
+
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
@@ -33,10 +47,11 @@ export default function Dashboard() {
     )
   }
 
-  const firstName = localStorage.getItem('user_first_name') || 'John'
   const isMobile = windowWidth < 768
   const isTablet = windowWidth >= 768 && windowWidth < 1280
   const isDesktop = windowWidth >= 1280
+
+  const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
 
   const availableBalance = 124.50
   const totalEarned = 1245.30

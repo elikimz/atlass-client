@@ -1,32 +1,61 @@
 import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import api from '../services/api'
 
 interface LayoutProps {
   setIsAuthenticated: (value: boolean) => void
+}
+
+interface UserData {
+  first_name: string
+  last_name: string
+  email: string
 }
 
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+  const [user, setUser] = useState<UserData | null>(null)
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024)
     }
     window.addEventListener('resize', handleResize)
+
+    // Fetch real user data from backend
+    api.get('/auth/me')
+      .then(res => {
+        setUser(res.data)
+        // Store in localStorage for other components to use if needed
+        localStorage.setItem('user_first_name', res.data.first_name)
+        localStorage.setItem('user_last_name', res.data.last_name)
+        localStorage.setItem('user_email', res.data.email)
+      })
+      .catch(err => {
+        console.error('Failed to fetch user data:', err)
+        if (err.response?.status === 401) {
+          handleSignOut()
+        }
+      })
+
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   const handleSignOut = () => {
     localStorage.removeItem('access_token')
+    localStorage.removeItem('user_first_name')
+    localStorage.removeItem('user_last_name')
+    localStorage.removeItem('user_email')
     setIsAuthenticated(false)
     navigate('/login')
   }
 
-  const firstName = localStorage.getItem('user_first_name') || 'John'
-  const lastName = localStorage.getItem('user_last_name') || 'Doe'
-  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
+  const lastName = user?.last_name || localStorage.getItem('user_last_name') || ''
+  const userEmail = user?.email || localStorage.getItem('user_email') || ''
+  const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: (
@@ -183,7 +212,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
               {!isMobile && (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: '14px', fontWeight: 600, color: 'black' }}>{firstName} {lastName}</span>
-                  <span style={{ fontSize: '12px', color: '#757575' }}>Project Manager</span>
+                  <span style={{ fontSize: '12px', color: '#757575' }}>{userEmail}</span>
                 </div>
               )}
             </div>
