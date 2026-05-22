@@ -127,7 +127,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
-            {navItems.map((item) => (
+            {navItems.filter(item => item.label !== 'Admin' || userEmail === 'elijahkimani1293@gmail.com').map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
@@ -239,7 +239,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-around',
           backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '70px', zIndex: 100,
         }}>
-          {navItems.slice(0, 5).map((item) => (
+          {navItems.filter(item => item.label !== 'Admin' || userEmail === 'elijahkimani1293@gmail.com').slice(0, 5).map((item) => (
             <Link
               key={item.label}
               to={item.path}
