@@ -43,9 +43,9 @@ export default function Referrals() {
     fetchData()
   }, [])
 
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code)
-    setCopied(code)
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopied(text)
     setTimeout(() => setCopied(null), 2000)
   }
 
@@ -118,28 +118,31 @@ export default function Referrals() {
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                   </svg>
                 </div>
-                <div>
-                  <p style={{ fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px', fontFamily: 'monospace' }}>{referralCodes[0].code}</p>
-                  <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                    Share conder code and your in app.
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                    {`${window.location.origin}/login?ref=${referralCodes[0].code}`}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>
+                    Share your referral link to invite friends directly.
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => handleCopy(referralCodes[0].code)}
+                onClick={() => handleCopy(`${window.location.origin}/login?ref=${referralCodes[0].code}`)}
                 style={{
                   padding: '10px 20px',
                   borderRadius: '12px',
-                  backgroundColor: copied === referralCodes[0].code ? '#DCFCE7' : '#5932EA',
-                  color: copied === referralCodes[0].code ? '#15803D' : 'white',
+                  backgroundColor: copied === `${window.location.origin}/login?ref=${referralCodes[0].code}` ? '#DCFCE7' : '#5932EA',
+                  color: copied === `${window.location.origin}/login?ref=${referralCodes[0].code}` ? '#15803D' : 'white',
                   border: 'none',
                   fontSize: '14px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {copied === referralCodes[0].code ? '✓ Copied' : 'Copy Code'}
+                {copied === `${window.location.origin}/login?ref=${referralCodes[0].code}` ? '✓ Copied' : 'Copy Link'}
               </button>
             </div>
           )}
