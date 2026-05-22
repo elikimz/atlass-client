@@ -11,6 +11,8 @@ interface UserData {
   first_name: string
   last_name: string
   email: string
+  deposit_wallet_balance: number
+  withdrawal_wallet_balance: number
 }
 
 export default function Dashboard() {
@@ -22,8 +24,8 @@ export default function Dashboard() {
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
-    
-    // Fetch dashboard summary and user info in parallel
+
+    // Fetch dashboard summary and user info (which now includes wallet balances) in parallel
     Promise.all([
       api.get('/dashboard/summary'),
       api.get('/auth/me')
@@ -53,10 +55,10 @@ export default function Dashboard() {
 
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
 
-  const availableBalance = 124.50
-  const totalEarned = 1245.30
-  const videosWatched = 186
-  const totalRewards = 125.80
+  // Real wallet balances from API
+  const depositBalance = user?.deposit_wallet_balance ?? 0
+  const withdrawalBalance = user?.withdrawal_wallet_balance ?? 0
+  const totalBalance = depositBalance + withdrawalBalance
 
   const earningsData = [
     { day: 'Mon', value: 100 }, { day: 'Tue', value: 220 }, { day: 'Wed', value: 150 },
@@ -69,7 +71,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-      
+
       <div>
         <h1 style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 700, color: 'black', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           Dashboard <span style={{ fontSize: '24px' }}>✨</span>
@@ -77,28 +79,55 @@ export default function Dashboard() {
         <p style={{ fontSize: '14px', color: '#757575', margin: 0 }}>Welcome back, {firstName}! Here's your overview.</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Wallet Balances Section */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr 1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'),
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
         gap: '16px',
       }}>
-        {[
-          { label: 'Available Balance', value: `$${availableBalance}`, bg: '#F2EFFF', iconColor: '#5932EA', icon: <><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></> },
-          { label: 'Total Earned', value: `$${totalEarned}`, bg: '#D3FFE7', iconColor: '#00AC4F', icon: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/></> },
-          { label: 'Videos Watched', value: videosWatched, bg: '#D4E8FF', iconColor: '#4A90E2', icon: <polygon points="5 3 19 12 5 21 5 3"/> },
-          { label: 'Total Rewards', value: `$${totalRewards}`, bg: '#FFE8D1', iconColor: '#F59E0B', icon: <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/> },
-        ].map((stat, i) => (
-          <div key={i} style={{ backgroundColor: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '12px', color: '#757575', marginBottom: '8px' }}>{stat.label}</div>
-              <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'black' }}>{stat.value}</div>
-            </div>
-            <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={stat.iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{stat.icon}</svg>
-            </div>
+        {/* Deposit Wallet */}
+        <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #F2EFFF' }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Deposit Wallet</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'black' }}>${depositBalance.toFixed(2)}</div>
+            <div style={{ fontSize: '11px', color: '#5932EA', marginTop: '4px' }}>Available to use</div>
           </div>
-        ))}
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Withdrawal Wallet */}
+        <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #D3FFE7' }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Withdrawal Wallet</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'black' }}>${withdrawalBalance.toFixed(2)}</div>
+            <div style={{ fontSize: '11px', color: '#00AC4F', marginTop: '4px' }}>Earned from tasks</div>
+          </div>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#D3FFE7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Total Balance */}
+        <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #FFE8D1' }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Total Balance</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'black' }}>${totalBalance.toFixed(2)}</div>
+            <div style={{ fontSize: '11px', color: '#F59E0B', marginTop: '4px' }}>Combined wallets</div>
+          </div>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#FFE8D1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/>
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* Main Content Grid */}
@@ -138,13 +167,12 @@ export default function Dashboard() {
 
         {/* Quick Summary */}
         <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 24px' }}>Quick Summary</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 24px' }}>Wallet Summary</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {[
-              { label: 'Available Balance', value: `$${availableBalance}`, color: '#5932EA', icon: <><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></> },
-              { label: 'Total Earned', value: `$${totalEarned}`, color: '#00AC4F', icon: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/></> },
-              { label: 'Videos Watched', value: videosWatched, color: '#4A90E2', icon: <polygon points="5 3 19 12 5 21 5 3"/> },
-              { label: 'Total Rewards', value: `$${totalRewards}`, color: '#F59E0B', icon: <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/> },
+              { label: 'Deposit Wallet', value: `$${depositBalance.toFixed(2)}`, color: '#5932EA', icon: <><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></> },
+              { label: 'Withdrawal Wallet', value: `$${withdrawalBalance.toFixed(2)}`, color: '#00AC4F', icon: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/></> },
+              { label: 'Total Balance', value: `$${totalBalance.toFixed(2)}`, color: '#F59E0B', icon: <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/> },
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

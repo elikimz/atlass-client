@@ -21,9 +21,9 @@ export default function TaskPlayer() {
   const [videoWatched, setVideoWatched] = useState(false)
 
   useEffect(() => {
-    // Fetch task details - in a real app, this would come from the backend
-    // For now, we'll fetch from available tasks
-    api.get('/tasks/available')
+    // Fetch task details from /tasks/all so we can load any task by ID
+    // regardless of whether it has already been completed by the user
+    api.get('/tasks/all')
       .then(res => {
         const tasks = res.data
         const foundTask = tasks.find((t: TaskData) => t.id === parseInt(taskId || '0'))
