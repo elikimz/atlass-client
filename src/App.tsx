@@ -11,6 +11,7 @@ import Payments from './pages/Payments'
 import Feedback from './pages/Feedback'
 import Settings from './pages/Settings'
 import Layout from './components/Layout'
+import Placeholder from './pages/Placeholder'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -41,6 +42,11 @@ function App() {
         {isAuthenticated ? (
           <Route element={<Layout setIsAuthenticated={setIsAuthenticated} />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/product" element={<Placeholder title="Product" />} />
+            <Route path="/customers" element={<Placeholder title="Customers" />} />
+            <Route path="/income" element={<Placeholder title="Income" />} />
+            <Route path="/promote" element={<Placeholder title="Promote" />} />
+            <Route path="/help" element={<Placeholder title="Help" />} />
             <Route path="/training" element={<Training />} />
             <Route path="/training/hub" element={<LearningHub />} />
             <Route path="/tasks" element={<Tasks />} />
