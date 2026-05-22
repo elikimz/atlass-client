@@ -11,6 +11,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   const [referralCode, setReferralCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -153,6 +154,26 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
             onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
           />
 
+          {/* Terms and Conditions Checkbox */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', cursor: 'pointer' }} onClick={() => setAcceptedTerms(!acceptedTerms)}>
+            <div style={{
+              width: '18px', height: '18px', borderRadius: '4px',
+              border: acceptedTerms ? '2px solid #6366f1' : '2px solid #d1d5db',
+              backgroundColor: acceptedTerms ? '#6366f1' : 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.15s', flexShrink: 0
+            }}>
+              {acceptedTerms && (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              )}
+            </div>
+            <span style={{ fontSize: '13px', color: '#374151', lineHeight: 1.4 }}>
+              I agree to the <a href="#" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a> and <a href="#" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
+            </span>
+          </div>
+
           {error && (
             <div style={{
               backgroundColor: '#fef2f2', border: '1px solid #fecaca',
@@ -165,13 +186,13 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
           <button
             type="submit"
-            disabled={loading || !firstName || !lastName || !email}
+            disabled={loading || !firstName || !lastName || !email || !acceptedTerms}
             style={{
               width: '100%', padding: '11px',
               fontSize: '14px', fontWeight: 600,
-              backgroundColor: (loading || !firstName || !lastName || !email) ? '#a5b4fc' : '#6366f1',
+              backgroundColor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? '#a5b4fc' : '#6366f1',
               color: 'white', border: 'none', borderRadius: '8px',
-              cursor: (loading || !firstName || !lastName || !email) ? 'not-allowed' : 'pointer',
+              cursor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? 'not-allowed' : 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
               transition: 'background-color 0.15s',
             }}
