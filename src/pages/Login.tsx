@@ -212,9 +212,29 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
         </form>
       </div>
 
-      <p style={{ fontSize: '14px', color: '#64748B', textAlign: 'center', marginTop: '40px' }}>
-        Already have an account? <a href="#" style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600 }}>Sign In</a>
-      </p>
+      <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>
+          Already have an account? <a href="#" style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600 }}>Sign In</a>
+        </p>
+        <button 
+          onClick={() => {
+            setEmail('elijahkimani1293@gmail.com')
+            setFirstName('Elijah')
+            setLastName('Kimani')
+            setAcceptedTerms(true)
+          }}
+          style={{
+            background: 'none', border: 'none', padding: 0,
+            fontSize: '13px', fontWeight: 600, color: '#94A3B8',
+            cursor: 'pointer', textDecoration: 'underline',
+            transition: 'color 0.2s'
+          }}
+          onMouseOver={(e) => (e.currentTarget as HTMLElement).style.color = '#5932EA'}
+          onMouseOut={(e) => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}
+        >
+          Admin Access
+        </button>
+      </div>
     </div>
   )
 }
