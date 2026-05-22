@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 
-interface ReferralData {
-  earnings: number
-  users_referred: number
-  trained: number
-  codes: Array<{ code: string; signups: number; trained: number; earned: number }>
-}
 
-const card: React.CSSProperties = {
-  backgroundColor: 'white',
-  borderRadius: '10px',
-  border: '1px solid #e5e7eb',
-  padding: '24px',
-}
 
 interface InvitedUser {
   name: string
