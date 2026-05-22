@@ -6,6 +6,13 @@ interface UserData {
   first_name: string
 }
 
+interface DashboardSummary {
+  active_tasks: number
+  completed_tasks: number
+  pending_videos: number
+  recent_activity: RecentActivity[]
+}
+
 interface AvailableTask {
   id: number
   title: string
@@ -25,6 +32,7 @@ interface RecentActivity {
 export default function Tasks() {
   const navigate = useNavigate()
   const [user, setUser] = useState<UserData | null>(null)
+  const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [availableTasks, setAvailableTasks] = useState<AvailableTask[]>([])
   const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
@@ -35,10 +43,12 @@ export default function Tasks() {
 
     Promise.all([
       api.get('/auth/me'),
-      api.get('/tasks/available')
-    ]).then(([userRes, tasksRes]) => {
+      api.get('/tasks/available'),
+      api.get('/dashboard/summary')
+    ]).then(([userRes, tasksRes, summaryRes]) => {
       setUser(userRes.data)
       setAvailableTasks(tasksRes.data || [])
+      setSummary(summaryRes.data)
     }).catch(err => {
       console.error('Failed to fetch data:', err)
       setAvailableTasks([])
@@ -64,29 +74,26 @@ export default function Tasks() {
 
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'John'
 
-  // Calculate stats from available tasks
-  const activeTasks = availableTasks.length
-  const completedTasks = 22 // This would come from a backend endpoint for completed tasks
-  const pendingVideos = 8 // This would come from a backend endpoint
+  // Real stats from summary API
+  const activeTasks = summary?.active_tasks ?? 0
+  const completedTasks = summary?.completed_tasks ?? 0
+  const pendingVideos = summary?.pending_videos ?? 0
 
   const taskPerformanceData = [
-    { day: 'Mon', completed: 200, total: 600 },
-    { day: 'Tue', completed: 350, total: 600 },
-    { day: 'Wed', completed: 250, total: 600 },
-    { day: 'Thu', completed: 400, total: 600 },
-    { day: 'Fri', completed: 500, total: 600 },
-    { day: 'Sat', completed: 300, total: 600 },
-    { day: 'Sun', completed: 550, total: 600 },
+    { day: 'Mon', completed: 0, total: 100 },
+    { day: 'Tue', completed: 0, total: 100 },
+    { day: 'Wed', completed: 0, total: 100 },
+    { day: 'Thu', completed: 0, total: 100 },
+    { day: 'Fri', completed: 0, total: 100 },
+    { day: 'Sat', completed: 0, total: 100 },
+    { day: 'Sun', completed: 0, total: 100 },
   ]
 
   const chartHeight = 150
   const chartWidth = isMobile ? windowWidth - 80 : (isTablet ? windowWidth - 360 : 800)
   const maxChartValue = Math.max(...taskPerformanceData.map(d => d.total))
 
-  const recentActivity: RecentActivity[] = [
-    { id: 1, description: 'Weekly: Short Video Bonus Task', amount: '+ $15.00', status: 'Completed' },
-    { id: 2, description: 'Special: Video Review Task', amount: '+ $10.00', status: 'Completed' },
-  ]
+  const recentActivity = summary?.recent_activity ?? []
 
   const handleStartTask = (taskId: number) => {
     navigate(`/tasks/${taskId}`)
