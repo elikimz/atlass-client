@@ -10,6 +10,7 @@ interface UserData {
   first_name: string
   last_name: string
   email: string
+  is_admin: boolean
 }
 
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
@@ -32,6 +33,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         localStorage.setItem('user_first_name', res.data.first_name)
         localStorage.setItem('user_last_name', res.data.last_name)
         localStorage.setItem('user_email', res.data.email)
+        localStorage.setItem('user_is_admin', res.data.is_admin ? 'true' : 'false')
       })
       .catch(err => {
         console.error('Failed to fetch user data:', err)
@@ -48,6 +50,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     localStorage.removeItem('user_first_name')
     localStorage.removeItem('user_last_name')
     localStorage.removeItem('user_email')
+    localStorage.removeItem('user_is_admin')
     setIsAuthenticated(false)
     navigate('/login')
   }
@@ -55,6 +58,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
   const lastName = user?.last_name || localStorage.getItem('user_last_name') || ''
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
+  const isAdminUser = user?.is_admin || localStorage.getItem('user_is_admin') === 'true'
   const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
 
   const navItems = [
@@ -127,7 +131,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
-            {navItems.filter(item => item.label !== 'Admin' || userEmail === 'elijahkimani1293@gmail.com').map((item) => (
+            {navItems.filter(item => item.label !== 'Admin' || isAdminUser).map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
@@ -239,7 +243,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-around',
           backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '70px', zIndex: 100,
         }}>
-          {navItems.filter(item => item.label !== 'Admin' || userEmail === 'elijahkimani1293@gmail.com').slice(0, 5).map((item) => (
+          {navItems.filter(item => item.label !== 'Admin' || isAdminUser).slice(0, 5).map((item) => (
             <Link
               key={item.label}
               to={item.path}
