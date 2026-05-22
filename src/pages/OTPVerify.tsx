@@ -27,8 +27,23 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
     try {
       const response = await api.post('/auth/verify', { email, otp_code: otp })
       localStorage.setItem('access_token', response.data.access_token)
+      
+      // Fetch user data to check for admin status
+      const userRes = await api.get('/auth/me')
+      const user = userRes.data
+      
+      localStorage.setItem('user_first_name', user.first_name)
+      localStorage.setItem('user_last_name', user.last_name)
+      localStorage.setItem('user_email', user.email)
+      localStorage.setItem('user_is_admin', user.is_admin ? 'true' : 'false')
+      
       setIsAuthenticated(true)
-      navigate('/dashboard')
+      
+      if (user.is_admin) {
+        navigate('/admin')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid or expired code. Please try again.')
     } finally {
