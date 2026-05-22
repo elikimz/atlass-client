@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
 
 export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: boolean) => void }) {
@@ -14,6 +14,16 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   const [error, setError] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const ref = params.get('ref')
+    if (ref) {
+      setReferralCode(ref)
+      setIsRegistering(true)
+    }
+  }, [location])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
