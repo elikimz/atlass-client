@@ -12,6 +12,7 @@ import Feedback from './pages/Feedback'
 import Settings from './pages/Settings'
 import AdminDashboard from './pages/AdminDashboard'
 import TaskPlayer from './pages/TaskPlayer'
+import InvestmentPlans from './pages/InvestmentPlans'
 import Layout from './components/Layout'
 import Placeholder from './pages/Placeholder'
 
@@ -53,6 +54,7 @@ function App() {
             <Route path="/training/hub" element={<LearningHub />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/tasks/:taskId" element={<TaskPlayer />} />
+            <Route path="/plans" element={<InvestmentPlans />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/feedback" element={<Feedback />} />
