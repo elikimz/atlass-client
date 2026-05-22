@@ -10,6 +10,8 @@ import Referrals from './pages/Referrals'
 import Payments from './pages/Payments'
 import Feedback from './pages/Feedback'
 import Settings from './pages/Settings'
+import AdminDashboard from './pages/AdminDashboard'
+import TaskPlayer from './pages/TaskPlayer'
 import Layout from './components/Layout'
 import Placeholder from './pages/Placeholder'
 
@@ -50,10 +52,12 @@ function App() {
             <Route path="/training" element={<Training />} />
             <Route path="/training/hub" element={<LearningHub />} />
             <Route path="/tasks" element={<Tasks />} />
+            <Route path="/tasks/:taskId" element={<TaskPlayer />} />
             <Route path="/referrals" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Route>

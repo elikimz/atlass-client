@@ -1,12 +1,30 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 interface UserData {
   first_name: string
 }
 
+interface AvailableTask {
+  id: number
+  title: string
+  description?: string
+  video_url: string
+  reward_amount: number
+}
+
+interface RecentActivity {
+  id: number
+  description: string
+  amount: string
+  status: string
+}
+
 export default function Tasks() {
+  const navigate = useNavigate()
   const [user, setUser] = useState<UserData | null>(null)
+  const [availableTasks, setAvailableTasks] = useState<AvailableTask[]>([])
   const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
@@ -14,10 +32,16 @@ export default function Tasks() {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
 
-    api.get('/auth/me')
-      .then((userRes) => {
-        setUser(userRes.data)
-      }).catch(console.error)
+    Promise.all([
+      api.get('/auth/me'),
+      api.get('/tasks/available')
+    ]).then(([userRes, tasksRes]) => {
+      setUser(userRes.data)
+      setAvailableTasks(tasksRes.data || [])
+    }).catch(err => {
+      console.error('Failed to fetch data:', err)
+      setAvailableTasks([])
+    })
       .finally(() => setLoading(false))
 
     return () => window.removeEventListener('resize', handleResize)
@@ -39,10 +63,10 @@ export default function Tasks() {
 
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'John'
 
-  // Placeholder data for stats and chart
-  const activeTasks = 5
-  const completedTasks = 22
-  const pendingVideos = 8
+  // Calculate stats from available tasks
+  const activeTasks = availableTasks.length
+  const completedTasks = 22 // This would come from a backend endpoint for completed tasks
+  const pendingVideos = 8 // This would come from a backend endpoint
 
   const taskPerformanceData = [
     { day: 'Mon', completed: 200, total: 600 },
@@ -58,19 +82,14 @@ export default function Tasks() {
   const chartWidth = isMobile ? windowWidth - 80 : (isTablet ? windowWidth - 360 : 800)
   const maxChartValue = Math.max(...taskPerformanceData.map(d => d.total))
 
-  const availableTasks = [
-    { id: 1, title: 'Watch & Rate Vid: Quantum Computing', type: 'video', reward: 15.00 },
-    { id: 2, title: 'Interact: Local News Summary', type: 'text', reward: 10.00 },
-    { id: 3, title: 'Video Watch Completing', type: 'video', reward: 12.50 },
-    { id: 4, title: 'Video Watch', type: 'video', reward: 8.00 },
-    { id: 5, title: 'Video Watch', type: 'video', reward: 8.00 },
-    { id: 6, title: 'Watch: Art & Craft Tutorial', type: 'video', reward: 10.00 },
-  ]
-
-  const recentActivity = [
+  const recentActivity: RecentActivity[] = [
     { id: 1, description: 'Weekly: Short Video Bonus Task', amount: '+ $15.00', status: 'Completed' },
     { id: 2, description: 'Special: Video Review Task', amount: '+ $10.00', status: 'Completed' },
   ]
+
+  const handleStartTask = (taskId: number) => {
+    navigate(`/tasks/${taskId}`)
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
@@ -138,25 +157,39 @@ export default function Tasks() {
 
       {/* Available Tasks */}
       <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 20px' }}>Available Tasks</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {availableTasks.map((task) => (
-            <div key={task.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #F0F0F0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    {task.type === 'video' ? <polygon points="5 3 19 12 5 21 5 3"/> : <><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></>}
-                  </svg>
+        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 20px' }}>Available Tasks ({availableTasks.length})</h2>
+        {availableTasks.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>No tasks available at the moment. Check back soon!</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {availableTasks.map((task) => (
+              <div key={task.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #F0F0F0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: 'black' }}>{task.title}</span>
+                    {task.description && <p style={{ fontSize: '12px', color: '#6B7280', margin: '4px 0 0' }}>{task.description}</p>}
+                  </div>
                 </div>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: 'black' }}>{task.title}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#00AC4F' }}>${task.reward_amount.toFixed(2)}</span>
+                  <button 
+                    onClick={() => handleStartTask(task.id)}
+                    style={{ backgroundColor: '#5932EA', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}>
+                    START TASK
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                </div>
               </div>
-              <button style={{ backgroundColor: '#5932EA', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}>
-                START TASK
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recent Activity */}
