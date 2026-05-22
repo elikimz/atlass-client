@@ -36,98 +36,99 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    padding: '10px 14px',
+    padding: '12px 16px',
     fontSize: '14px',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
+    border: '1px solid #EEEEEE',
+    borderRadius: '12px',
     outline: 'none',
     backgroundColor: 'white',
-    color: '#111827',
+    color: '#292D32',
     boxSizing: 'border-box',
-    marginBottom: '14px',
-    transition: 'border-color 0.15s',
+    marginBottom: '16px',
+    transition: 'all 0.2s',
   }
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: '13px',
-    fontWeight: 600,
-    color: '#374151',
-    marginBottom: '6px',
+    fontWeight: 500,
+    color: '#B5B7C0',
+    marginBottom: '8px',
   }
 
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#f0f4ff',
+      backgroundColor: '#FAFBFF',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      fontFamily: 'Inter, system-ui, sans-serif',
+      fontFamily: 'Poppins, Inter, system-ui, sans-serif',
       padding: '0 16px',
     }}>
-      {/* Logo */}
-      <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {/* Logo Section */}
+      <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '10px' }}>
         <div style={{
-          width: '36px', height: '36px',
-          backgroundColor: '#6366f1', borderRadius: '10px',
+          width: '42px', height: '42px',
+          backgroundColor: '#5932EA', borderRadius: '12px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0px 10px 30px rgba(89, 50, 234, 0.3)',
         }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>Adpulse AI</span>
+        <span style={{ fontSize: '24px', fontWeight: 600, color: 'black' }}>Adpulse AI</span>
       </div>
 
-      {/* Main Card */}
+      {/* Floating Card */}
       <div style={{
         width: '100%',
-        maxWidth: '420px',
+        maxWidth: '440px',
         backgroundColor: 'white',
-        borderRadius: '16px',
-        border: '1px solid #e5e7eb',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
-        padding: '36px 32px',
+        borderRadius: '30px',
+        padding: '40px',
+        boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.8)',
       }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', textAlign: 'center', lineHeight: 1.3, marginBottom: '8px' }}>
-          Get Started with{' '}
-          <span style={{ color: '#6366f1' }}>Adpulse AI</span>
+        <h1 style={{ fontSize: '26px', fontWeight: 600, color: 'black', textAlign: 'center', marginBottom: '8px' }}>
+          Create Account
         </h1>
-        <p style={{ fontSize: '14px', color: '#6b7280', textAlign: 'center', marginBottom: '28px', lineHeight: 1.6 }}>
-          Enter your details below and we'll send you a verification code to access your dashboard.
+        <p style={{ fontSize: '14px', color: '#757575', textAlign: 'center', marginBottom: '32px', lineHeight: 1.6 }}>
+          Join thousands of contributors building the future of AI.
         </p>
 
         <form onSubmit={handleSubmit}>
-          {/* First Name */}
-          <label style={labelStyle}>First Name</label>
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder="John"
-            required
-            style={inputStyle}
-            onFocus={(e) => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)' }}
-            onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
-          />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>First Name</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Elijah"
+                required
+                style={inputStyle}
+                onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+                onBlur={(e) => { e.target.style.borderColor = '#EEEEEE'; e.target.style.boxShadow = 'none' }}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Last Name</label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Kimani"
+                required
+                style={inputStyle}
+                onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+                onBlur={(e) => { e.target.style.borderColor = '#EEEEEE'; e.target.style.boxShadow = 'none' }}
+              />
+            </div>
+          </div>
 
-          {/* Last Name */}
-          <label style={labelStyle}>Last Name</label>
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Doe"
-            required
-            style={inputStyle}
-            onFocus={(e) => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)' }}
-            onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
-          />
-
-          {/* Email */}
-          <label style={labelStyle}>Email</label>
+          <label style={labelStyle}>Email Address</label>
           <input
             type="email"
             value={email}
@@ -135,33 +136,31 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
             placeholder="name@example.com"
             required
             style={inputStyle}
-            onFocus={(e) => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)' }}
-            onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
+            onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+            onBlur={(e) => { e.target.style.borderColor = '#EEEEEE'; e.target.style.boxShadow = 'none' }}
           />
 
-          {/* Referral Code (optional) */}
           <label style={labelStyle}>
-            Referral Code{' '}
-            <span style={{ fontWeight: 400, color: '#9ca3af' }}>(optional)</span>
+            Referral Code <span style={{ fontWeight: 400, color: '#ACACAC' }}>(Optional)</span>
           </label>
           <input
             type="text"
             value={referralCode}
             onChange={(e) => setReferralCode(e.target.value)}
-            placeholder="Enter referral code if you have one"
+            placeholder="Enter code"
             style={inputStyle}
-            onFocus={(e) => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)' }}
-            onBlur={(e) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' }}
+            onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
+            onBlur={(e) => { e.target.style.borderColor = '#EEEEEE'; e.target.style.boxShadow = 'none' }}
           />
 
           {/* Terms and Conditions Checkbox */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', cursor: 'pointer' }} onClick={() => setAcceptedTerms(!acceptedTerms)}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '24px', cursor: 'pointer' }} onClick={() => setAcceptedTerms(!acceptedTerms)}>
             <div style={{
-              width: '18px', height: '18px', borderRadius: '4px',
-              border: acceptedTerms ? '2px solid #6366f1' : '2px solid #d1d5db',
-              backgroundColor: acceptedTerms ? '#6366f1' : 'white',
+              width: '20px', height: '20px', borderRadius: '6px',
+              border: acceptedTerms ? '2px solid #5932EA' : '2px solid #EEEEEE',
+              backgroundColor: acceptedTerms ? '#5932EA' : 'white',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.15s', flexShrink: 0
+              transition: 'all 0.2s', flexShrink: 0, marginTop: '2px'
             }}>
               {acceptedTerms && (
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
@@ -169,16 +168,16 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                 </svg>
               )}
             </div>
-            <span style={{ fontSize: '13px', color: '#374151', lineHeight: 1.4 }}>
-              I agree to the <a href="#" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a> and <a href="#" style={{ color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
+            <span style={{ fontSize: '13px', color: '#757575', lineHeight: 1.5 }}>
+              I agree to the <a href="#" style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600 }}>Terms of Service</a> and <a href="#" style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</a>
             </span>
           </div>
 
           {error && (
             <div style={{
-              backgroundColor: '#fef2f2', border: '1px solid #fecaca',
-              borderRadius: '8px', padding: '10px 12px',
-              fontSize: '13px', color: '#dc2626', marginBottom: '12px',
+              backgroundColor: '#FFF4F4', border: '1px solid #FFC5C5',
+              borderRadius: '12px', padding: '12px 16px',
+              fontSize: '13px', color: '#DF0404', marginBottom: '16px',
             }}>
               {error}
             </div>
@@ -188,33 +187,31 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
             type="submit"
             disabled={loading || !firstName || !lastName || !email || !acceptedTerms}
             style={{
-              width: '100%', padding: '11px',
-              fontSize: '14px', fontWeight: 600,
-              backgroundColor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? '#a5b4fc' : '#6366f1',
-              color: 'white', border: 'none', borderRadius: '8px',
+              width: '100%', padding: '14px',
+              fontSize: '16px', fontWeight: 600,
+              backgroundColor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? '#DED5FF' : '#5932EA',
+              color: 'white', border: 'none', borderRadius: '12px',
               cursor: (loading || !firstName || !lastName || !email || !acceptedTerms) ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-              transition: 'background-color 0.15s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              transition: 'all 0.2s',
+              boxShadow: (loading || !firstName || !lastName || !email || !acceptedTerms) ? 'none' : '0px 10px 30px rgba(89, 50, 234, 0.3)',
             }}
           >
             {loading ? 'Sending code...' : (
               <>
                 Continue
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                 </svg>
               </>
             )}
           </button>
         </form>
-
-        <p style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center', marginTop: '16px' }}>
-          By continuing, you agree to our{' '}
-          <a href="#" style={{ color: '#6366f1', textDecoration: 'none' }}>Terms of Service</a>
-          {' '}and{' '}
-          <a href="#" style={{ color: '#6366f1', textDecoration: 'none' }}>Privacy Policy</a>.
-        </p>
       </div>
+
+      <p style={{ fontSize: '13px', color: '#B5B7C0', textAlign: 'center', marginTop: '32px' }}>
+        Already have an account? <a href="#" style={{ color: '#5932EA', textDecoration: 'none', fontWeight: 600 }}>Sign In</a>
+      </p>
     </div>
   )
 }
