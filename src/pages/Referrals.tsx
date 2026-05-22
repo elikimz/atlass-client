@@ -81,7 +81,7 @@ export default function Referrals() {
               </svg>
             </div>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: '0 0 8px' }}>Total Invites:</p>
-            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>{summary?.users_referred || '35'}</p>
+            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>{summary?.users_referred ?? 0}</p>
           </div>
           {/* Stat Card 2 */}
           <div style={{ backgroundColor: '#F8FAFC', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
@@ -91,7 +91,7 @@ export default function Referrals() {
               </svg>
             </div>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: '0 0 8px' }}>Total Invite Commission:</p>
-            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${summary?.earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '1,250.00'}</p>
+            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${(summary?.earnings ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
           {/* Stat Card 3 */}
           <div style={{ backgroundColor: '#F8FAFC', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
@@ -101,7 +101,7 @@ export default function Referrals() {
               </svg>
             </div>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: '0 0 8px' }}>Total Task Rebate Commission:</p>
-            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${summary?.task_rebate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '780.00'}</p>
+            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${(summary?.task_rebate ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
         </div>
       </div>
