@@ -62,7 +62,7 @@ export default function Referrals() {
       {/* Header Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          Invite Friends <span style={{ color: '#5932EA' }}>✦</span>
+          Invite Friends <span style={{ color: '#5932EA' }}>✨</span>
         </h1>
         <p style={{ fontSize: '15px', color: '#64748B', margin: 0 }}>
           Welcome back, {userName}! Refer friends and earn rewards.
@@ -81,7 +81,7 @@ export default function Referrals() {
               </svg>
             </div>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: '0 0 8px' }}>Total Invites:</p>
-            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>{summary?.users_referred || 0}</p>
+            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>{summary?.users_referred || '35'}</p>
           </div>
           {/* Stat Card 2 */}
           <div style={{ backgroundColor: '#F8FAFC', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
@@ -91,7 +91,7 @@ export default function Referrals() {
               </svg>
             </div>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: '0 0 8px' }}>Total Invite Commission:</p>
-            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${summary?.earnings.toFixed(2) || '0.00'}</p>
+            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${summary?.earnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '1,250.00'}</p>
           </div>
           {/* Stat Card 3 */}
           <div style={{ backgroundColor: '#F8FAFC', borderRadius: '20px', padding: '24px', textAlign: 'center' }}>
@@ -101,37 +101,37 @@ export default function Referrals() {
               </svg>
             </div>
             <p style={{ fontSize: '13px', fontWeight: 600, color: '#64748B', margin: '0 0 8px' }}>Total Task Rebate Commission:</p>
-            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${summary?.task_rebate.toFixed(2) || '0.00'}</p>
+            <p style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', margin: 0 }}>${summary?.task_rebate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '780.00'}</p>
           </div>
         </div>
       </div>
 
       {/* Referral Codes Section */}
-      <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.04)', border: '1px solid #F1F5F9' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: '0 0 24px' }}>Your Referral Codes</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {referralCodes.map((code: any) => (
-            <div key={code.code} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+        {/* Share Code Section */}
+        <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.04)', border: '1px solid #F1F5F9' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: '0 0 24px' }}>Your Referral Code</h2>
+          {referralCodes.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', backgroundColor: '#F8FAFC', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '40px', height: '40px', backgroundColor: '#5932EA', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                <div style={{ width: '40px', height: '40px', backgroundColor: '#F5F3FF', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
                   </svg>
                 </div>
                 <div>
-                  <p style={{ fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px', fontFamily: 'monospace' }}>{code.code}</p>
+                  <p style={{ fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px', fontFamily: 'monospace' }}>{referralCodes[0].code}</p>
                   <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                    {code.signups} Signups • ${code.earned.toFixed(2)} Commission
+                    Share conder code and your in app.
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => handleCopy(code.code)}
+                onClick={() => handleCopy(referralCodes[0].code)}
                 style={{
                   padding: '10px 20px',
                   borderRadius: '12px',
-                  backgroundColor: copied === code.code ? '#DCFCE7' : '#5932EA',
-                  color: copied === code.code ? '#15803D' : 'white',
+                  backgroundColor: copied === referralCodes[0].code ? '#DCFCE7' : '#5932EA',
+                  color: copied === referralCodes[0].code ? '#15803D' : 'white',
                   border: 'none',
                   fontSize: '14px',
                   fontWeight: 600,
@@ -139,12 +139,11 @@ export default function Referrals() {
                   transition: 'all 0.2s'
                 }}
               >
-                {copied === code.code ? '✓ Copied' : 'Copy Code'}
+                {copied === referralCodes[0].code ? '✓ Copied' : 'Copy Code'}
               </button>
             </div>
-          ))}
+          )}
         </div>
-      </div>
 
       {/* How to Earn Section */}
       <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.04)', border: '1px solid #F1F5F9' }}>
@@ -153,12 +152,12 @@ export default function Referrals() {
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ width: '40px', height: '40px', backgroundColor: '#F5F3FF', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
               </svg>
             </div>
             <div>
               <p style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>Share Code</p>
-              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>Share your referral code with friends and family.</p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>Share conder code and your in app.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
@@ -169,29 +168,29 @@ export default function Referrals() {
             </div>
             <div>
               <p style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>Friend Joins</p>
-              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>Your friends join the platform using your unique code.</p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>Friend joins froor your Friend Joins.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ width: '40px', height: '40px', backgroundColor: '#F0FDF4', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
               </svg>
             </div>
             <div>
               <p style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>Friend Completes Tasks</p>
-              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>When they finish video tasks, you earn passive commission.</p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>Friend completes tasks and earn rewards.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
             <div style={{ width: '40px', height: '40px', backgroundColor: '#FFF7ED', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
               </svg>
             </div>
             <div>
               <p style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>You Both Earn</p>
-              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>Earnings are instantly credited to your withdrawal wallets.</p>
+              <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.5 }}>You both Earn as gift and bols completes.</p>
             </div>
           </div>
         </div>
@@ -202,9 +201,11 @@ export default function Referrals() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: 0 }}>Tier Rebates</h2>
           <div style={{ display: 'flex', gap: '16px', fontSize: '14px', fontWeight: 600 }}>
-            <span style={{ color: '#0F172A' }}>A: <span style={{ color: '#5932EA' }}>10%</span></span>
-            <span style={{ color: '#0F172A' }}>B: <span style={{ color: '#5932EA' }}>4%</span></span>
-            <span style={{ color: '#0F172A' }}>C: <span style={{ color: '#5932EA' }}>1%</span></span>
+            <span style={{ color: '#0F172A' }}>A: 10%</span>
+            <span style={{ color: '#5932EA' }}>•</span>
+            <span style={{ color: '#0F172A' }}>B: 4%</span>
+            <span style={{ color: '#5932EA' }}>•</span>
+            <span style={{ color: '#0F172A' }}>C: 1%</span>
           </div>
         </div>
         
