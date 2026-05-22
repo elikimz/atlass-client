@@ -8,19 +8,23 @@ interface LayoutProps {
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 1024
       setIsMobile(mobile)
-      if (mobile) setSidebarOpen(false)
-      else setSidebarOpen(true)
+      if (!mobile) setSidebarOpen(true)
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  // Close sidebar on route change on mobile
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false)
+  }, [location.pathname, isMobile])
 
   const isActive = (path: string) => location.pathname === path
 
@@ -92,28 +96,38 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       backgroundColor: '#FAFBFF',
       fontFamily: 'Poppins, Inter, system-ui, sans-serif',
       overflow: 'hidden',
+      position: 'relative',
     }}>
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 40,
+          }}
+        />
+      )}
+
       {/* Sidebar */}
       <div style={{
-        width: sidebarOpen ? '306px' : '0',
-        minWidth: sidebarOpen ? '306px' : '0',
+        width: sidebarOpen ? (isMobile ? '280px' : '306px') : '0',
+        minWidth: sidebarOpen ? (isMobile ? '280px' : '306px') : '0',
         flexShrink: 0,
         backgroundColor: 'white',
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
         overflow: 'hidden',
-        transition: 'width 0.25s ease, min-width 0.25s ease',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.5)',
-        position: isMobile ? 'fixed' : 'relative',
+        position: isMobile ? 'absolute' : 'relative',
+        left: isMobile && !sidebarOpen ? '-280px' : '0',
         zIndex: 50,
       }}>
-        {/* Logo (EXACTLY AS IN IMAGE) */}
+        {/* Logo */}
         <div style={{ padding: '36px 28px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '37px', height: '37px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+          <div style={{ width: '37px', height: '37px' }}>
             <svg width="37" height="37" viewBox="0 0 37 37" fill="none">
               <path d="M18.5 0.5L34.0885 9.5V27.5L18.5 36.5L2.91154 27.5V9.5L18.5 0.5Z" stroke="black" strokeWidth="2.5"/>
               <circle cx="18.5" cy="18.5" r="6" fill="black"/>
@@ -122,8 +136,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           <div style={{ fontSize: '26px', fontWeight: 600, color: 'black' }}>Dashboard <span style={{ fontSize: '10px', color: '#838383', verticalAlign: 'middle' }}>v.01</span></div>
         </div>
 
-        {/* Navigation Items (EXACTLY AS IN IMAGE) */}
-        <div style={{ flex: 1, padding: '0 28px' }}>
+        {/* Navigation Items */}
+        <div style={{ flex: 1, padding: '0 28px', overflowY: 'auto' }}>
           {navItems.map((item) => (
             <Link key={item.label} to={item.path} style={navLinkStyle(isActive(item.path))}>
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</span>
@@ -160,19 +174,33 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
 
       {/* Main Content Area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowY: 'auto' }}>
-        <div style={{ padding: '40px 70px' }}>
+        <div style={{ padding: isMobile ? '20px' : '40px 70px' }}>
           {/* Top Bar / Search */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
-            <div style={{ fontSize: '24px', fontWeight: 500, color: 'black' }}>Hello {firstName} 👋,</div>
-            <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: '20px', marginBottom: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', width: '100%' }}>
+              {isMobile && (
+                <button 
+                  onClick={() => setSidebarOpen(true)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                </button>
+              )}
+              <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 500, color: 'black' }}>Hello {firstName} 👋,</div>
+            </div>
+            
+            <div style={{ position: 'relative', width: isMobile ? '100%' : 'auto' }}>
               <input
                 type="text"
                 placeholder="Search"
                 style={{
-                  width: '216px', padding: '10px 10px 10px 40px',
+                  width: isMobile ? '100%' : '216px', padding: '10px 10px 10px 40px',
                   backgroundColor: 'white', border: 'none', borderRadius: '12px',
                   fontSize: '14px', color: '#B5B7C0', outline: 'none',
                   boxShadow: '0px 10px 60px rgba(226, 236, 249, 0.5)',
+                  boxSizing: 'border-box',
                 }}
               />
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7E7E7E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}>
