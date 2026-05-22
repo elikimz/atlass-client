@@ -161,7 +161,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
               </div>
             )}
             {!isMobile && (
-              <div style={{ fontSize: '18px', fontWeight: 500, color: '#292D32' }}>Welcome back, <span style={{ fontWeight: 700 }}>{firstName}</span> 👋</div>
+              <div style={{ fontSize: '18px', fontWeight: 500, color: '#292D32' }}>Overview</div>
             )}
           </div>
 

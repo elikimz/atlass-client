@@ -33,6 +33,7 @@ export default function Dashboard() {
     )
   }
 
+  const firstName = localStorage.getItem('user_first_name') || 'John'
   const isMobile = windowWidth < 768
   const isTablet = windowWidth >= 768 && windowWidth < 1280
   const isDesktop = windowWidth >= 1280
@@ -58,7 +59,7 @@ export default function Dashboard() {
         <h1 style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 700, color: 'black', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           Dashboard <span style={{ fontSize: '24px' }}>✨</span>
         </h1>
-        <p style={{ fontSize: '14px', color: '#757575', margin: 0 }}>Here's your overview for today.</p>
+        <p style={{ fontSize: '14px', color: '#757575', margin: 0 }}>Welcome back, {firstName}! Here's your overview.</p>
       </div>
 
       {/* Stats Grid */}
