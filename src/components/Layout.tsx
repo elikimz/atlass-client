@@ -30,7 +30,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     navigate('/login')
   }
 
-  const userEmail = localStorage.getItem('user_email') || 'elijahkimani1293@gmail.com'
   const firstName = localStorage.getItem('user_first_name') || 'Elijah'
   const lastName = localStorage.getItem('user_last_name') || 'Kimani'
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()

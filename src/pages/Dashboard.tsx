@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 
-interface DashboardData {
-  footage_labeled_min: number
-  approved_roles: string
-  certifications_earned: number
-}
-
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api.get('/dashboard/summary')
-      .then((r) => setData(r.data))
+      .then(() => {})
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
