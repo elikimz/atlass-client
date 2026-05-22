@@ -12,6 +12,7 @@ interface AvailableTask {
   description?: string
   video_url: string
   reward_amount: number
+  status: string
 }
 
 interface RecentActivity {
@@ -167,10 +168,16 @@ export default function Tasks() {
             {availableTasks.map((task) => (
               <div key={task.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #F0F0F0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: task.status === 'completed' ? '#D3FFE7' : '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {task.status === 'completed' ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                      </svg>
+                    )}
                   </div>
                   <div>
                     <span style={{ fontSize: '14px', fontWeight: 500, color: 'black' }}>{task.title}</span>
@@ -179,12 +186,18 @@ export default function Tasks() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontSize: '13px', fontWeight: 600, color: '#00AC4F' }}>${task.reward_amount.toFixed(2)}</span>
-                  <button 
-                    onClick={() => handleStartTask(task.id)}
-                    style={{ backgroundColor: '#5932EA', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}>
-                    START TASK
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                  </button>
+                  {task.status === 'completed' ? (
+                    <div style={{ backgroundColor: '#D3FFE7', color: '#00AC4F', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      DONE ✓
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => handleStartTask(task.id)}
+                      style={{ backgroundColor: '#5932EA', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}>
+                      START TASK
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
