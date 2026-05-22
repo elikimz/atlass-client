@@ -18,11 +18,13 @@ export default function AdminDashboard() {
   const [videos, setVideos] = useState<VideoTask[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadType, setUploadType] = useState<'file' | 'link'>('file')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     reward_amount: 10.00,
     file: null as File | null,
+    video_url: '',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -65,8 +67,13 @@ export default function AdminDashboard() {
     setError('')
     setSuccess('')
 
-    if (!formData.file) {
+    if (uploadType === 'file' && !formData.file) {
       setError('Please select a video file')
+      return
+    }
+
+    if (uploadType === 'link' && !formData.video_url.trim()) {
+      setError('Please enter a video URL')
       return
     }
 
@@ -78,24 +85,28 @@ export default function AdminDashboard() {
     setUploading(true)
 
     try {
-      // 1. Upload to Cloudinary
-      const cloudinaryData = new FormData()
-      cloudinaryData.append('file', formData.file)
-      cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-      
-      const cloudinaryRes = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
-        cloudinaryData
-      )
-      
-      const videoUrl = cloudinaryRes.data.secure_url
+      let finalVideoUrl = formData.video_url
+
+      if (uploadType === 'file' && formData.file) {
+        // 1. Upload to Cloudinary
+        const cloudinaryData = new FormData()
+        cloudinaryData.append('file', formData.file)
+        cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+        
+        const cloudinaryRes = await axios.post(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+          cloudinaryData
+        )
+        
+        finalVideoUrl = cloudinaryRes.data.secure_url
+      }
       
       // 2. Save to Backend
       await api.post('/admin/create-video-task', {
         title: formData.title,
         description: formData.description,
         reward_amount: formData.reward_amount,
-        video_url: videoUrl
+        video_url: finalVideoUrl
       })
 
       setSuccess(`Video "${formData.title}" uploaded successfully!`)
@@ -104,6 +115,7 @@ export default function AdminDashboard() {
         description: '',
         reward_amount: 10.00,
         file: null,
+        video_url: '',
       })
       
       // Reset file input
@@ -195,17 +207,84 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>Video File *</label>
-            <input
-              id="file-input"
-              type="file"
-              accept="video/*"
-              onChange={handleFileChange}
-              style={{ width: '100%', padding: '10px 12px', border: '2px dashed #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', cursor: 'pointer' }}
-              required
-            />
-            <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>Supported formats: MP4, WebM, Ogg, etc.</p>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '12px' }}>Video Source *</label>
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={() => setUploadType('file')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: uploadType === 'file' ? '#5932EA' : '#D1D5DB',
+                  backgroundColor: uploadType === 'file' ? '#F2EFFF' : 'white',
+                  color: uploadType === 'file' ? '#5932EA' : '#374151',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadType('link')}
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: uploadType === 'link' ? '#5932EA' : '#D1D5DB',
+                  backgroundColor: uploadType === 'link' ? '#F2EFFF' : 'white',
+                  color: uploadType === 'link' ? '#5932EA' : '#374151',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Video Link
+              </button>
+            </div>
+
+            {uploadType === 'file' ? (
+              <>
+                <input
+                  id="file-input"
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileChange}
+                  style={{ width: '100%', padding: '10px 12px', border: '2px dashed #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', cursor: 'pointer' }}
+                  required
+                />
+                <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>Supported formats: MP4, WebM, Ogg, etc.</p>
+              </>
+            ) : (
+              <input
+                type="url"
+                name="video_url"
+                value={formData.video_url}
+                onChange={handleInputChange}
+                placeholder="https://example.com/video.mp4"
+                style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }}
+                required
+              />
+            )}
           </div>
 
           <button
