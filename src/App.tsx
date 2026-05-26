@@ -19,11 +19,14 @@ import Placeholder from './pages/Placeholder'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
+    const adminStatus = localStorage.getItem('user_is_admin') === 'true'
     setIsAuthenticated(!!token)
+    setIsAdmin(adminStatus)
     setLoading(false)
   }, [])
 
@@ -62,8 +65,8 @@ function App() {
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="*" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<Navigate to={isAdmin ? "/admin" : "/dashboard"} />} />
+            <Route path="*" element={<Navigate to={isAdmin ? "/admin" : "/dashboard"} />} />
           </Route>
         ) : (
           <Route path="*" element={<Navigate to="/login" />} />
