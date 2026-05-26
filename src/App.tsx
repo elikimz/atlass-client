@@ -7,6 +7,7 @@ import Training from './pages/Training'
 import LearningHub from './pages/LearningHub'
 import Tasks from './pages/Tasks'
 import Referrals from './pages/Referrals'
+import Invite from './pages/Invite'
 import Payments from './pages/Payments'
 import Feedback from './pages/Feedback'
 import Settings from './pages/Settings'
@@ -55,7 +56,8 @@ function App() {
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/tasks/:taskId" element={<TaskPlayer />} />
             <Route path="/plans" element={<InvestmentPlans />} />
-            <Route path="/referrals" element={<Referrals />} />
+            <Route path="/referrals" element={<Invite />} />
+            <Route path="/referrals-old" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
