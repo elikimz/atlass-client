@@ -11,370 +11,235 @@ interface VideoTask {
   created_at: string
 }
 
+interface Certification {
+  id: number
+  name: string
+  description: string
+  estimated_time: string
+  video_url: string
+}
+
 const CLOUDINARY_UPLOAD_PRESET = "task_images";
 const CLOUDINARY_CLOUD_NAME = "doste1wr0";
 
 export default function AdminDashboard() {
   const [videos, setVideos] = useState<VideoTask[]>([])
+  const [certifications, setCertifications] = useState<Certification[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [uploadType, setUploadType] = useState<'file' | 'link'>('file')
-  const [formData, setFormData] = useState({
+  const [activeTab, setActiveTab] = useState<'tasks' | 'training'>('tasks')
+  
+  const [taskFormData, setTaskFormData] = useState({
     title: '',
     description: '',
     reward_amount: 10.00,
     file: null as File | null,
-    video_url: '',
   })
+
+  const [trainingFormData, setTrainingFormData] = useState({
+    name: '',
+    description: '',
+    estimated_time: '15 mins',
+    file: null as File | null,
+  })
+
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   useEffect(() => {
-    fetchVideos()
+    fetchData()
   }, [])
 
-  const fetchVideos = async () => {
+  const fetchData = async () => {
     try {
-      const response = await api.get('/admin/video-tasks')
-      setVideos(response.data)
+      const [videosRes, certsRes] = await Promise.all([
+        api.get('/admin/video-tasks'),
+        api.get('/admin/certifications')
+      ])
+      setVideos(videosRes.data)
+      setCertifications(certsRes.data)
     } catch (err) {
-      setError('Failed to fetch videos')
+      setError('Failed to fetch data')
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'reward_amount' ? parseFloat(value) : value,
-    }))
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({
-        ...prev,
-        file: e.target.files![0],
-      }))
-    }
-  }
-
-  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleTaskUpload = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (uploadType === 'file' && !formData.file) {
-      setError('Please select a video file')
-      return
-    }
-
-    if (uploadType === 'link' && !formData.video_url.trim()) {
-      setError('Please enter a video URL')
-      return
-    }
-
-    if (!formData.title.trim()) {
-      setError('Please enter a title')
-      return
-    }
-
+    if (!taskFormData.file || !taskFormData.title) return setError('Please fill all required fields')
+    
     setUploading(true)
-
+    setError('')
     try {
-      let finalVideoUrl = formData.video_url
-
-      if (uploadType === 'file' && formData.file) {
-        // 1. Upload to Cloudinary
-        const cloudinaryData = new FormData()
-        cloudinaryData.append('file', formData.file)
-        cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-        
-        const cloudinaryRes = await axios.post(
-          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
-          cloudinaryData
-        )
-        
-        finalVideoUrl = cloudinaryRes.data.secure_url
-      }
+      const cloudinaryData = new FormData()
+      cloudinaryData.append('file', taskFormData.file)
+      cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
       
-      // 2. Save to Backend
+      const cloudinaryRes = await axios.post(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+        cloudinaryData
+      )
+      
       await api.post('/admin/create-video-task', {
-        title: formData.title,
-        description: formData.description,
-        reward_amount: formData.reward_amount,
-        video_url: finalVideoUrl
+        title: taskFormData.title,
+        description: taskFormData.description,
+        reward_amount: taskFormData.reward_amount,
+        video_url: cloudinaryRes.data.secure_url
       })
 
-      setSuccess(`Video "${formData.title}" uploaded successfully!`)
-      setFormData({
-        title: '',
-        description: '',
-        reward_amount: 10.00,
-        file: null,
-        video_url: '',
-      })
-      
-      // Reset file input
-      const fileInput = document.getElementById('file-input') as HTMLInputElement
-      if (fileInput) fileInput.value = ''
-
-      // Refresh videos list
-      await fetchVideos()
+      setSuccess('Video task uploaded successfully!')
+      setTaskFormData({ title: '', description: '', reward_amount: 10.00, file: null })
+      fetchData()
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Failed to upload video')
-      console.error(err)
+      setError('Upload failed')
     } finally {
       setUploading(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#5932EA', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading...</p>
-        </div>
-      </div>
-    )
+  const handleTrainingUpload = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!trainingFormData.file || !trainingFormData.name) return setError('Please fill all required fields')
+    
+    setUploading(true)
+    setError('')
+    try {
+      const cloudinaryData = new FormData()
+      cloudinaryData.append('file', trainingFormData.file)
+      cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+      
+      const cloudinaryRes = await axios.post(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+        cloudinaryData
+      )
+      
+      await api.post('/admin/upload-training-video', null, {
+        params: {
+          name: trainingFormData.name,
+          description: trainingFormData.description,
+          estimated_time: trainingFormData.estimated_time,
+        },
+        data: trainingFormData.file, // Note: The backend expects a File object in the request body for UploadFile
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      // Wait, I should use the correct endpoint structure I just created in the backend
+      const formData = new FormData();
+      formData.append('file', trainingFormData.file);
+      
+      await api.post(`/admin/upload-training-video?name=${encodeURIComponent(trainingFormData.name)}&description=${encodeURIComponent(trainingFormData.description)}&estimated_time=${encodeURIComponent(trainingFormData.estimated_time)}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      setSuccess('Training video uploaded successfully!')
+      setTrainingFormData({ name: '', description: '', estimated_time: '15 mins', file: null })
+      fetchData()
+    } catch (err: any) {
+      setError('Upload failed')
+    } finally {
+      setUploading(false)
+    }
   }
 
+  const deleteCert = async (id: number) => {
+    if (!window.confirm('Are you sure?')) return
+    try {
+      await api.delete(`/admin/certifications/${id}`)
+      fetchData()
+    } catch (err) {
+      setError('Delete failed')
+    }
+  }
+
+  if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-      
-      <div>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'black', margin: '0 0 8px' }}>Admin Dashboard</h1>
-        <p style={{ fontSize: '14px', color: '#757575', margin: 0 }}>Manage and upload video tasks for users</p>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '24px' }}>Admin Dashboard</h1>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '32px', borderBottom: '1px solid #E2E8F0' }}>
+        <button 
+          onClick={() => setActiveTab('tasks')}
+          style={{ padding: '12px 24px', border: 'none', background: 'none', borderBottom: activeTab === 'tasks' ? '2px solid #5932EA' : 'none', color: activeTab === 'tasks' ? '#5932EA' : '#64748B', fontWeight: 600, cursor: 'pointer' }}
+        >
+          Video Tasks
+        </button>
+        <button 
+          onClick={() => setActiveTab('training')}
+          style={{ padding: '12px 24px', border: 'none', background: 'none', borderBottom: activeTab === 'training' ? '2px solid #5932EA' : 'none', color: activeTab === 'training' ? '#5932EA' : '#64748B', fontWeight: 600, cursor: 'pointer' }}
+        >
+          Training Videos
+        </button>
       </div>
 
-      {/* Upload Form */}
-      <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'black', margin: '0 0 24px' }}>Upload New Video Task</h2>
-        
-        {error && (
-          <div style={{ backgroundColor: '#FEE2E2', border: '1px solid #FECACA', color: '#DC2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
-            {error}
-          </div>
-        )}
+      {error && <div style={{ padding: '12px', backgroundColor: '#FEE2E2', color: '#DC2626', borderRadius: '8px', marginBottom: '16px' }}>{error}</div>}
+      {success && <div style={{ padding: '12px', backgroundColor: '#DCFCE7', color: '#15803D', borderRadius: '8px', marginBottom: '16px' }}>{success}</div>}
 
-        {success && (
-          <div style={{ backgroundColor: '#DCFCE7', border: '1px solid #BBF7D0', color: '#15803D', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>Video Title *</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="e.g., Watch & Rate: Quantum Computing"
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }}
-              required
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Describe the task..."
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', minHeight: '100px', resize: 'vertical' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>Reward Amount ($) *</label>
-            <input
-              type="number"
-              name="reward_amount"
-              value={formData.reward_amount}
-              onChange={handleInputChange}
-              placeholder="10.00"
-              step="0.01"
-              min="0"
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }}
-              required
-            />
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '12px' }}>Video Source *</label>
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-              <button
-                type="button"
-                onClick={() => setUploadType('file')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid',
-                  borderColor: uploadType === 'file' ? '#5932EA' : '#D1D5DB',
-                  backgroundColor: uploadType === 'file' ? '#F2EFFF' : 'white',
-                  color: uploadType === 'file' ? '#5932EA' : '#374151',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                Upload File
+      {activeTab === 'tasks' ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+          {/* Task Form */}
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Upload Video Task</h2>
+            <form onSubmit={handleTaskUpload} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input type="text" placeholder="Title" value={taskFormData.title} onChange={e => setTaskFormData({...taskFormData, title: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
+              <textarea placeholder="Description" value={taskFormData.description} onChange={e => setTaskFormData({...taskFormData, description: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB', minHeight: '80px' }} />
+              <input type="number" placeholder="Reward ($)" value={taskFormData.reward_amount} onChange={e => setTaskFormData({...taskFormData, reward_amount: parseFloat(e.target.value)})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
+              <input type="file" accept="video/*" onChange={e => setTaskFormData({...taskFormData, file: e.target.files?.[0] || null})} style={{ padding: '10px' }} />
+              <button disabled={uploading} style={{ padding: '12px', backgroundColor: '#5932EA', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
+                {uploading ? 'Uploading...' : 'Upload Task'}
               </button>
-              <button
-                type="button"
-                onClick={() => setUploadType('link')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '1px solid',
-                  borderColor: uploadType === 'link' ? '#5932EA' : '#D1D5DB',
-                  backgroundColor: uploadType === 'link' ? '#F2EFFF' : 'white',
-                  color: uploadType === 'link' ? '#5932EA' : '#374151',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                </svg>
-                Video Link
-              </button>
-            </div>
-
-            {uploadType === 'file' ? (
-              <>
-                <input
-                  id="file-input"
-                  type="file"
-                  accept="video/*"
-                  onChange={handleFileChange}
-                  style={{ width: '100%', padding: '10px 12px', border: '2px dashed #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', cursor: 'pointer' }}
-                  required
-                />
-                <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '8px' }}>Supported formats: MP4, WebM, Ogg, etc.</p>
-              </>
-            ) : (
-              <input
-                type="url"
-                name="video_url"
-                value={formData.video_url}
-                onChange={handleInputChange}
-                placeholder="https://example.com/video.mp4"
-                style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit' }}
-                required
-              />
-            )}
+            </form>
           </div>
 
-          <button
-            type="submit"
-            disabled={uploading}
-            style={{
-              backgroundColor: uploading ? '#D1D5DB' : '#5932EA',
-              color: 'white',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              border: 'none',
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              fontWeight: 600,
-              transition: 'background-color 0.2s',
-            }}
-          >
-            {uploading ? 'Uploading...' : 'Upload Video Task'}
-          </button>
-        </form>
-      </div>
-
-      {/* Videos List */}
-      <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'black', margin: '0 0 24px' }}>Uploaded Video Tasks ({videos.length})</h2>
-
-        {videos.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <div style={{ width: '52px', height: '52px', backgroundColor: '#F0F4FF', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="23 7 16 12 23 17 23 7"/>
-                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-              </svg>
-            </div>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 6px' }}>No videos uploaded yet</p>
-            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Upload your first video task above to get started</p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-            {videos.map((video) => (
-              <div key={video.id} style={{ backgroundColor: '#F9FBFF', borderRadius: '12px', padding: '16px', border: '1px solid #E5E7EB' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="23 7 16 12 23 17 23 7"/>
-                      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'black', margin: '0 0 4px' }}>{video.title}</h3>
-                    <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>ID: {video.id}</p>
-                  </div>
+          {/* Task List */}
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Existing Tasks</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {videos.map(v => (
+                <div key={v.id} style={{ padding: '12px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                  <p style={{ fontWeight: 600, margin: '0 0 4px' }}>{v.title}</p>
+                  <p style={{ fontSize: '12px', color: '#64748B' }}>${v.reward_amount} • {v.id}</p>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+          {/* Training Form */}
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Upload Training Video</h2>
+            <form onSubmit={handleTrainingUpload} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input type="text" placeholder="Course Name (e.g. Video Reviewing Mastery)" value={trainingFormData.name} onChange={e => setTrainingFormData({...trainingFormData, name: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
+              <textarea placeholder="Description" value={trainingFormData.description} onChange={e => setTrainingFormData({...trainingFormData, description: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB', minHeight: '80px' }} />
+              <input type="text" placeholder="Estimated Time (e.g. 15 mins)" value={trainingFormData.estimated_time} onChange={e => setTrainingFormData({...trainingFormData, estimated_time: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #D1D5DB' }} />
+              <input type="file" accept="video/*" onChange={e => setTrainingFormData({...trainingFormData, file: e.target.files?.[0] || null})} style={{ padding: '10px' }} />
+              <button disabled={uploading} style={{ padding: '12px', backgroundColor: '#5932EA', color: 'white', borderRadius: '8px', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
+                {uploading ? 'Uploading...' : 'Upload Training Video'}
+              </button>
+            </form>
+          </div>
 
-                {video.description && (
-                  <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 12px', lineHeight: '1.4' }}>{video.description}</p>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #E5E7EB' }}>
+          {/* Training List */}
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '20px' }}>Current Training Courses</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {certifications.map(c => (
+                <div key={c.id} style={{ padding: '12px', backgroundColor: '#F5F3FF', borderRadius: '12px', border: '1px solid #DDD6FE', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 4px' }}>Reward</p>
-                    <p style={{ fontSize: '16px', fontWeight: 600, color: '#00AC4F', margin: 0 }}>${video.reward_amount.toFixed(2)}</p>
+                    <p style={{ fontWeight: 600, margin: '0 0 4px' }}>{c.name}</p>
+                    <p style={{ fontSize: '12px', color: '#64748B' }}>{c.estimated_time} • ID: {c.id}</p>
                   </div>
-                  <a
-                    href={video.video_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      backgroundColor: '#5932EA',
-                      color: 'white',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      textDecoration: 'none',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    View Video
-                  </a>
+                  <button onClick={() => deleteCert(c.id)} style={{ padding: '6px 12px', backgroundColor: '#FEE2E2', color: '#DC2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Delete</button>
                 </div>
-
-                <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0', textAlign: 'right' }}>
-                  {new Date(video.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
