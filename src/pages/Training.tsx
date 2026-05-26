@@ -7,7 +7,7 @@ interface TrainingCourse {
   name: string
   description: string
   duration: string
-  videoCount: number
+  videoUrl: string
   status: 'available' | 'in_progress' | 'completed'
   icon?: string
 }
@@ -25,13 +25,13 @@ export default function Training() {
         const certsRes = await api.get('/training/certifications')
         const certs = certsRes.data
 
-        // Map certifications to training courses
+        // Map certifications to training courses using dynamic data
         const mappedCourses: TrainingCourse[] = certs.map((cert: any) => ({
           id: cert.id,
           name: cert.name || 'Video Reviewing Mastery',
-          description: 'Master the essentials of video assessment in this focused, single-video module. Gain the key insight required for standard tasks and become a qualified reviewer. This efficient course prepares you for premium-paying tasks.',
-          duration: '15 mins / 1 Video',
-          videoCount: 1,
+          description: cert.description || 'Master the essentials of video assessment in this focused module.',
+          duration: cert.estimated_time || '15 mins / 1 Video',
+          videoUrl: cert.video_url || '',
           status: cert.status,
           icon: '🎥'
         }))
@@ -62,14 +62,12 @@ export default function Training() {
       await api.post(`/training/certifications/${courseId}/complete`)
       setVideoWatched(true)
 
-      // Refresh certifications
+      // Check if all mandatory trainings are completed
       const certsRes = await api.get('/training/certifications')
       const certs = certsRes.data
-
-      // Check if all mandatory trainings are completed
       const allCompleted = certs.every((c: any) => c.status === 'completed')
+      
       if (allCompleted) {
-        // Redirect to investment plans after a short delay
         setTimeout(() => {
           navigate('/packages')
         }, 1500)
@@ -94,15 +92,22 @@ export default function Training() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', backgroundColor: '#FAFBFF', minHeight: '100vh' }}>
         {/* Video Player Section */}
         <div style={{ backgroundColor: 'black', width: '100%', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <video
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            controls
-            autoPlay
-            onEnded={() => handleVideoComplete(watchingCourseId)}
-          >
-            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {course?.videoUrl ? (
+            <video
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              controls
+              autoPlay
+              onEnded={() => handleVideoComplete(watchingCourseId)}
+            >
+              <source src={course.videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <div style={{ color: 'white', textAlign: 'center' }}>
+              <p>No video available for this training.</p>
+              <button onClick={() => setWatchingCourseId(null)} style={{ color: '#5932EA', background: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 600 }}>Go Back</button>
+            </div>
+          )}
         </div>
 
         {/* Course Info Section */}
@@ -141,148 +146,71 @@ export default function Training() {
 
       {/* Content Section */}
       <div style={{ flex: 1, padding: '16px' }}>
-        {/* Training Courses Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              style={{
-                backgroundColor: '#F5F3FF',
-                borderRadius: '16px',
-                border: '2px solid #8B5CF6',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}
-            >
-              {/* Course Header */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    backgroundColor: 'white',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '24px',
-                    flexShrink: 0
-                  }}>
-                    {course.icon}
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>
-                      {course.name}
-                    </h3>
-                    <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>
-                      {course.duration}
-                    </p>
-                  </div>
-                </div>
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '4px 12px',
-                  backgroundColor: course.status === 'completed' ? '#DCFCE7' : '#FEF3C7',
-                  borderRadius: '8px',
-                  flexShrink: 0
-                }}>
-                  <span style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: course.status === 'completed' ? '#15803D' : '#B45309',
-                    textTransform: 'uppercase'
-                  }}>
-                    {course.status === 'completed' ? '✓ Completed' : course.status === 'in_progress' ? 'In Progress' : 'OPEN'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Course Description */}
-              <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5', margin: 0 }}>
-                {course.description}
-              </p>
-
-              {/* CTA Button */}
-              {course.status === 'available' && (
-                <button
-                  onClick={() => handleStartTraining(course.id)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: '#5932EA',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#4C2FBF' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#5932EA' }}
-                >
-                  START TRAINING
-                  <span>→</span>
-                </button>
-              )}
-              {course.status === 'in_progress' && (
-                <button
-                  onClick={() => handleStartTraining(course.id)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: '#5932EA',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#4C2FBF' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#5932EA' }}
-                >
-                  CONTINUE TRAINING
-                  <span>→</span>
-                </button>
-              )}
-              {course.status === 'completed' && (
-                <button
-                  disabled
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    backgroundColor: '#DCFCE7',
-                    color: '#15803D',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    border: 'none',
-                    borderRadius: '12px',
-                    cursor: 'default',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <span>✓</span>
-                  COMPLETED
-                </button>
-              )}
+          {courses.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #E2E8F0' }}>
+              <p style={{ fontSize: '14px', color: '#64748B' }}>No training courses available yet.</p>
             </div>
-          ))}
+          ) : (
+            courses.map((course) => (
+              <div
+                key={course.id}
+                style={{
+                  backgroundColor: '#F5F3FF',
+                  borderRadius: '16px',
+                  border: '2px solid #8B5CF6',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    <div style={{
+                      width: '48px', height: '48px', backgroundColor: 'white', borderRadius: '12px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0
+                    }}>
+                      {course.icon}
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px' }}>{course.name}</h3>
+                      <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>{course.duration}</p>
+                    </div>
+                  </div>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', padding: '4px 12px',
+                    backgroundColor: course.status === 'completed' ? '#DCFCE7' : '#FEF3C7',
+                    borderRadius: '8px', flexShrink: 0
+                  }}>
+                    <span style={{
+                      fontSize: '11px', fontWeight: 600,
+                      color: course.status === 'completed' ? '#15803D' : '#B45309',
+                      textTransform: 'uppercase'
+                    }}>
+                      {course.status === 'completed' ? '✓ Completed' : 'OPEN'}
+                    </span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5', margin: 0 }}>{course.description}</p>
+
+                {course.status !== 'completed' && (
+                  <button
+                    onClick={() => handleStartTraining(course.id)}
+                    style={{
+                      width: '100%', padding: '12px', backgroundColor: '#5932EA', color: 'white',
+                      fontSize: '14px', fontWeight: 600, border: 'none', borderRadius: '12px',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                    }}
+                  >
+                    {course.status === 'in_progress' ? 'CONTINUE TRAINING' : 'START TRAINING'}
+                    <span>→</span>
+                  </button>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
