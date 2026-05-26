@@ -81,6 +81,12 @@ export default function Invite() {
   const inviteLink = referralCodes.length > 0 ? `${window.location.origin}/login?ref=${referralCodes[0].code}` : ''
   const inviteCode = referralCodes.length > 0 ? referralCodes[0].code : ''
 
+  const renderEmptyCode = (label: string) => (
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', padding: '12px', backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px dashed #CBD5E1' }}>
+      <p style={{ fontSize: '12px', color: '#64748B', margin: 0 }}>Generating your {label}...</p>
+    </div>
+  )
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', backgroundColor: '#FAFBFF', minHeight: '100vh' }}>
       {/* Header Section */}
@@ -100,7 +106,7 @@ export default function Invite() {
         {/* Your Invite Link */}
         <div style={{ marginBottom: '16px' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', margin: '0 0 12px', padding: '0 12px' }}>Your Invite Link</h3>
-          {inviteLink && (
+          {inviteLink ? (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
               <div style={{
                 flex: 1,
@@ -149,13 +155,13 @@ export default function Invite() {
                 {copied === 'link' ? '✓' : 'COPY LINK'}
               </button>
             </div>
-          )}
+          ) : renderEmptyCode('invite link')}
         </div>
 
         {/* Your Invite Code */}
         <div style={{ marginBottom: '24px' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', margin: '0 0 12px', padding: '0 12px' }}>Your Invite Code</h3>
-          {inviteCode && (
+          {inviteCode ? (
             <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
               <div style={{
                 flex: 1,
@@ -204,7 +210,7 @@ export default function Invite() {
                 {copied === 'code' ? '✓' : 'COPY CODE'}
               </button>
             </div>
-          )}
+          ) : renderEmptyCode('invite code')}
         </div>
 
         {/* Tier Rebates Section */}
