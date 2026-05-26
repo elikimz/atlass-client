@@ -42,7 +42,8 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
       if (user.is_admin) {
         navigate('/admin')
       } else {
-        navigate('/dashboard')
+        // New users go to training first
+        navigate('/training')
       }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid or expired code. Please try again.')
