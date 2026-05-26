@@ -23,7 +23,7 @@ interface ReferralCodeData {
 }
 
 export default function Invite() {
-  const [summary, setSummary] = useState<ReferralSummaryData | null>(null)
+
   const [activeInvites, setActiveInvites] = useState<InvitedUser[]>([])
   const [referralCodes, setReferralCodes] = useState<ReferralCodeData[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,12 +32,10 @@ export default function Invite() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [summaryRes, activeRes, codesRes] = await Promise.all([
-          api.get('/referrals/summary'),
+        const [activeRes, codesRes] = await Promise.all([
           api.get('/referrals/active'),
           api.get('/referrals/codes')
         ])
-        setSummary(summaryRes.data)
         setActiveInvites(activeRes.data)
         setReferralCodes(codesRes.data)
       } catch (err) {
