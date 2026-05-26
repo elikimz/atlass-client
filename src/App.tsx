@@ -15,6 +15,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import TaskPlayer from './pages/TaskPlayer'
 import InvestmentPlans from './pages/InvestmentPlans'
 import Layout from './components/Layout'
+import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
 
 function App() {
@@ -46,7 +47,17 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
         <Route path="/verify" element={<OTPVerify setIsAuthenticated={setIsAuthenticated} />} />
-        {isAuthenticated ? (
+        {isAuthenticated && isAdmin ? (
+          <Route element={<AdminLayout setIsAuthenticated={setIsAuthenticated} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/tasks" element={<Placeholder title="Manage Video Tasks" />} />
+            <Route path="/admin/training" element={<Placeholder title="Manage Training" />} />
+            <Route path="/admin/users" element={<Placeholder title="Manage Users" />} />
+            <Route path="/admin/payments" element={<Placeholder title="Manage Payments" />} />
+            <Route path="/" element={<Navigate to="/admin" />} />
+            <Route path="*" element={<Navigate to="/admin" />} />
+          </Route>
+        ) : isAuthenticated ? (
           <Route element={<Layout setIsAuthenticated={setIsAuthenticated} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/product" element={<Placeholder title="Product" />} />
@@ -64,9 +75,8 @@ function App() {
             <Route path="/payments" element={<Payments />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/" element={<Navigate to={isAdmin ? "/admin" : "/dashboard"} />} />
-            <Route path="*" element={<Navigate to={isAdmin ? "/admin" : "/dashboard"} />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
           </Route>
         ) : (
           <Route path="*" element={<Navigate to="/login" />} />
