@@ -21,7 +21,6 @@ interface UserCertification {
 export default function Training() {
   const navigate = useNavigate()
   const [courses, setCourses] = useState<TrainingCourse[]>([])
-  const [userCerts, setUserCerts] = useState<UserCertification[]>([])
   const [loading, setLoading] = useState(true)
   const [watchingCourseId, setWatchingCourseId] = useState<number | null>(null)
   const [videoWatched, setVideoWatched] = useState(false)
@@ -44,7 +43,6 @@ export default function Training() {
         }))
 
         setCourses(mappedCourses)
-        setUserCerts(certs)
       } catch (err) {
         console.error('Failed to fetch training data', err)
       } finally {
@@ -73,7 +71,6 @@ export default function Training() {
       // Refresh certifications
       const certsRes = await api.get('/training/certifications')
       const certs = certsRes.data
-      setUserCerts(certs)
 
       // Check if all mandatory trainings are completed
       const allCompleted = certs.every((c: any) => c.status === 'completed')
