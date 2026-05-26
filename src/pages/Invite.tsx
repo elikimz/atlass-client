@@ -96,7 +96,7 @@ export default function Invite() {
       {/* Header Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          Invite Friends & Get 10% 4% 1%
+          Invite Friends & Get 10% 4% 1% <span style={{ color: '#5932EA', fontSize: '16px', fontWeight: 500 }}>- Welcome, {userName}!</span>
         </h1>
         <p style={{ fontSize: '15px', color: '#64748B', margin: 0 }}>
           1. Copy your link or code. 2. Share with friends. 3. Get 10%, 4%, or 1% commission based on their level.
