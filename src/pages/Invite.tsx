@@ -8,12 +8,6 @@ interface InvitedUser {
   is_active: boolean
 }
 
-interface ReferralSummaryData {
-  earnings: number
-  users_referred: number
-  task_rebate: number
-}
-
 interface ReferralCodeData {
   code: string
   signups: number
