@@ -12,12 +12,6 @@ interface TrainingCourse {
   icon?: string
 }
 
-interface UserCertification {
-  id: number
-  certification_id: number
-  status: 'available' | 'in_progress' | 'completed'
-}
-
 export default function Training() {
   const navigate = useNavigate()
   const [courses, setCourses] = useState<TrainingCourse[]>([])
