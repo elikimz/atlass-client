@@ -110,7 +110,7 @@ export default function AdminDashboard() {
       cloudinaryData.append('file', trainingFormData.file)
       cloudinaryData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
       
-      const cloudinaryRes = await axios.post(
+      await axios.post(
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
         cloudinaryData
       )
