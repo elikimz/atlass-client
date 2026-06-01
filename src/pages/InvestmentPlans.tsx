@@ -17,7 +17,18 @@ interface UserData {
   last_name: string
   deposit_wallet_balance: number
   current_plan_id: number | null
+  plan_start_date?: string
+  plan_expiry_date?: string
   current_plan?: Plan
+}
+
+// Plan financial data
+const PLAN_FINANCIALS: Record<string, { daily_earnings: number; total_return: number; profit: number }> = {
+  'Intern': { daily_earnings: 0.7, total_return: 2.1, profit: 2.1 },
+  'LV1': { daily_earnings: 0.7, total_return: 42, profit: 22 },
+  'LV2': { daily_earnings: 1.7, total_return: 102, profit: 52 },
+  'LV3': { daily_earnings: 3.5, total_return: 210, profit: 110 },
+  'LV4': { daily_earnings: 5.0, total_return: 300, profit: 150 },
 }
 
 export default function InvestmentPlans() {
@@ -83,14 +94,20 @@ export default function InvestmentPlans() {
 
   const getPlanColor = (name: string) => {
     switch(name) {
-      case 'Intern': return { bg: '#E6F4EA', text: '#1E7E34', btn: '#28A745' };
-      case 'LV1': return { bg: '#E8EAF6', text: '#3F51B5', btn: '#3F51B5' };
-      case 'LV2': return { bg: '#E3F2FD', text: '#1976D2', btn: '#1976D2' };
-      case 'LV3': return { bg: '#FFF3E0', text: '#E65100', btn: '#FB8C00' };
-      case 'LV4': return { bg: '#FFF8E1', text: '#FBC02D', btn: '#FBC02D' };
-      default: return { bg: '#F5F5F5', text: '#616161', btn: '#757575' };
+      case 'Intern': return { bg: '#E6F4EA', text: '#1E7E34', btn: '#28A745', header: '#1E7E34' };
+      case 'LV1': return { bg: '#E8EAF6', text: '#3F51B5', btn: '#3F51B5', header: '#3F51B5' };
+      case 'LV2': return { bg: '#E3F2FD', text: '#1976D2', btn: '#1976D2', header: '#1976D2' };
+      case 'LV3': return { bg: '#FFF3E0', text: '#E65100', btn: '#FB8C00', header: '#FB8C00' };
+      case 'LV4': return { bg: '#FFF8E1', text: '#FBC02D', btn: '#FBC02D', header: '#FBC02D' };
+      default: return { bg: '#F5F5F5', text: '#616161', btn: '#757575', header: '#616161' };
     }
   }
+
+  const getFinancials = (planName: string) => {
+    return PLAN_FINANCIALS[planName] || { daily_earnings: 0, total_return: 0, profit: 0 }
+  }
+
+  const isExpired = user?.plan_expiry_date && new Date(user.plan_expiry_date) < new Date()
 
   return (
     <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0', fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -105,7 +122,7 @@ export default function InvestmentPlans() {
         </div>
         
         <div style={{ backgroundColor: 'white', padding: '12px 16px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '14px', fontWeight: 600 }}>
-          ACTIVE PLAN: <span style={{ color: '#3B82F6' }}>{user?.current_plan?.name || 'None'}</span> | VALIDITY: {user?.current_plan?.validity_days || 0} Days
+          ACTIVE PLAN: <span style={{ color: '#3B82F6' }}>{user?.current_plan?.name || 'None'}</span> | VALIDITY: {isExpired ? '⚠️ EXPIRED' : user?.current_plan?.validity_days || 0} Days
         </div>
       </div>
 
@@ -124,8 +141,10 @@ export default function InvestmentPlans() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
         {plans.map((plan) => {
           const colors = getPlanColor(plan.name);
+          const financials = getFinancials(plan.name);
           const isActive = user?.current_plan_id === plan.id;
           const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
+          const canPurchase = !isActive && (!user?.current_plan_id || isExpired || !isLowerTier);
           
           return (
             <div key={plan.id} style={{ 
@@ -134,9 +153,9 @@ export default function InvestmentPlans() {
               display: 'flex', flexDirection: 'column'
             }}>
               <div style={{ backgroundColor: colors.bg, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: colors.text, fontWeight: 800, fontSize: '16px' }}>{plan.name} Plan</span>
-                {isActive && <span style={{ backgroundColor: colors.btn, color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Active</span>}
-                {plan.name === 'Intern' && !isActive && <span style={{ backgroundColor: colors.btn, color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Free Trial</span>}
+                <span style={{ color: colors.header, fontWeight: 800, fontSize: '16px' }}>{plan.name}</span>
+                {isActive && <span style={{ backgroundColor: colors.btn, color: 'white', padding: '4px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Active</span>}
+                {plan.name === 'Intern' && !isActive && <span style={{ backgroundColor: colors.btn, color: 'white', padding: '4px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Free Trial</span>}
               </div>
               
               <div style={{ padding: '20px', textAlign: 'center', flex: 1 }}>
@@ -146,7 +165,7 @@ export default function InvestmentPlans() {
                 <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Daily:</span>
-                    <span style={{ fontWeight: 700 }}>{(plan.price * 0.035 || 0.7).toFixed(1)} USD ({plan.daily_tasks_limit} Tasks)</span>
+                    <span style={{ fontWeight: 700 }}>{financials.daily_earnings.toFixed(1)} USD ({plan.daily_tasks_limit} Tasks)</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Validity:</span>
@@ -154,22 +173,28 @@ export default function InvestmentPlans() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Total Return:</span>
-                    <span style={{ fontWeight: 700 }}>{(plan.price * 2.1 || 2.1).toFixed(1)} USD</span>
+                    <span style={{ fontWeight: 700 }}>{financials.total_return.toFixed(0)} USD</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Profit:</span>
-                    <span style={{ fontWeight: 700 }}>{(plan.price * 1.1 || 2.1).toFixed(1)} USD</span>
+                    <span style={{ fontWeight: 700 }}>{financials.profit.toFixed(0)} USD</span>
                   </div>
                 </div>
 
+                {isLowerTier && (
+                  <div style={{ fontSize: '12px', color: '#DC2626', marginBottom: '12px', fontWeight: 600 }}>
+                    Limitroute refund: Total Return: {financials.total_return.toFixed(0)} USD
+                  </div>
+                )}
+
                 <button
                   onClick={() => handleAction(plan)}
-                  disabled={isActive || isLowerTier || actionLoading !== null}
+                  disabled={!canPurchase || actionLoading !== null}
                   style={{
                     width: '100%', padding: '12px', borderRadius: '8px', border: 'none',
                     backgroundColor: isActive ? '#E2E8F0' : isLowerTier ? '#F1F5F9' : colors.btn,
                     color: isActive ? '#64748B' : isLowerTier ? '#94A3B8' : 'white',
-                    fontSize: '14px', fontWeight: 700, cursor: (isActive || isLowerTier) ? 'not-allowed' : 'pointer',
+                    fontSize: '14px', fontWeight: 700, cursor: !canPurchase ? 'not-allowed' : 'pointer',
                     transition: 'opacity 0.2s'
                   }}
                 >
@@ -193,17 +218,17 @@ export default function InvestmentPlans() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '14px', color: '#475569' }}>
           <div>
             <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>Single Package Restriction:</div>
-            <div style={{ paddingLeft: '12px' }}>• You may only have one active plan at any time. Purchases overwrite.</div>
+            <div style={{ paddingLeft: '12px' }}>You may only have one active plan at any time. Purchases overwrite.</div>
           </div>
           
           <div>
             <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>Important Note:</div>
-            <div style={{ paddingLeft: '12px' }}>• After your plan's validity expires, you are required to upgrade to continue earning and unlock higher tiers. Lower-tier repeats are locked.</div>
+            <div style={{ paddingLeft: '12px' }}>After your plan's validity expires, you are required to upgrade to continue earning and unlock higher tiers. Lower-tier repeats are locked.</div>
           </div>
           
           <div>
             <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>Upgrade Refund:</div>
-            <div style={{ paddingLeft: '12px' }}>• Upgrade refund to a total performance bonus. When you upgrade, the initial price of your previous plan is refunded back to your balance.</div>
+            <div style={{ paddingLeft: '12px' }}>Upgrade refund to a total performance bonus. When you upgrade, the initial price of your previous plan is refunded back to your balance.</div>
           </div>
         </div>
       </div>

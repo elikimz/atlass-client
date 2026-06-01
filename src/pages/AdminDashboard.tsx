@@ -168,6 +168,26 @@ export default function AdminDashboard() {
             <span style={{ fontSize: '20px' }}>💳</span>
             <span>View Payments</span>
           </a>
+
+          <a href="/admin/plans" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px',
+            backgroundColor: '#FEF2F2',
+            borderRadius: '10px',
+            textDecoration: 'none',
+            color: '#991B1B',
+            fontSize: '14px',
+            fontWeight: 600,
+            transition: 'background-color 0.2s',
+          }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEE2E2' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2' }}
+          >
+            <span style={{ fontSize: '20px' }}>💎</span>
+            <span>Manage Plans</span>
+          </a>
         </div>
       </div>
     </div>
