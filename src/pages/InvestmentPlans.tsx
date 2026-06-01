@@ -8,142 +8,204 @@ interface Plan {
   daily_tasks_limit: number
   validity_days: number
   description: string
+  is_upgrade_only: boolean
 }
 
-const cardStyle: React.CSSProperties = {
-  backgroundColor: 'white',
-  borderRadius: '24px',
-  padding: '32px',
-  boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.04)',
-  border: '1px solid #F1F5F9',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '16px',
-  position: 'relative',
-  overflow: 'hidden'
+interface UserData {
+  id: number
+  first_name: string
+  last_name: string
+  deposit_wallet_balance: number
+  current_plan_id: number | null
+  current_plan?: Plan
 }
 
 export default function InvestmentPlans() {
   const [plans, setPlans] = useState<Plan[]>([])
+  const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [purchasing, setPurchasing] = useState<number | null>(null)
+  const [actionLoading, setActionLoading] = useState<number | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
+  const fetchData = async () => {
+    try {
+      const [plansRes, userRes] = await Promise.all([
+        api.get('/plans'),
+        api.get('/auth/me')
+      ])
+      setPlans(plansRes.data)
+      setUser(userRes.data)
+    } catch (err) {
+      console.error('Failed to fetch data', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    api.get('/plans')
-      .then(res => setPlans(res.data))
-      .catch(err => console.error('Failed to fetch plans', err))
-      .finally(() => setLoading(false))
+    fetchData()
   }, [])
 
-  const handlePurchase = async (planId: number) => {
-    setPurchasing(planId)
+  const handleAction = async (plan: Plan) => {
+    const isUpgrade = user?.current_plan_id !== null && user?.current_plan_id !== undefined;
+    
+    if (user?.current_plan_id === plan.id) return;
+
+    setActionLoading(plan.id)
     setMessage(null)
+    
     try {
-      const res = await api.post('/plans/purchase', { plan_id: planId })
-      setMessage({ type: 'success', text: res.data.message })
+      const endpoint = isUpgrade ? `/plans/upgrade/${plan.id}` : `/plans/purchase/${plan.id}`;
+      await api.post(endpoint)
+      setMessage({ 
+        type: 'success', 
+        text: isUpgrade ? `Successfully upgraded to ${plan.name}!` : `Successfully purchased ${plan.name}!` 
+      })
+      await fetchData() // Refresh user state
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.response?.data?.detail || 'Purchase failed. Please check your deposit wallet.' })
+      setMessage({ 
+        type: 'error', 
+        text: err.response?.data?.detail || 'Transaction failed. Please check your balance.' 
+      })
     } finally {
-      setPurchasing(null)
+      setActionLoading(null)
     }
   }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#5932EA', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
+        <div style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #3498db', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
+  const getPlanColor = (name: string) => {
+    switch(name) {
+      case 'Intern': return { bg: '#E6F4EA', text: '#1E7E34', btn: '#28A745' };
+      case 'LV1': return { bg: '#E8EAF6', text: '#3F51B5', btn: '#3F51B5' };
+      case 'LV2': return { bg: '#E3F2FD', text: '#1976D2', btn: '#1976D2' };
+      case 'LV3': return { bg: '#FFF3E0', text: '#E65100', btn: '#FB8C00' };
+      case 'LV4': return { bg: '#FFF8E1', text: '#FBC02D', btn: '#FBC02D' };
+      default: return { bg: '#F5F5F5', text: '#616161', btn: '#757575' };
+    }
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-          Investment Plans <span style={{ color: '#5932EA' }}>🚀</span>
-        </h1>
-        <p style={{ fontSize: '15px', color: '#64748B', margin: 0 }}>
-          Upgrade your plan to unlock higher earning potential and more daily tasks.
-        </p>
+    <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      {/* Header Status Section */}
+      <div style={{ backgroundColor: '#F8FAFC', borderRadius: '12px', padding: '20px', marginBottom: '24px', border: '1px solid #E2E8F0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+          <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#CBD5E1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>👤</div>
+          <div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#1E293B' }}>{user?.first_name || 'User'}_{user?.id || '1234'}</div>
+            <div style={{ fontSize: '14px', color: '#64748B', fontWeight: 600 }}>WALLET BALANCE: {user?.deposit_wallet_balance?.toFixed(2) || '0.00'} USD</div>
+          </div>
+        </div>
+        
+        <div style={{ backgroundColor: 'white', padding: '12px 16px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '14px', fontWeight: 600 }}>
+          ACTIVE PLAN: <span style={{ color: '#3B82F6' }}>{user?.current_plan?.name || 'None'}</span> | VALIDITY: {user?.current_plan?.validity_days || 0} Days
+        </div>
       </div>
 
       {message && (
         <div style={{ 
-          padding: '16px 20px', 
-          borderRadius: '12px', 
+          padding: '12px 16px', borderRadius: '8px', marginBottom: '24px',
           backgroundColor: message.type === 'success' ? '#DCFCE7' : '#FEE2E2',
-          color: message.type === 'success' ? '#15803D' : '#B91C1C',
-          fontSize: '14px',
-          fontWeight: 600,
-          border: `1px solid ${message.type === 'success' ? '#BBF7D0' : '#FECACA'}`
+          color: message.type === 'success' ? '#166534' : '#991B1B',
+          fontSize: '14px', fontWeight: 600, border: '1px solid transparent'
         }}>
           {message.text}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-        {plans.map((plan) => (
-          <div key={plan.id} style={cardStyle}>
-            <div style={{ position: 'absolute', top: 0, right: 0, padding: '12px 20px', backgroundColor: '#F5F3FF', color: '#5932EA', fontSize: '12px', fontWeight: 700, borderBottomLeftRadius: '20px' }}>
-              POPULAR
-            </div>
-            
-            <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#0F172A', margin: 0 }}>{plan.name}</h3>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-              <span style={{ fontSize: '32px', fontWeight: 900, color: '#5932EA' }}>${plan.price}</span>
-              <span style={{ fontSize: '14px', color: '#94A3B8', fontWeight: 600 }}>/ {plan.validity_days} days</span>
-            </div>
-            
-            <p style={{ fontSize: '14px', color: '#64748B', lineHeight: 1.6, margin: 0 }}>{plan.description}</p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '8px 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <span style={{ fontSize: '14px', color: '#334155', fontWeight: 500 }}>{plan.daily_tasks_limit} Daily Video Tasks</span>
+      {/* Plans Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        {plans.map((plan) => {
+          const colors = getPlanColor(plan.name);
+          const isActive = user?.current_plan_id === plan.id;
+          const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
+          
+          return (
+            <div key={plan.id} style={{ 
+              backgroundColor: 'white', borderRadius: '16px', overflow: 'hidden', 
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', border: isActive ? `2px solid ${colors.btn}` : '1px solid #E2E8F0',
+              display: 'flex', flexDirection: 'column'
+            }}>
+              <div style={{ backgroundColor: colors.bg, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: colors.text, fontWeight: 800, fontSize: '16px' }}>{plan.name} Plan</span>
+                {isActive && <span style={{ backgroundColor: colors.btn, color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Active</span>}
+                {plan.name === 'Intern' && !isActive && <span style={{ backgroundColor: colors.btn, color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Free Trial</span>}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              
+              <div style={{ padding: '20px', textAlign: 'center', flex: 1 }}>
+                <div style={{ fontSize: '28px', fontWeight: 900, color: '#1E293B', marginBottom: '4px' }}>{plan.price} USD</div>
+                <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '20px' }}>(Approx. {(plan.price * 130).toLocaleString()} KSH)</div>
+                
+                <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#475569', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Daily:</span>
+                    <span style={{ fontWeight: 700 }}>{(plan.price * 0.035 || 0.7).toFixed(1)} USD ({plan.daily_tasks_limit} Tasks)</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Validity:</span>
+                    <span style={{ fontWeight: 700 }}>{plan.validity_days} Days</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Total Return:</span>
+                    <span style={{ fontWeight: 700 }}>{(plan.price * 2.1 || 2.1).toFixed(1)} USD</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Profit:</span>
+                    <span style={{ fontWeight: 700 }}>{(plan.price * 1.1 || 2.1).toFixed(1)} USD</span>
+                  </div>
                 </div>
-                <span style={{ fontSize: '14px', color: '#334155', fontWeight: 500 }}>Tier A/B/C Network Rebates</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <span style={{ fontSize: '14px', color: '#334155', fontWeight: 500 }}>Priority Support</span>
-              </div>
-            </div>
 
-            <button
-              onClick={() => handlePurchase(plan.id)}
-              disabled={purchasing !== null}
-              style={{
-                marginTop: 'auto',
-                padding: '16px',
-                borderRadius: '16px',
-                backgroundColor: '#5932EA',
-                color: 'white',
-                border: 'none',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                opacity: purchasing !== null ? 0.7 : 1
-              }}
-            >
-              {purchasing === plan.id ? 'Processing...' : 'Purchase Plan'}
-            </button>
-          </div>
-        ))}
+                <button
+                  onClick={() => handleAction(plan)}
+                  disabled={isActive || isLowerTier || actionLoading !== null}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: '8px', border: 'none',
+                    backgroundColor: isActive ? '#E2E8F0' : isLowerTier ? '#F1F5F9' : colors.btn,
+                    color: isActive ? '#64748B' : isLowerTier ? '#94A3B8' : 'white',
+                    fontSize: '14px', fontWeight: 700, cursor: (isActive || isLowerTier) ? 'not-allowed' : 'pointer',
+                    transition: 'opacity 0.2s'
+                  }}
+                >
+                  {actionLoading === plan.id ? 'Processing...' : 
+                   isActive ? 'ACTIVE' : 
+                   isLowerTier ? 'LOCKED' : 
+                   user?.current_plan_id ? `UPGRADE TO ${plan.name}` : 'PURCHASE PLAN'}
+                </button>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
-      <div style={{ backgroundColor: '#F8FAFC', borderRadius: '24px', padding: '32px', border: '1px dashed #E2E8F0', textAlign: 'center' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: '0 0 8px' }}>Need a Custom Plan?</h3>
-        <p style={{ fontSize: '14px', color: '#64748B', margin: 0 }}>Contact our support team for enterprise solutions and bulk network rates.</p>
+      {/* Guidelines Section */}
+      <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1E293B', marginBottom: '16px', borderBottom: '1px solid #F1F5F9', paddingBottom: '8px' }}>
+          PLAN INFORMATION & PLATFORM GUIDELINES
+        </h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '14px', color: '#475569' }}>
+          <div>
+            <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>Single Package Restriction:</div>
+            <div style={{ paddingLeft: '12px' }}>• You may only have one active plan at any time. Purchases overwrite.</div>
+          </div>
+          
+          <div>
+            <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>Important Note:</div>
+            <div style={{ paddingLeft: '12px' }}>• After your plan's validity expires, you are required to upgrade to continue earning and unlock higher tiers. Lower-tier repeats are locked.</div>
+          </div>
+          
+          <div>
+            <div style={{ fontWeight: 700, color: '#1E293B', marginBottom: '4px' }}>Upgrade Refund:</div>
+            <div style={{ paddingLeft: '12px' }}>• Upgrade refund to a total performance bonus. When you upgrade, the initial price of your previous plan is refunded back to your balance.</div>
+          </div>
+        </div>
       </div>
     </div>
   )
