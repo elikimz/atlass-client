@@ -119,7 +119,7 @@ export default function AdminDashboard() {
             textDecoration: 'none',
             color: '#92400E',
             fontSize: '14px',
-            fontWeight: 600',
+            fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF3C7' }}
