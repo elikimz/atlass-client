@@ -25,7 +25,7 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
     setLoading(true)
     setError('')
     try {
-      const response = await api.post('/auth/verify', { email, otp_code: otp })
+      const response = await api.post('/auth/verify', { email, otp_code: otp.trim() })
       localStorage.setItem('access_token', response.data.access_token)
       
       // Fetch user data to check for admin status

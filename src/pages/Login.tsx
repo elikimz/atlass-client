@@ -33,7 +33,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     setError('')
     
     try {
-      const payload: any = { email: email.trim() }
+      const payload: any = { email: email.trim().toLowerCase() }
       if (isRegistering) {
         payload.first_name = firstName.trim()
         payload.last_name = lastName.trim()
@@ -43,7 +43,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
       }
 
       await api.post('/auth/login', payload)
-      localStorage.setItem('email', email.trim())
+      localStorage.setItem('email', email.trim().toLowerCase())
       navigate('/verify')
     } catch (err: any) {
       console.error('Login error:', err)
