@@ -176,7 +176,9 @@ export default function InvestmentPlans() {
           const financials = getFinancials(plan.name);
           const isActive = user?.current_plan_id === plan.id;
           const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
-          const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= plan.price;
+          const currentPlanPrice = user?.current_plan?.price || 0;
+          const requiredBalance = user?.current_plan_id ? Math.max(plan.price - currentPlanPrice, 0) : plan.price;
+          const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= requiredBalance;
           const canPurchase = !isActive && hasEnoughBalance && (!user?.current_plan_id || isExpired || !isLowerTier);
           
           return (
@@ -250,7 +252,7 @@ export default function InvestmentPlans() {
                    isLowerTier ? 'LOCKED' :
                    !hasEnoughBalance ? 'INSUFFICIENT BALANCE' :
                    plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' :
-                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${plan.price})` : 'PURCHASE'}
+                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${(plan.price - (plans.find(p => p.id === user?.current_plan_id)?.price || 0)).toFixed(2)})` : 'PURCHASE'}
                 </button>
               </div>
             </div>
