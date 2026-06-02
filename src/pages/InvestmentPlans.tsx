@@ -131,7 +131,7 @@ export default function InvestmentPlans() {
       
       {/* Top Header Mockup Style */}
       <div style={{ backgroundColor: '#003399', color: 'white', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '8px 8px 0 0' }}>
-        <div style={{ fontWeight: 800, fontSize: '14px' }}>GLOBAL TASK HUB (GTH)</div>
+        <div style={{ fontWeight: 800, fontSize: '14px' }}>AdPulseAI GLOBAL TASK HUB</div>
         <div style={{ fontSize: '18px' }}>🔍</div>
       </div>
 

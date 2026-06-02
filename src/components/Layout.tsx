@@ -127,8 +127,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           zIndex: 20,
         }}>
           <div style={{ padding: '30px 24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
-            <span style={{ fontSize: '22px', fontWeight: 700, color: 'black' }}>AdPulse</span>
+            <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
+            <span style={{ fontSize: '22px', fontWeight: 700, color: 'black' }}>AdPulseAI</span>
           </div>
 
           <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
@@ -191,8 +191,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-                <span style={{ fontSize: '20px', fontWeight: 700, color: 'black' }}>AdPulse</span>
+                <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
+                <span style={{ fontSize: '20px', fontWeight: 700, color: 'black' }}>AdPulseAI</span>
               </div>
             )}
             {!isMobile && (

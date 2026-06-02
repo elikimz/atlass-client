@@ -94,8 +94,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     }}>
       {/* Logo Section */}
       <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '44px', height: '44px', borderRadius: '14px', objectFit: 'cover', boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.1)' }} />
-        <span style={{ fontSize: '26px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em' }}>AdPulse AI</span>
+        <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '44px', height: '44px', borderRadius: '14px', objectFit: 'cover', boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.1)' }} />
+        <span style={{ fontSize: '26px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em' }}>AdPulseAI</span>
       </div>
 
       {/* Floating Card */}

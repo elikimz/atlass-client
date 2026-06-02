@@ -60,8 +60,8 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
     }}>
       {/* Logo */}
       <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
-        <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>AdPulse AI</span>
+        <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
+        <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>AdPulseAI</span>
       </div>
 
       {/* Card */}
