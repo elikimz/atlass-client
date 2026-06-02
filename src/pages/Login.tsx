@@ -94,17 +94,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     }}>
       {/* Logo Section */}
       <div style={{ marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '44px', height: '44px',
-          backgroundColor: '#5932EA', borderRadius: '14px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0px 10px 25px rgba(89, 50, 234, 0.25)',
-        }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <span style={{ fontSize: '26px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em' }}>Adpulse AI</span>
+        <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '44px', height: '44px', borderRadius: '14px', objectFit: 'cover', boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.1)' }} />
+        <span style={{ fontSize: '26px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.02em' }}>AdPulse AI</span>
       </div>
 
       {/* Floating Card */}

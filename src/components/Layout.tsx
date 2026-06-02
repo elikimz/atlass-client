@@ -127,12 +127,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           zIndex: 20,
         }}>
           <div style={{ padding: '30px 24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #5932EA 0%, #7C3AED 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-                <path d="M5 3L19 12L5 21V3Z"/>
-              </svg>
-            </div>
-            <span style={{ fontSize: '22px', fontWeight: 700, color: 'black' }}>VidEarn</span>
+            <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
+            <span style={{ fontSize: '22px', fontWeight: 700, color: 'black' }}>AdPulse</span>
           </div>
 
           <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
@@ -195,12 +191,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, #5932EA 0%, #7C3AED 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M5 3L19 12L5 21V3Z"/>
-                  </svg>
-                </div>
-                <span style={{ fontSize: '20px', fontWeight: 700, color: 'black' }}>VidEarn</span>
+                <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
+                <span style={{ fontSize: '20px', fontWeight: 700, color: 'black' }}>AdPulse</span>
               </div>
             )}
             {!isMobile && (

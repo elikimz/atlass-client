@@ -60,12 +60,8 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
     }}>
       {/* Logo */}
       <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ width: '36px', height: '36px', backgroundColor: '#6366f1', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>Adpulse AI</span>
+        <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
+        <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827' }}>AdPulse AI</span>
       </div>
 
       {/* Card */}

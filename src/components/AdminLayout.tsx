@@ -68,11 +68,9 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
           {/* Logo */}
           <div style={{ padding: '24px', borderBottom: '1px solid #374151' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 700 }}>
-                ⚙️
-              </div>
+              <img src="/assets/logo.png" alt="AdPulse Logo" style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }} />
               <div>
-                <div style={{ fontSize: '16px', fontWeight: 700 }}>VidEarn</div>
+                <div style={{ fontSize: '16px', fontWeight: 700 }}>AdPulse</div>
                 <div style={{ fontSize: '11px', color: '#9CA3AF' }}>Admin Portal</div>
               </div>
             </div>

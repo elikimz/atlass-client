@@ -60,7 +60,7 @@ export default function AdminDashboard() {
     <div>
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1F2937', margin: '0 0 8px' }}>Dashboard</h1>
-        <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>Welcome to the VidEarn Admin Portal</p>
+        <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>Welcome to the AdPulse Admin Portal</p>
       </div>
 
       {/* Stats Grid */}
