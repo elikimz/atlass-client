@@ -64,7 +64,8 @@ export default function InvestmentPlans() {
   }, [])
 
   const handleAction = async (plan: Plan) => {
-    const isUpgrade = user?.current_plan_id !== null && user?.current_plan_id !== undefined;
+    const hasExistingPlan = user?.current_plan_id !== null && user?.current_plan_id !== undefined;
+    const isUpgrade = hasExistingPlan;
     
     if (user?.current_plan_id === plan.id) return;
 
@@ -76,7 +77,11 @@ export default function InvestmentPlans() {
       await api.post(endpoint)
       setMessage({ 
         type: 'success', 
-        text: isUpgrade ? `Successfully upgraded to ${plan.name}!` : `Successfully purchased ${plan.name}!` 
+        text: plan.name === 'Intern'
+          ? 'Free Intern trial activated successfully!'
+          : isUpgrade
+            ? `Successfully upgraded to ${plan.name}!`
+            : `Successfully purchased ${plan.name}!` 
       })
       await fetchData() // Refresh user state
     } catch (err: any) {
@@ -169,7 +174,10 @@ export default function InvestmentPlans() {
           const financials = getFinancials(plan.name);
           const isActive = user?.current_plan_id === plan.id;
           const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
-          const canPurchase = !isActive && (!user?.current_plan_id || isExpired || !isLowerTier);
+          const currentPlanPrice = user?.current_plan?.price || 0;
+          const requiredBalance = user?.current_plan_id ? Math.max(plan.price - currentPlanPrice, 0) : plan.price;
+          const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= requiredBalance;
+          const canPurchase = !isActive && hasEnoughBalance && (!user?.current_plan_id || isExpired || !isLowerTier);
           
           return (
             <div key={plan.id} style={{ 
@@ -239,8 +247,9 @@ export default function InvestmentPlans() {
                 >
                   {actionLoading === plan.id ? '...' : 
                    isActive ? 'ACTIVE' : 
-                   isLowerTier ? 'LOCKED' : 
-                   plan.name === 'Intern' ? 'TRIAL ACTIVATED' :
+                   isLowerTier ? 'LOCKED' :
+                   !hasEnoughBalance ? 'INSUFFICIENT BALANCE' :
+                   plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' :
                    user?.current_plan_id ? `UPGRADE TO ${plan.name}` : 'PURCHASE'}
                 </button>
               </div>
