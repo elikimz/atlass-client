@@ -13,6 +13,7 @@ interface UserData {
   email: string
   deposit_wallet_balance: number
   withdrawal_wallet_balance: number
+  performance_bonus_balance: number
 }
 
 export default function Dashboard() {
@@ -58,7 +59,8 @@ export default function Dashboard() {
   // Real wallet balances from API
   const depositBalance = user?.deposit_wallet_balance ?? 0
   const withdrawalBalance = user?.withdrawal_wallet_balance ?? 0
-  const totalBalance = depositBalance + withdrawalBalance
+  const bonusBalance = user?.performance_bonus_balance ?? 0
+  const totalBalance = depositBalance + withdrawalBalance + bonusBalance
 
   const earningsData = [
     { day: 'Mon', value: 100 }, { day: 'Tue', value: 220 }, { day: 'Wed', value: 150 },
@@ -82,7 +84,7 @@ export default function Dashboard() {
       {/* Wallet Balances Section */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+        gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'),
         gap: '16px',
       }}>
         {/* Deposit Wallet */}
@@ -111,6 +113,20 @@ export default function Dashboard() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/>
               <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Performance Bonus */}
+        <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #E0F2FE' }}>
+          <div>
+            <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Performance Bonus</div>
+            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'black' }}>${bonusBalance.toFixed(2)}</div>
+            <div style={{ fontSize: '11px', color: '#0EA5E9', marginTop: '4px' }}>Upgrade refunds</div>
+          </div>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#E0F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
           </div>
         </div>

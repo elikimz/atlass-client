@@ -16,6 +16,7 @@ interface UserData {
   first_name: string
   last_name: string
   deposit_wallet_balance: number
+  performance_bonus_balance: number
   current_plan_id: number | null
   plan_start_date?: string
   plan_expiry_date?: string
@@ -143,7 +144,8 @@ export default function InvestmentPlans() {
           </div>
           <div>
             <div style={{ fontSize: '14px', fontWeight: 700 }}>User_{user?.id || '1234'}</div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>WALLET BALANCE: {user?.deposit_wallet_balance?.toFixed(2) || '0.00'} USD</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>DEPOSIT: {user?.deposit_wallet_balance?.toFixed(2) || '0.00'} USD</div>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: '#0EA5E9' }}>BONUS: {user?.performance_bonus_balance?.toFixed(2) || '0.00'} USD</div>
           </div>
         </div>
         
@@ -174,9 +176,7 @@ export default function InvestmentPlans() {
           const financials = getFinancials(plan.name);
           const isActive = user?.current_plan_id === plan.id;
           const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
-          const currentPlanPrice = user?.current_plan?.price || 0;
-          const requiredBalance = user?.current_plan_id ? Math.max(plan.price - currentPlanPrice, 0) : plan.price;
-          const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= requiredBalance;
+          const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= plan.price;
           const canPurchase = !isActive && hasEnoughBalance && (!user?.current_plan_id || isExpired || !isLowerTier);
           
           return (
@@ -250,7 +250,7 @@ export default function InvestmentPlans() {
                    isLowerTier ? 'LOCKED' :
                    !hasEnoughBalance ? 'INSUFFICIENT BALANCE' :
                    plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' :
-                   user?.current_plan_id ? `UPGRADE TO ${plan.name}` : 'PURCHASE'}
+                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${plan.price})` : 'PURCHASE'}
                 </button>
               </div>
             </div>
