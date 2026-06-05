@@ -8,7 +8,6 @@ export default function Recharge() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20)
   const [customAmount, setCustomAmount] = useState('')
   const [method, setMethod] = useState('crypto')
-  const [loading, setLoading] = useState(false)
 
   const amounts = [20, 50, 100, 150, 200]
 
@@ -181,16 +180,16 @@ export default function Recharge() {
 
       {/* Proceed Button */}
       <button
-        disabled={finalAmount < 20 || loading}
+        disabled={finalAmount < 20}
         style={{
           width: '100%', padding: '16px', borderRadius: '16px',
-          backgroundColor: (finalAmount < 20 || loading) ? '#a0aec0' : '#319795',
+          backgroundColor: finalAmount < 20 ? '#a0aec0' : '#319795',
           color: 'white', fontSize: '16px', fontWeight: 700, border: 'none',
-          cursor: (finalAmount < 20 || loading) ? 'not-allowed' : 'pointer',
+          cursor: finalAmount < 20 ? 'not-allowed' : 'pointer',
           boxShadow: '0 4px 12px rgba(49, 151, 149, 0.2)'
         }}
       >
-        {loading ? 'Processing...' : `Proceed to pay $${finalAmount.toFixed(2)} USD`}
+        Proceed to pay ${finalAmount.toFixed(2)} USD
       </button>
       <p style={{ textAlign: 'center', fontSize: '11px', color: '#6b7280', marginTop: '12px' }}>
         * Funds will be credited after successful payment.
