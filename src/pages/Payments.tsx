@@ -33,6 +33,10 @@ const card: React.CSSProperties = {
   padding: '20px',
   cursor: 'pointer',
   transition: 'all 0.3s ease',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  height: '100%',
 }
 
 const cardHover: React.CSSProperties = {
@@ -78,11 +82,8 @@ export default function Payments() {
     )
   }
 
-  // Calculate today, week, and month earnings from history
-  // Note: Backend period is a string (e.g., "May 2024"). 
-  // For live timestamp filtering, we'll use the current date as a fallback if period parsing fails.
   const now = new Date()
-  const todayStr = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) // e.g., "Jun 2026"
+  const todayStr = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   
   const todayEarnings = history
     .filter(h => h.status === 'paid' && (h.period.includes(todayStr) || !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getFullYear(), now.getMonth(), now.getDate())))
@@ -96,11 +97,6 @@ export default function Payments() {
     .filter(h => h.status === 'paid' && h.period.includes(todayStr))
     .reduce((sum, h) => sum + h.amount, 0)
 
-  // Calculate total earnings: 
-  // 1. Withdrawal Wallet (Current Available) 
-  // 2. Total Paid (Already cashed out)
-  // 3. Referral Commission & Rebates are already included in Withdrawal Wallet when earned, 
-  // but for "Total Made Ever", we sum: Total Paid + Current Withdrawal Balance
   const totalEarnings = (overview?.total_paid || 0) + (user?.withdrawal_wallet_balance || 0)
 
   const actionButtons = [
@@ -164,15 +160,14 @@ export default function Payments() {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
       {/* Header */}
       <div>
         <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Payments</h1>
-        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Manage your payment method and view your earnings.</p>
       </div>
 
-      {/* Action Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+      {/* Top Action Buttons */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
         {actionButtons.map((btn) => (
           <button
             key={btn.label}
@@ -181,177 +176,96 @@ export default function Payments() {
               backgroundColor: 'white',
               border: '1px solid #e5e7eb',
               borderRadius: '12px',
-              padding: '16px 12px',
+              padding: '20px 12px',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               gap: '8px',
               transition: 'all 0.3s ease',
-              fontSize: '13px',
-              fontWeight: 600,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6'
-              e.currentTarget.style.boxShadow = '0px 2px 8px rgba(0, 0, 0, 0.08)'
+              e.currentTarget.style.backgroundColor = '#f9fafb'
+              e.currentTarget.style.boxShadow = '0px 2px 8px rgba(0, 0, 0, 0.05)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'white'
               e.currentTarget.style.boxShadow = 'none'
             }}
           >
-            <span style={{ fontSize: '24px' }}>{btn.icon}</span>
-            <span style={{ color: '#111827' }}>{btn.label}</span>
-            <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 500 }}>{btn.subtext}</span>
+            <span style={{ fontSize: '28px' }}>{btn.icon}</span>
+            <span style={{ color: '#111827', fontSize: '15px', fontWeight: 700 }}>{btn.label}</span>
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 500 }}>{btn.subtext}</span>
           </button>
         ))}
       </div>
 
-      {/* Wallet & Earnings Cards Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-        {/* Wallet Cards */}
-        {walletCards.slice(0, 4).map((walletCard) => (
+      {/* Main 6 Cards Grid (2 columns) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+        {/* First 5 Wallet Cards */}
+        {walletCards.map((w) => (
           <div
-            key={walletCard.id}
-            onClick={() => navigate(walletCard.route)}
-            onMouseEnter={() => setHoveredCard(walletCard.id)}
+            key={w.id}
+            onClick={() => navigate(w.route)}
+            onMouseEnter={() => setHoveredCard(w.id)}
             onMouseLeave={() => setHoveredCard(null)}
-            style={hoveredCard === walletCard.id ? cardHover : card}
+            style={hoveredCard === w.id ? cardHover : card}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '10px',
-                  backgroundColor: `${walletCard.color}20`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                }}
-              >
-                {walletCard.icon}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ 
+                width: '36px', height: '36px', borderRadius: '8px', 
+                backgroundColor: `${w.color}15`, display: 'flex', 
+                alignItems: 'center', justifyContent: 'center', fontSize: '18px' 
+              }}>
+                {w.icon}
               </div>
-              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: 0 }}>{walletCard.title}</h3>
+              <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: 0 }}>{w.title}</h3>
             </div>
-            <p style={{ fontSize: '24px', fontWeight: 700, color: walletCard.color, margin: '8px 0' }}>
-              USD {walletCard.amount.toFixed(2)}
-            </p>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '8px 0 0' }}>Current Balance</p>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
-              {walletCard.source}
+            
+            <div>
+              <p style={{ fontSize: '28px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
+                USD {w.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Current Balance</p>
+            </div>
+
+            <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
+              {w.source}
             </div>
           </div>
         ))}
 
-        {/* Earning Periods Card */}
+        {/* 6th Card: Earning Periods */}
         <div
           onClick={() => navigate('/payments/periods')}
           onMouseEnter={() => setHoveredCard('periods')}
           onMouseLeave={() => setHoveredCard(null)}
           style={hoveredCard === 'periods' ? cardHover : card}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                backgroundColor: '#a78bfa20',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-              }}
-            >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <div style={{ 
+              width: '36px', height: '36px', borderRadius: '8px', 
+              backgroundColor: '#a78bfa15', display: 'flex', 
+              alignItems: 'center', justifyContent: 'center', fontSize: '18px' 
+            }}>
               📅
             </div>
-            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: 0 }}>Earning Periods</h3>
+            <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: 0 }}>Earning Periods</h3>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {earningPeriods.map((period, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#6b7280' }}>{period.label}:</span>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>USD {period.amount.toFixed(2)}</span>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {earningPeriods.map((p, i) => (
+              <div key={i} style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>{p.label}:</span>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>USD {p.amount.toFixed(2)}</span>
               </div>
             ))}
           </div>
-          <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
+
+          <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
             Source: Live Server Timestamp
           </div>
         </div>
-      </div>
-
-      {/* Total Earnings Card - Full Width */}
-      <div
-        onClick={() => navigate('/payments/earnings')}
-        onMouseEnter={() => setHoveredCard('total-earnings')}
-        onMouseLeave={() => setHoveredCard(null)}
-        style={hoveredCard === 'total-earnings' ? cardHover : card}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              backgroundColor: '#22c55e20',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-            }}
-          >
-            💰
-          </div>
-          <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: 0 }}>Total Earnings</h3>
-        </div>
-        <p style={{ fontSize: '32px', fontWeight: 700, color: '#22c55e', margin: '8px 0' }}>
-          USD {totalEarnings.toFixed(2)}
-        </p>
-        <p style={{ fontSize: '12px', color: '#6b7280', margin: '8px 0 0' }}>Combined sum of all money ever made on the platform</p>
-        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
-          Formula: [Tasks + Referrals + Rebates]
-        </div>
-      </div>
-
-      {/* Payment History */}
-      <div style={card}>
-        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 16px' }}>Payment History</h2>
-        {history.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {history.slice(0, 5).map((payment, i) => {
-              const statusBadge = payment.status === 'paid' 
-                ? { label: 'Paid', color: '#16a34a', bg: '#dcfce7' }
-                : payment.status === 'pending'
-                ? { label: 'Pending', color: '#b45309', bg: '#fef3c7' }
-                : { label: 'In Progress', color: '#2563eb', bg: '#dbeafe' }
-              
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827', margin: '0 0 2px' }}>{payment.period}</p>
-                    <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Status: {payment.status}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>
-                      ${payment.amount.toFixed(2)}
-                    </p>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: statusBadge.color, backgroundColor: statusBadge.bg, padding: '2px 8px', borderRadius: '20px' }}>
-                      {statusBadge.label}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '32px 24px' }}>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#6b7280', margin: '0 0 4px' }}>No payment history yet</p>
-            <p style={{ fontSize: '14px', color: '#9ca3af', margin: 0 }}>Complete tasks to start earning</p>
-          </div>
-        )}
       </div>
     </div>
   )
