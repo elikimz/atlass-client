@@ -23,6 +23,8 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
   const [saving, setSaving] = useState(false)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [withdrawalPassword, setWithdrawalPassword] = useState('')
+  const [settingWithdrawalPassword, setSettingWithdrawalPassword] = useState(false)
 
   useEffect(() => {
     api.get('/settings/profile')
@@ -54,6 +56,21 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
     localStorage.removeItem('access_token')
     setIsAuthenticated(false)
     navigate('/login')
+  }
+
+  const handleSetWithdrawalPassword = async () => {
+    if (!withdrawalPassword) return
+    setSettingWithdrawalPassword(true)
+    try {
+      await api.post('/settings/withdrawal-password', { password: withdrawalPassword })
+      alert('Withdrawal password set successfully!')
+      setWithdrawalPassword('')
+    } catch (err) {
+      console.error(err)
+      alert('Failed to set withdrawal password')
+    } finally {
+      setSettingWithdrawalPassword(false)
+    }
   }
 
   const handleDeleteAccount = async () => {
@@ -195,6 +212,44 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
         }}>
           Connect Discord
         </button>
+      </div>
+
+      {/* Security Section */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '18px' }}>🛡️</span>
+          <div>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Security</h2>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Protect your funds</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>Withdrawal Password</label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="password"
+              placeholder="Set new withdrawal password"
+              value={withdrawalPassword}
+              onChange={(e) => setWithdrawalPassword(e.target.value)}
+              style={{
+                flex: 1, padding: '8px 12px', fontSize: '14px', border: '1px solid #d1d5db', borderRadius: '7px',
+                outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+            <button
+              onClick={handleSetWithdrawalPassword}
+              disabled={!withdrawalPassword || settingWithdrawalPassword}
+              style={{
+                padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+                backgroundColor: '#319795', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
+                opacity: (!withdrawalPassword || settingWithdrawalPassword) ? 0.6 : 1
+              }}
+            >
+              {settingWithdrawalPassword ? 'Saving...' : 'Set'}
+            </button>
+          </div>
+          <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>This password is required for all withdrawals. Keep it safe.</p>
+        </div>
       </div>
 
       {/* Account Section */}
