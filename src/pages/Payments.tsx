@@ -123,7 +123,6 @@ export default function Payments() {
       amount: user?.deposit_wallet_balance || 0,
       icon: '💼',
       color: '#5932EA',
-      source: 'Source: External Top-up or Via Direct Deposit',
     },
     {
       id: 'withdrawal',
@@ -131,7 +130,6 @@ export default function Payments() {
       amount: user?.withdrawal_wallet_balance || 0,
       icon: '💳',
       color: '#00B4D8',
-      source: 'Source: Available Balance or Cleared Funds',
     },
     {
       id: 'earnings',
@@ -139,7 +137,6 @@ export default function Payments() {
       amount: totalEarnings,
       icon: '💰',
       color: '#22c55e',
-      source: 'Formula: [Tasks + Referrals + Rebates]',
     },
     {
       id: 'referral',
@@ -147,7 +144,6 @@ export default function Payments() {
       amount: referrals?.earnings || 0,
       icon: '👥',
       color: '#f59e0b',
-      source: 'Source: Team Network Purchases',
     },
     {
       id: 'rebate',
@@ -155,7 +151,6 @@ export default function Payments() {
       amount: referrals?.task_rebate || 0,
       icon: '🎬',
       color: '#10b981',
-      source: 'Source: Completed Video Tasks By Team',
     },
   ]
 
@@ -229,9 +224,7 @@ export default function Payments() {
               <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Current Balance</p>
             </div>
 
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
-              {w.source}
-            </div>
+
           </div>
         ))}
 
@@ -257,9 +250,7 @@ export default function Payments() {
             ))}
           </div>
 
-          <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
-            Source: Live Server Timestamp
-          </div>
+
         </div>
       </div>
     </div>
