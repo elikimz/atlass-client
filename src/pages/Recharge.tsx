@@ -416,7 +416,7 @@ export default function Recharge() {
           }}>
             <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
             <div>
-              <p style={{ fontSize: '12px', fontWeight: 700, color: '#92400e', margin: '0 0 4px' }}>Use ERC20 Network Only</p>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: '#92400e', margin: '0 0 4px' }}>Use {USDT_NETWORK} Only</p>
               <p style={{ fontSize: '11px', color: '#b45309', margin: 0 }}>Sending from other networks will result in loss of funds.</p>
             </div>
           </div>
