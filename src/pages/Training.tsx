@@ -74,9 +74,27 @@ export default function Training() {
       const allCompleted = certs.every((c: any) => c.status === 'completed')
       
       if (allCompleted) {
-        setTimeout(() => {
-          navigate('/plans')
-        }, 1500)
+        // Force an immediate refresh of state before navigating
+        setWatchingCourseId(null)
+        setVideoWatched(false)
+        navigate('/plans', { replace: true })
+      } else {
+        // If not all completed, just reset to show the list again
+        setWatchingCourseId(null)
+        setVideoWatched(false)
+        // Refresh courses list
+        const updatedCertsRes = await api.get('/training/certifications')
+        const updatedCerts = updatedCertsRes.data
+        const mappedCourses: TrainingCourse[] = updatedCerts.map((cert: any) => ({
+          id: cert.id,
+          name: cert.name || 'Video Reviewing Mastery',
+          description: cert.description || 'Master the essentials of video assessment in this focused module.',
+          duration: cert.estimated_time || '15 mins / 1 Video',
+          videoUrl: cert.video_url || '',
+          status: cert.status,
+          icon: '🎬'
+        }))
+        setCourses(mappedCourses)
       }
     } catch (err) {
       console.error('Failed to complete training', err)
