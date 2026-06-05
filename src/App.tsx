@@ -20,6 +20,7 @@ import Recharge from './pages/Recharge'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
+import AdminPayments from './pages/AdminPayments'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -56,7 +57,7 @@ function App() {
             <Route path="/admin/tasks" element={<Placeholder title="Manage Video Tasks" />} />
             <Route path="/admin/training" element={<Placeholder title="Manage Training" />} />
             <Route path="/admin/users" element={<Placeholder title="Manage Users" />} />
-            <Route path="/admin/payments" element={<Placeholder title="Manage Payments" />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/plans" element={<Placeholder title="Manage Plans" />} />
             <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />

@@ -13,6 +13,12 @@ export default function Recharge() {
   const [method, setMethod] = useState('crypto')
   const [copied, setCopied] = useState(false)
   const [showCryptoDetails, setShowCryptoDetails] = useState(false)
+  const [proofFile, setProofFile] = useState<File | null>(null)
+  const [proofPreview, setProofPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadedProofUrl, setUploadedProofUrl] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const amounts = [20, 50, 100, 150, 200]
 
@@ -34,6 +40,78 @@ export default function Recharge() {
   const handleProceed = () => {
     if (finalAmount < 20) return
     setShowCryptoDetails(true)
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setProofFile(file)
+      setError(null)
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        setProofPreview(event.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleUploadProof = async () => {
+    if (!proofFile) {
+      setError('Please select an image')
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', proofFile)
+
+      const response = await api.post('/payments/upload-proof', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+
+      setUploadedProofUrl(response.data.url)
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to upload proof')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleSubmitDeposit = async () => {
+    if (!uploadedProofUrl) {
+      setError('Please upload a payment proof')
+      return
+    }
+
+    setSubmitting(true)
+    setError(null)
+
+    try {
+      await api.post('/payments/deposit', {
+        amount: finalAmount,
+        payment_method: 'USDT',
+        network: 'ERC20',
+        proof_url: uploadedProofUrl
+      })
+
+      // Reset form and show success
+      setShowCryptoDetails(false)
+      setProofFile(null)
+      setProofPreview(null)
+      setUploadedProofUrl(null)
+      setCustomAmount('')
+      setSelectedAmount(20)
+
+      // Navigate to payments page
+      setTimeout(() => navigate('/payments'), 1500)
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to submit deposit')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${USDT_ADDRESS}&bgcolor=ffffff&color=319795&margin=10`
@@ -356,7 +434,7 @@ export default function Recharge() {
           </div>
 
           {/* Steps */}
-          <div style={{ marginBottom: '16px' }}>
+          <div style={{ marginBottom: '20px' }}>
             <p style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '10px' }}>How to complete your payment:</p>
             {[
               `Send exactly ${finalAmount.toFixed(2)} USDT to the address above`,
@@ -375,6 +453,88 @@ export default function Recharge() {
             ))}
           </div>
 
+          {/* Proof Upload Section */}
+          <div style={{ marginBottom: '20px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
+            <p style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '12px' }}>Upload Payment Proof</p>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
+              Take a screenshot of your transaction confirmation and upload it here.
+            </p>
+
+            {/* File Input */}
+            <label style={{
+              display: 'block', padding: '16px', borderRadius: '12px',
+              border: '2px dashed #d1d5db', backgroundColor: '#f9fafb',
+              cursor: 'pointer', textAlign: 'center', marginBottom: '12px',
+              transition: 'all 0.2s'
+            }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#319795'
+                e.currentTarget.style.backgroundColor = '#f0fdfa'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#d1d5db'
+                e.currentTarget.style.backgroundColor = '#f9fafb'
+              }}
+            >
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>📸</div>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', margin: '0 0 4px' }}>
+                {proofFile ? proofFile.name : 'Click to upload or drag and drop'}
+              </p>
+              <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>PNG, JPG, GIF up to 10MB</p>
+            </label>
+
+            {/* Preview */}
+            {proofPreview && (
+              <div style={{ marginBottom: '12px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
+                <img src={proofPreview} alt="Proof preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
+              </div>
+            )}
+
+            {/* Upload Button */}
+            {proofFile && !uploadedProofUrl && (
+              <button
+                onClick={handleUploadProof}
+                disabled={uploading}
+                style={{
+                  width: '100%', padding: '12px', borderRadius: '8px',
+                  backgroundColor: uploading ? '#a0aec0' : '#319795',
+                  color: 'white', border: 'none', cursor: uploading ? 'not-allowed' : 'pointer',
+                  fontSize: '13px', fontWeight: 700, marginBottom: '12px'
+                }}
+              >
+                {uploading ? '⏳ Uploading...' : '📤 Upload Proof'}
+              </button>
+            )}
+
+            {/* Success State */}
+            {uploadedProofUrl && (
+              <div style={{
+                backgroundColor: '#ecfdf5', border: '1px solid #d1fae5',
+                borderRadius: '8px', padding: '12px', marginBottom: '12px',
+                display: 'flex', alignItems: 'center', gap: '8px'
+              }}>
+                <span style={{ fontSize: '16px' }}>✓</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#065f46' }}>Proof uploaded successfully</span>
+              </div>
+            )}
+
+            {/* Error */}
+            {error && (
+              <div style={{
+                backgroundColor: '#fef2f2', border: '1px solid #fecaca',
+                borderRadius: '8px', padding: '12px', marginBottom: '12px'
+              }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#991b1b' }}>❌ {error}</span>
+              </div>
+            )}
+          </div>
+
           {/* Done / Back buttons */}
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
@@ -388,22 +548,25 @@ export default function Recharge() {
               ← Back
             </button>
             <button
-              onClick={() => navigate('/payments')}
+              onClick={handleSubmitDeposit}
+              disabled={!uploadedProofUrl || submitting}
               style={{
                 flex: 2, padding: '14px', borderRadius: '20px',
-                backgroundColor: '#319795', border: 'none',
-                color: 'white', fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+                backgroundColor: !uploadedProofUrl || submitting ? '#a0aec0' : '#319795',
+                border: 'none',
+                color: 'white', fontSize: '15px', fontWeight: 700,
+                cursor: !uploadedProofUrl || submitting ? 'not-allowed' : 'pointer',
                 boxShadow: '0 4px 12px rgba(49,151,149,0.3)'
               }}
             >
-              I've Sent the Payment ✓
+              {submitting ? '⏳ Submitting...' : 'Submit Deposit ✓'}
             </button>
           </div>
         </div>
       )}
 
       <p style={{ textAlign: 'center', fontSize: '12px', color: '#111827', fontWeight: 600, marginTop: '4px' }}>
-        * Funds will be credited after successful payment confirmation.
+        * Funds will be credited after admin approval and payment confirmation.
       </p>
     </div>
   )
