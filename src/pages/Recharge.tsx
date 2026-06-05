@@ -20,27 +20,30 @@ export default function Recharge() {
   const finalAmount = customAmount ? parseFloat(customAmount) : (selectedAmount || 0)
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F0FDF4', padding: '20px' }}>
+    <div style={{ 
+      minHeight: '100vh', backgroundColor: '#e0f2f1', padding: '16px',
+      fontFamily: 'Inter, sans-serif'
+    }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>←</button>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#111827' }}>←</button>
         <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#111827', margin: 0 }}>Recharge Account</h1>
-        <button onClick={() => navigate('/payments/history')} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>🕒</button>
+        <button onClick={() => navigate('/payments/history')} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#111827' }}>🕒</button>
       </div>
 
       {/* Current Balance Card */}
       <div style={{ 
-        backgroundColor: 'white', borderRadius: '20px', padding: '24px', textAlign: 'center', 
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)', marginBottom: '32px' 
+        backgroundColor: 'white', borderRadius: '24px', padding: '24px', textAlign: 'center', 
+        boxShadow: '0 2px 10px rgba(0,0,0,0.02)', marginBottom: '24px', border: '1px solid rgba(0,0,0,0.03)'
       }}>
-        <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>Current Balance</div>
-        <div style={{ fontSize: '36px', fontWeight: 700, color: '#111827' }}>${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-        <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>USD</div>
+        <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px', fontWeight: 500 }}>Current Balance</div>
+        <div style={{ fontSize: '38px', fontWeight: 800, color: '#0f172a' }}>${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+        <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', fontWeight: 600 }}>USD</div>
       </div>
 
       {/* Select Amount Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>Select Recharge Amount</h3>
+      <div style={{ marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '16px' }}>Select Recharge Amount</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
           {amounts.map(amt => (
             <button
@@ -50,25 +53,30 @@ export default function Recharge() {
                 setCustomAmount('')
               }}
               style={{
-                padding: '12px 4px', borderRadius: '12px', border: '1px solid #e5e7eb',
-                backgroundColor: (selectedAmount === amt && !customAmount) ? '#319795' : 'white',
-                color: (selectedAmount === amt && !customAmount) ? 'white' : '#111827',
-                fontSize: '15px', fontWeight: 600, cursor: 'pointer',
+                height: '52px', borderRadius: '12px', border: (selectedAmount === amt && !customAmount) ? '2px solid #319795' : '1px solid #e5e7eb',
+                backgroundColor: 'white',
+                color: '#111827',
+                fontSize: '18px', fontWeight: 700, cursor: 'pointer',
                 transition: 'all 0.2s', position: 'relative'
               }}
             >
               ${amt}
               {selectedAmount === amt && !customAmount && (
-                <span style={{ position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#4fd1c5', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✓</span>
+                <div style={{ 
+                  position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#4fd1c5', 
+                  borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
+                  border: '2px solid white', fontWeight: 800
+                }}>✓</div>
               )}
             </button>
           ))}
         </div>
 
-        <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: '14px', color: '#111827', marginBottom: '8px' }}>Or enter custom amount</p>
+        <div style={{ marginBottom: '24px' }}>
+          <p style={{ fontSize: '14px', color: '#111827', marginBottom: '8px', fontWeight: 600 }}>Or enter custom amount</p>
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <span style={{ position: 'absolute', left: '16px', color: '#9ca3af' }}>$</span>
+            <span style={{ position: 'absolute', left: '16px', color: '#9ca3af', fontWeight: 600 }}>$</span>
             <input
               type="number"
               value={customAmount}
@@ -78,8 +86,9 @@ export default function Recharge() {
               }}
               placeholder="Enter amount"
               style={{
-                width: '100%', padding: '12px 16px 12px 32px', borderRadius: '12px',
-                border: '1px solid #e5e7eb', fontSize: '15px', outline: 'none'
+                width: '100%', padding: '14px 40px 14px 32px', borderRadius: '12px',
+                border: '1px solid #e5e7eb', fontSize: '16px', outline: 'none',
+                fontWeight: 500
               }}
             />
             {customAmount && (
@@ -89,13 +98,13 @@ export default function Recharge() {
               >✕</button>
             )}
           </div>
-          <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>Minimum deposit is 20$</p>
+          <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px', fontWeight: 500 }}>Minimum deposit is 20$</p>
         </div>
       </div>
 
       {/* Choose Method Section */}
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px' }}>Choose Payment Method</h3>
+      <div style={{ marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '16px' }}>Choose Payment Method</h3>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Crypto */}
@@ -103,16 +112,18 @@ export default function Recharge() {
             onClick={() => setMethod('crypto')}
             style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-              padding: '16px', borderRadius: '12px', border: `2px solid ${method === 'crypto' ? '#319795' : '#e5e7eb'}`,
+              padding: '16px', borderRadius: '16px', border: `2px solid ${method === 'crypto' ? '#319795' : 'transparent'}`,
               backgroundColor: 'white', cursor: 'pointer'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', backgroundColor: '#DCFCE7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>₮</div>
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>Crypto (USDT - ERC20)</span>
+              <div style={{ width: '36px', height: '36px', backgroundColor: '#319795', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: 'white' }}>₮</div>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>Crypto (USDT - ERC20)</span>
             </div>
-            <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #319795', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {method === 'crypto' && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#319795' }} />}
+            <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid #319795', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {method === 'crypto' && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#319795' }}>
+                <span style={{ color: 'white', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>✓</span>
+              </div>}
             </div>
           </div>
 
@@ -121,17 +132,15 @@ export default function Recharge() {
             onClick={() => setMethod('mpesa')}
             style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-              padding: '16px', borderRadius: '12px', border: `2px solid ${method === 'mpesa' ? '#319795' : '#e5e7eb'}`,
-              backgroundColor: 'white', cursor: 'pointer'
+              padding: '16px', borderRadius: '16px', border: `2px solid ${method === 'mpesa' ? '#319795' : 'transparent'}`,
+              backgroundColor: 'white', cursor: 'pointer', opacity: 0.8
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', backgroundColor: '#00AC4F', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800 }}>M</div>
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>M-PESA M-Pesa (Instant KES)</span>
+              <div style={{ width: '36px', height: '36px', backgroundColor: '#f3f4f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 800, color: '#00AC4F' }}>M</div>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>M-PESA M-Pesa (Instant KES)</span>
             </div>
-            <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #e5e7eb' }}>
-              {method === 'mpesa' && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#319795' }} />}
-            </div>
+            <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid #e5e7eb' }}></div>
           </div>
 
           {/* Wise */}
@@ -139,42 +148,40 @@ export default function Recharge() {
             onClick={() => setMethod('wise')}
             style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-              padding: '16px', borderRadius: '12px', border: `2px solid ${method === 'wise' ? '#319795' : '#e5e7eb'}`,
-              backgroundColor: 'white', cursor: 'pointer'
+              padding: '16px', borderRadius: '16px', border: `2px solid ${method === 'wise' ? '#319795' : 'transparent'}`,
+              backgroundColor: 'white', cursor: 'pointer', opacity: 0.8
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', backgroundColor: '#00B4D8', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>W</div>
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>Wise (Fast International Transfer)</span>
+              <div style={{ width: '36px', height: '36px', backgroundColor: '#f3f4f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', color: '#00B4D8' }}>W</div>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>Wise (Fast International Transfer)</span>
             </div>
-            <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #e5e7eb' }}>
-              {method === 'wise' && <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#319795' }} />}
-            </div>
+            <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: '2px solid #e5e7eb' }}></div>
           </div>
         </div>
       </div>
 
       {/* Summary Section */}
-      <div style={{ backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-          <span style={{ color: '#6b7280' }}>Method:</span>
-          <span style={{ fontWeight: 600 }}>{method === 'crypto' ? 'Crypto (USDT-ERC20)' : (method === 'mpesa' ? 'M-Pesa' : 'Wise')}</span>
+      <div style={{ marginBottom: '24px', padding: '0 8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
+          <span style={{ color: '#111827', fontWeight: 500 }}>Method:</span>
+          <span style={{ fontWeight: 700, color: '#111827' }}>Crypto (USDT-ERC20)</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-          <span style={{ color: '#6b7280' }}>Exchange Rate:</span>
-          <span style={{ fontWeight: 600 }}>1 USDT = 1 USD</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
+          <span style={{ color: '#111827', fontWeight: 500 }}>Exchange Rate:</span>
+          <span style={{ fontWeight: 700, color: '#111827' }}>1 USDT = 1 USD</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-          <span style={{ color: '#6b7280' }}>Total to pay:</span>
-          <span style={{ fontWeight: 600 }}>{finalAmount.toFixed(2)} {method === 'crypto' ? 'USDT' : 'USD'}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
+          <span style={{ color: '#111827', fontWeight: 500 }}>Total to pay:</span>
+          <span style={{ fontWeight: 700, color: '#111827' }}>{finalAmount.toFixed(2)} USDT</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px' }}>
-          <span style={{ color: '#6b7280' }}>Fees:</span>
-          <span style={{ fontWeight: 600 }}>$0.00</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
+          <span style={{ color: '#111827', fontWeight: 500 }}>Fees:</span>
+          <span style={{ fontWeight: 700, color: '#111827' }}>$0.00</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-          <span style={{ color: '#6b7280' }}>Total Credit:</span>
-          <span style={{ fontWeight: 700 }}>${finalAmount.toFixed(2)} USD</span>
+          <span style={{ color: '#111827', fontWeight: 500 }}>Total Credit:</span>
+          <span style={{ fontWeight: 800, color: '#111827' }}>${finalAmount.toFixed(2)} USD</span>
         </div>
       </div>
 
@@ -182,16 +189,17 @@ export default function Recharge() {
       <button
         disabled={finalAmount < 20}
         style={{
-          width: '100%', padding: '16px', borderRadius: '16px',
+          width: '100%', padding: '18px', borderRadius: '30px',
           backgroundColor: finalAmount < 20 ? '#a0aec0' : '#319795',
-          color: 'white', fontSize: '16px', fontWeight: 700, border: 'none',
+          color: 'white', fontSize: '17px', fontWeight: 700, border: 'none',
           cursor: finalAmount < 20 ? 'not-allowed' : 'pointer',
-          boxShadow: '0 4px 12px rgba(49, 151, 149, 0.2)'
+          boxShadow: '0 4px 15px rgba(49, 151, 149, 0.3)',
+          marginBottom: '12px'
         }}
       >
         Proceed to pay ${finalAmount.toFixed(2)} USD
       </button>
-      <p style={{ textAlign: 'center', fontSize: '11px', color: '#6b7280', marginTop: '12px' }}>
+      <p style={{ textAlign: 'center', fontSize: '12px', color: '#111827', fontWeight: 600 }}>
         * Funds will be credited after successful payment.
       </p>
     </div>
