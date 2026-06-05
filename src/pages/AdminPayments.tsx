@@ -27,6 +27,10 @@ const statusColors: { [key: string]: { bg: string; text: string; icon: string } 
   cancelled: { bg: '#f3f4f6', text: '#374151', icon: '−' },
 }
 
+const getDisplayStatus = (status: string) => {
+  return status === 'pending' ? 'Processing' : (status.charAt(0).toUpperCase() + status.slice(1))
+}
+
 export default function AdminPayments() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
@@ -176,7 +180,7 @@ export default function AdminPayments() {
                           fontSize: '12px', fontWeight: 700
                         }}>
                           <span>{statusColor.icon}</span>
-                          {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                          {getDisplayStatus(payment.status)}
                         </span>
                       </td>
                       <td style={{ padding: '16px', fontSize: '13px', color: '#6B7280' }}>

@@ -22,6 +22,10 @@ const statusColors: { [key: string]: { bg: string; text: string; icon: string } 
   cancelled: { bg: '#f3f4f6', text: '#374151', icon: '−' },
 }
 
+const getDisplayStatus = (status: string) => {
+  return status === 'pending' ? 'Processing' : (status.charAt(0).toUpperCase() + status.slice(1))
+}
+
 const typeColors: { [key: string]: { bg: string; text: string; icon: string } } = {
   deposit: { bg: '#dbeafe', text: '#1e40af', icon: '📥' },
   payout: { bg: '#fce7f3', text: '#be185d', icon: '📤' },
@@ -167,15 +171,15 @@ export default function PaymentHistory() {
                 </div>
 
                 {/* Right: Status */}
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  backgroundColor: statusColor.bg, color: statusColor.text,
-                  padding: '6px 12px', borderRadius: '20px',
-                  fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap'
-                }}>
-                  <span>{statusColor.icon}</span>
-                  {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                </span>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        backgroundColor: statusColor.bg, color: statusColor.text,
+                        padding: '6px 12px', borderRadius: '20px',
+                        fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap'
+                      }}>
+                        <span>{statusColor.icon}</span>
+                        {getDisplayStatus(payment.status)}
+                      </span>
               </div>
             )
           })

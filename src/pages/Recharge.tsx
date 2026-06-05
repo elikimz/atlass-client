@@ -623,6 +623,7 @@ export default function Recharge() {
                   cancelled: { bg: '#f3f4f6', text: '#374151', icon: '−' },
                 }
                 const statusColor = statusColors[payment.status] || statusColors.pending
+                const displayStatus = payment.status === 'pending' ? 'Processing' : (payment.status.charAt(0).toUpperCase() + payment.status.slice(1))
                 
                 const formattedDate = payment.created_at
                   ? new Date(payment.created_at).toLocaleDateString('en-US', {
@@ -659,7 +660,7 @@ export default function Recharge() {
                       width: 'fit-content'
                     }}>
                       <span>{statusColor.icon}</span>
-                      {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                      {displayStatus}
                     </span>
                   </div>
                 )
