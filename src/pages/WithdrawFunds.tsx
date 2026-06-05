@@ -15,7 +15,6 @@ export default function WithdrawFunds() {
   const navigate = useNavigate()
   const [balance, setBalance] = useState(0)
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
-  const [method, setMethod] = useState('crypto')
   const [accounts, setAccounts] = useState<WithdrawalAccount[]>([])
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -74,7 +73,6 @@ export default function WithdrawFunds() {
     }
   }
 
-  const selectedAccount = accounts.find(a => a.id === selectedAccountId)
   const netReceived = selectedAmount ? selectedAmount - networkFee : 0
 
   if (success) {

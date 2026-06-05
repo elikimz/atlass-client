@@ -20,7 +20,6 @@ export default function WithdrawalAccounts() {
   
   // Form state
   const [type, setType] = useState('crypto')
-  const [label, setLabel] = useState('Primary')
   const [address, setAddress] = useState('')
   const [network, setNetwork] = useState('ERC20')
   const [isPrimary, setIsPrimary] = useState(true)
@@ -47,7 +46,7 @@ export default function WithdrawalAccounts() {
     try {
       await api.post('/withdrawal-accounts', {
         type,
-        label,
+        label: type === 'crypto' ? 'Crypto Wallet' : 'M-Pesa Account',
         address,
         network,
         is_primary: isPrimary
