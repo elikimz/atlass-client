@@ -23,6 +23,7 @@ export default function Recharge() {
   const [uploadedProofUrl, setUploadedProofUrl] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
 
   const amounts = [20, 50, 100, 150, 200]
 
@@ -111,16 +112,13 @@ export default function Recharge() {
         proof_url: uploadedProofUrl
       })
 
-      // Reset form and show success
-      setShowCryptoDetails(false)
-      setProofFile(null)
-      setProofPreview(null)
-      setUploadedProofUrl(null)
-      setCustomAmount('')
-      setSelectedAmount(20)
+      // Show success state
+      setSubmitSuccess(true)
 
-      // Navigate to payments page
-      setTimeout(() => navigate('/payments'), 1500)
+      // Navigate to payments page after 3 seconds
+      setTimeout(() => {
+        navigate('/payments')
+      }, 3000)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to submit deposit')
     } finally {
@@ -349,8 +347,54 @@ export default function Recharge() {
         </div>
       </div>
 
+      {/* Success Confirmation Screen */}
+      {submitSuccess && (
+        <div style={{
+          backgroundColor: 'white', borderRadius: '20px', padding: '40px 24px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.08)', marginBottom: '24px',
+          border: '1px solid #e5e7eb', textAlign: 'center'
+        }}>
+          <div style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            backgroundColor: '#d1fae5', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px', fontSize: '40px'
+          }}>✓</div>
+
+          <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>Deposit Submitted!</h2>
+          <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 24px', lineHeight: '1.6' }}>
+            Your deposit of <strong>${finalAmount.toFixed(2)} USDT</strong> has been submitted successfully.
+          </p>
+
+          <div style={{
+            backgroundColor: '#f0fdf4', border: '1px solid #dcfce7',
+            borderRadius: '12px', padding: '16px', marginBottom: '24px'
+          }}>
+            <p style={{ fontSize: '13px', color: '#15803d', margin: 0, fontWeight: 600 }}>
+              ⏳ Your deposit is pending admin approval. You will receive a notification once it is confirmed.
+            </p>
+          </div>
+
+          <p style={{ fontSize: '12px', color: '#9ca3af', margin: '0 0 20px' }}>
+            Redirecting to payments dashboard in a few seconds...
+          </p>
+
+          <button
+            onClick={() => navigate('/payments')}
+            style={{
+              width: '100%', padding: '14px', borderRadius: '20px',
+              backgroundColor: '#319795', border: 'none',
+              color: 'white', fontSize: '15px', fontWeight: 700,
+              cursor: 'pointer', boxShadow: '0 4px 12px rgba(49,151,149,0.3)'
+            }}
+          >
+            Go to Payments Now
+          </button>
+        </div>
+      )}
+
       {/* Proceed Button */}
-      {!showCryptoDetails && (
+      {!showCryptoDetails && !submitSuccess && (
         <button
           onClick={handleProceed}
           disabled={finalAmount < 20}

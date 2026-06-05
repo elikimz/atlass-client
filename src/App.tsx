@@ -21,6 +21,7 @@ import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
 import AdminPayments from './pages/AdminPayments'
+import PaymentHistory from './pages/PaymentHistory'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -78,6 +79,7 @@ function App() {
             <Route path="/referrals" element={<Invite />} />
             <Route path="/referrals-old" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/payments/history" element={<PaymentHistory />} />
             <Route path="/payments/recharge" element={<Recharge />} />
             <Route path="/payments/payout" element={<WithdrawFunds />} />
             <Route path="/payments/withdrawal" element={<WithdrawalAccounts />} />
