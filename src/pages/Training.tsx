@@ -64,20 +64,26 @@ export default function Training() {
 
   const handleVideoComplete = async (courseId: number) => {
     try {
-      // Mark certification as completed
+      // 1. Mark certification as completed in backend
       await api.post(`/training/certifications/${courseId}/complete`)
+      
+      // 2. Update local state immediately to prevent re-clicks
+      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'completed' } : c))
       setVideoWatched(true)
 
-      // Check if all mandatory trainings are completed
+      // 3. Re-fetch all certifications to be 100% sure
       const certsRes = await api.get('/training/certifications')
       const certs = certsRes.data
-      const allCompleted = certs.every((c: any) => c.status === 'completed')
+      const allCompleted = certs.length > 0 && certs.every((c: any) => c.status === 'completed')
       
       if (allCompleted) {
-        // Force an immediate refresh of state before navigating
+        // Clear watching state and redirect
         setWatchingCourseId(null)
         setVideoWatched(false)
-        navigate('/plans', { replace: true })
+        // Use a small delay to ensure the user sees the "Completed" state before redirecting
+        setTimeout(() => {
+          navigate('/plans', { replace: true })
+        }, 500)
       } else {
         // If not all completed, just reset to show the list again
         setWatchingCourseId(null)
