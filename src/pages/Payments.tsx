@@ -91,20 +91,24 @@ export default function Payments() {
   // Earning periods logic:
   // 1. Check payment history (for settled payouts)
   // 2. Check dashboard recent activity (for recent task rewards)
-  const recentTaskEarnings = dashboard?.recent_activity
-    .filter(act => act.status === 'Completed' || act.status === 'Paid')
-    .map(act => parseFloat(act.amount.replace(/[^0-9.]/g, '')))
-    .reduce((sum, amt) => sum + (isNaN(amt) ? 0 : amt), 0) || 0
+  const recentTaskEarnings = dashboard?.recent_activity && Array.isArray(dashboard.recent_activity)
+    ? dashboard.recent_activity
+      .filter(act => act.status === 'Completed' || act.status === 'Paid')
+      .map(act => parseFloat(act.amount.replace(/[^0-9.]/g, '')))
+      .reduce((sum, amt) => sum + (isNaN(amt) ? 0 : amt), 0)
+    : 0
 
-  const todayEarnings = history
+  const safeHistory = Array.isArray(history) ? history : []
+
+  const todayEarnings = safeHistory
     .filter(h => h.status === 'paid' && (h.period.includes(todayStr) || !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getFullYear(), now.getMonth(), now.getDate())))
     .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
 
-  const weekEarnings = history
+  const weekEarnings = safeHistory
     .filter(h => h.status === 'paid' && !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000))
     .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
 
-  const monthEarnings = history
+  const monthEarnings = safeHistory
     .filter(h => h.status === 'paid' && h.period.includes(todayStr))
     .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
 
