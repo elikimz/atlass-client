@@ -22,6 +22,7 @@ export default function WithdrawFunds() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([])
 
   const amounts = [2.50, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
   const networkFee = 0.50
@@ -38,6 +39,12 @@ export default function WithdrawFunds() {
       const primary = res.data.find((a: WithdrawalAccount) => a.is_primary)
       if (primary) setSelectedAccountId(primary.id)
       else if (res.data.length > 0) setSelectedAccountId(res.data[0].id)
+    }).catch(console.error)
+
+    // Fetch withdrawal history
+    api.get('/payments/history').then(res => {
+      const withdrawals = res.data.filter((p: any) => p.type === 'payout')
+      setWithdrawalHistory(withdrawals)
     }).catch(console.error)
   }, [])
 
@@ -232,6 +239,43 @@ export default function WithdrawFunds() {
       >
         Confirm Withdrawal
       </button>
+
+      {/* Withdrawal History */}
+      {withdrawalHistory.length > 0 && (
+        <div style={{ marginTop: '40px', paddingTop: '32px', borderTop: '2px solid #e5e7eb' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', marginBottom: '16px' }}>Recent Withdrawals</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 700, color: '#6b7280', fontSize: '13px' }}>Amount</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 700, color: '#6b7280', fontSize: '13px' }}>Date</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 700, color: '#6b7280', fontSize: '13px' }}>Method</th>
+                  <th style={{ textAlign: 'left', padding: '12px', fontWeight: 700, color: '#6b7280', fontSize: '13px' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawalHistory.map((w, i) => {
+                  const statusColor = w.status === 'processing' ? '#f59e0b' : w.status === 'paid' ? '#10b981' : '#ef4444'
+                  const displayStatus = w.status === 'processing' ? 'Processing' : w.status === 'paid' ? 'Paid' : 'Rejected'
+                  return (
+                    <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '12px', fontSize: '14px', fontWeight: 600, color: '#111827' }}>${w.amount?.toFixed(2) || '0.00'}</td>
+                      <td style={{ padding: '12px', fontSize: '14px', color: '#6b7280' }}>{new Date(w.created_at).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px', fontSize: '14px', color: '#6b7280' }}>{w.payment_method?.toUpperCase() || 'N/A'}</td>
+                      <td style={{ padding: '12px' }}>
+                        <span style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, backgroundColor: statusColor + '20', color: statusColor }}>
+                          {displayStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Password Modal */}
       {showPasswordModal && (
