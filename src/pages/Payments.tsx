@@ -26,6 +26,15 @@ interface PaymentHistory {
   status: string
 }
 
+interface DashboardSummary {
+  recent_activity: {
+    id: number
+    description: string
+    amount: string
+    status: string
+  }[]
+}
+
 const infoCard: React.CSSProperties = {
   backgroundColor: 'white',
   borderRadius: '12px',
@@ -43,6 +52,7 @@ export default function Payments() {
   const [user, setUser] = useState<UserData | null>(null)
   const [referrals, setReferrals] = useState<ReferralSummary | null>(null)
   const [history, setHistory] = useState<PaymentHistory[]>([])
+  const [dashboard, setDashboard] = useState<DashboardSummary | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -51,12 +61,14 @@ export default function Payments() {
       api.get('/auth/me'),
       api.get('/referrals/summary'),
       api.get('/payments/history'),
+      api.get('/dashboard/summary'),
     ])
-      .then(([overviewRes, userRes, referralsRes, historyRes]) => {
+      .then(([overviewRes, userRes, referralsRes, historyRes, dashboardRes]) => {
         setOverview(overviewRes.data)
         setUser(userRes.data)
         setReferrals(referralsRes.data)
         setHistory(historyRes.data)
+        setDashboard(dashboardRes.data)
       })
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -76,17 +88,25 @@ export default function Payments() {
   const now = new Date()
   const todayStr = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
   
+  // Earning periods logic:
+  // 1. Check payment history (for settled payouts)
+  // 2. Check dashboard recent activity (for recent task rewards)
+  const recentTaskEarnings = dashboard?.recent_activity
+    .filter(act => act.status === 'Completed' || act.status === 'Paid')
+    .map(act => parseFloat(act.amount.replace(/[^0-9.]/g, '')))
+    .reduce((sum, amt) => sum + (isNaN(amt) ? 0 : amt), 0) || 0
+
   const todayEarnings = history
     .filter(h => h.status === 'paid' && (h.period.includes(todayStr) || !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getFullYear(), now.getMonth(), now.getDate())))
-    .reduce((sum, h) => sum + h.amount, 0)
+    .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
 
   const weekEarnings = history
     .filter(h => h.status === 'paid' && !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000))
-    .reduce((sum, h) => sum + h.amount, 0)
+    .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
 
   const monthEarnings = history
     .filter(h => h.status === 'paid' && h.period.includes(todayStr))
-    .reduce((sum, h) => sum + h.amount, 0)
+    .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
 
   const totalEarnings = (overview?.total_paid || 0) + (user?.withdrawal_wallet_balance || 0)
 
