@@ -79,34 +79,29 @@ export default function Payments() {
   }
 
   // Calculate today, week, and month earnings from history
+  // Note: Backend period is a string (e.g., "May 2024"). 
+  // For live timestamp filtering, we'll use the current date as a fallback if period parsing fails.
   const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-  const monthAgo = new Date(now.getFullYear(), now.getMonth(), 1)
-
+  const todayStr = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) // e.g., "Jun 2026"
+  
   const todayEarnings = history
-    .filter(h => {
-      const hDate = new Date(h.period)
-      return hDate >= today && h.status === 'paid'
-    })
+    .filter(h => h.status === 'paid' && (h.period.includes(todayStr) || !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getFullYear(), now.getMonth(), now.getDate())))
     .reduce((sum, h) => sum + h.amount, 0)
 
   const weekEarnings = history
-    .filter(h => {
-      const hDate = new Date(h.period)
-      return hDate >= weekAgo && h.status === 'paid'
-    })
+    .filter(h => h.status === 'paid' && !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000))
     .reduce((sum, h) => sum + h.amount, 0)
 
   const monthEarnings = history
-    .filter(h => {
-      const hDate = new Date(h.period)
-      return hDate >= monthAgo && h.status === 'paid'
-    })
+    .filter(h => h.status === 'paid' && h.period.includes(todayStr))
     .reduce((sum, h) => sum + h.amount, 0)
 
-  // Calculate total earnings: tasks + referrals + rebates
-  const totalEarnings = (overview?.total_paid || 0) + (referrals?.earnings || 0) + (referrals?.task_rebate || 0)
+  // Calculate total earnings: 
+  // 1. Withdrawal Wallet (Current Available) 
+  // 2. Total Paid (Already cashed out)
+  // 3. Referral Commission & Rebates are already included in Withdrawal Wallet when earned, 
+  // but for "Total Made Ever", we sum: Total Paid + Current Withdrawal Balance
+  const totalEarnings = (overview?.total_paid || 0) + (user?.withdrawal_wallet_balance || 0)
 
   const actionButtons = [
     { label: 'Recharge', subtext: 'Add Funds', icon: '⚡', route: '/payments/recharge' },
