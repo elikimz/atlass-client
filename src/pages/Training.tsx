@@ -38,10 +38,10 @@ export default function Training() {
 
         setCourses(mappedCourses)
         
-        // If all courses are completed, redirect to dashboard automatically
+        // If all courses are completed, redirect to plans automatically
         const allCompleted = mappedCourses.length > 0 && mappedCourses.every(c => c.status === 'completed')
         if (allCompleted) {
-          navigate('/dashboard')
+          navigate('/plans')
         }
       } catch (err) {
         console.error('Failed to fetch training data', err)

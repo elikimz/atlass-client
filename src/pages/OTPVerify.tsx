@@ -49,7 +49,7 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
           const allCompleted = certs.length > 0 && certs.every((c: any) => c.status === 'completed')
           
           if (allCompleted) {
-            navigate('/dashboard')
+            navigate('/plans')
           } else {
             navigate('/training')
           }
