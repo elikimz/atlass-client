@@ -256,8 +256,11 @@ export default function WithdrawFunds() {
               </thead>
               <tbody>
                 {withdrawalHistory.map((w, i) => {
-                  const statusColor = w.status === 'processing' ? '#f59e0b' : w.status === 'paid' ? '#10b981' : '#ef4444'
-                  const displayStatus = w.status === 'processing' ? 'Processing' : w.status === 'paid' ? 'Paid' : 'Rejected'
+                  const isPending = w.status === 'pending' || w.status === 'processing' || w.status === 'in_progress'
+                  const isPaid = w.status === 'paid'
+                  const isRejected = w.status === 'rejected' || w.status === 'cancelled'
+                  const statusColor = isPending ? '#f59e0b' : isPaid ? '#10b981' : isRejected ? '#ef4444' : '#6b7280'
+                  const displayStatus = isPending ? 'Processing' : isPaid ? 'Paid' : isRejected ? 'Rejected' : w.status.charAt(0).toUpperCase() + w.status.slice(1)
                   return (
                     <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
                       <td style={{ padding: '12px', fontSize: '14px', fontWeight: 600, color: '#111827' }}>${w.amount?.toFixed(2) || '0.00'}</td>
