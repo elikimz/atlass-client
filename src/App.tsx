@@ -74,6 +74,14 @@ function App() {
             <Route path="/referrals" element={<Invite />} />
             <Route path="/referrals-old" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
+            <Route path="/payments/recharge" element={<Placeholder title="Recharge Wallet" />} />
+            <Route path="/payments/payout" element={<Placeholder title="Send Payout" />} />
+            <Route path="/payments/withdrawal" element={<Placeholder title="Manage Withdrawal Accounts" />} />
+            <Route path="/payments/deposit" element={<Placeholder title="Deposit Wallet Details" />} />
+            <Route path="/payments/earnings" element={<Placeholder title="Total Earnings" />} />
+            <Route path="/payments/referral" element={<Placeholder title="Referral Commission" />} />
+            <Route path="/payments/rebate" element={<Placeholder title="Task Rebate" />} />
+            <Route path="/payments/periods" element={<Placeholder title="Earning Periods" />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
