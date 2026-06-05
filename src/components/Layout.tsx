@@ -238,20 +238,24 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-around',
-          backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '70px', zIndex: 100,
+          backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '75px', zIndex: 100,
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
-          {navItems.filter(item => item.label !== 'Admin' || isAdminUser).slice(0, 5).map((item) => (
+          {navItems.filter(item => item.label !== 'Admin' || isAdminUser).slice(0, 6).map((item) => (
             <Link
               key={item.label}
               to={item.path}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                 textDecoration: 'none', color: isActive(item.path) ? '#5932EA' : '#B5B7C0',
-                fontSize: '11px', fontWeight: 500, flex: 1,
+                fontSize: '10px', fontWeight: 500, flex: 1,
+                minWidth: '0',
               }}
             >
-              <div style={{ color: 'inherit' }}>{item.icon}</div>
-              <span>{item.label}</span>
+              <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
+              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>
+                {item.label === 'Payments' ? 'Pay' : item.label}
+              </span>
             </Link>
           ))}
         </div>
