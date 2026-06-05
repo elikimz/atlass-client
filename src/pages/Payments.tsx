@@ -26,23 +26,15 @@ interface PaymentHistory {
   status: string
 }
 
-const card: React.CSSProperties = {
+const infoCard: React.CSSProperties = {
   backgroundColor: 'white',
   borderRadius: '12px',
   border: '1px solid #e5e7eb',
   padding: '20px',
-  cursor: 'pointer',
-  transition: 'all 0.3s ease',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
   height: '100%',
-}
-
-const cardHover: React.CSSProperties = {
-  ...card,
-  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-  transform: 'translateY(-2px)',
 }
 
 export default function Payments() {
@@ -52,7 +44,6 @@ export default function Payments() {
   const [referrals, setReferrals] = useState<ReferralSummary | null>(null)
   const [history, setHistory] = useState<PaymentHistory[]>([])
   const [loading, setLoading] = useState(true)
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -113,7 +104,6 @@ export default function Payments() {
       icon: '💼',
       color: '#5932EA',
       source: 'Source: External Top-up or Via Direct Deposit',
-      route: '/payments/deposit',
     },
     {
       id: 'withdrawal',
@@ -122,7 +112,6 @@ export default function Payments() {
       icon: '💳',
       color: '#00B4D8',
       source: 'Source: Available Balance or Cleared Funds',
-      route: '/payments/withdrawal',
     },
     {
       id: 'earnings',
@@ -131,7 +120,6 @@ export default function Payments() {
       icon: '💰',
       color: '#22c55e',
       source: 'Formula: [Tasks + Referrals + Rebates]',
-      route: '/payments/earnings',
     },
     {
       id: 'referral',
@@ -140,7 +128,6 @@ export default function Payments() {
       icon: '👥',
       color: '#f59e0b',
       source: 'Source: Team Network Purchases',
-      route: '/payments/referral',
     },
     {
       id: 'rebate',
@@ -149,7 +136,6 @@ export default function Payments() {
       icon: '🎬',
       color: '#10b981',
       source: 'Source: Completed Video Tasks By Team',
-      route: '/payments/rebate',
     },
   ]
 
@@ -166,7 +152,7 @@ export default function Payments() {
         <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Payments</h1>
       </div>
 
-      {/* Top Action Buttons */}
+      {/* Top Action Buttons (ONLY CLICKABLE ITEMS) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
         {actionButtons.map((btn) => (
           <button
@@ -200,17 +186,11 @@ export default function Payments() {
         ))}
       </div>
 
-      {/* Main 6 Cards Grid (2 columns) */}
+      {/* Main 6 Cards Grid (2 columns) - NON-CLICKABLE INFORMATION DISPLAY */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
-        {/* First 5 Wallet Cards */}
+        {/* Wallet Cards */}
         {walletCards.map((w) => (
-          <div
-            key={w.id}
-            onClick={() => navigate(w.route)}
-            onMouseEnter={() => setHoveredCard(w.id)}
-            onMouseLeave={() => setHoveredCard(null)}
-            style={hoveredCard === w.id ? cardHover : card}
-          >
+          <div key={w.id} style={infoCard}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
               <div style={{ 
                 width: '36px', height: '36px', borderRadius: '8px', 
@@ -235,13 +215,8 @@ export default function Payments() {
           </div>
         ))}
 
-        {/* 6th Card: Earning Periods */}
-        <div
-          onClick={() => navigate('/payments/periods')}
-          onMouseEnter={() => setHoveredCard('periods')}
-          onMouseLeave={() => setHoveredCard(null)}
-          style={hoveredCard === 'periods' ? cardHover : card}
-        >
+        {/* Earning Periods Card */}
+        <div style={infoCard}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{ 
               width: '36px', height: '36px', borderRadius: '8px', 
