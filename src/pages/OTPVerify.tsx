@@ -41,22 +41,10 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
       
       if (user.is_admin) {
         navigate('/admin')
+      } else if (user.is_trained) {
+        navigate('/plans')
       } else {
-        // Check if user has completed training
-        try {
-          const certsRes = await api.get('/training/certifications')
-          const certs = certsRes.data
-          const allCompleted = certs.length > 0 && certs.every((c: any) => c.status === 'completed')
-          
-          if (allCompleted) {
-            navigate('/plans')
-          } else {
-            navigate('/training')
-          }
-        } catch (err) {
-          console.error('Failed to check certifications:', err)
-          navigate('/training')
-        }
+        navigate('/training')
       }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Invalid or expired code. Please try again.')

@@ -71,27 +71,20 @@ export default function Training() {
       setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'completed' } : c))
       setVideoWatched(true)
 
-      // 3. Re-fetch all certifications to be 100% sure
-      const certsRes = await api.get('/training/certifications')
-      const certs = certsRes.data
-      const allCompleted = certs.length > 0 && certs.every((c: any) => c.status === 'completed')
+      // 3. Fetch fresh user data to check is_trained flag
+      const userRes = await api.get('/auth/me')
+      const user = userRes.data
       
-      if (allCompleted) {
-        // Clear watching state and redirect
+      if (user.is_trained) {
         setWatchingCourseId(null)
         setVideoWatched(false)
-        // Use a small delay to ensure the user sees the "Completed" state before redirecting
-        setTimeout(() => {
-          navigate('/plans', { replace: true })
-        }, 500)
+        navigate('/plans', { replace: true })
       } else {
-        // If not all completed, just reset to show the list again
         setWatchingCourseId(null)
         setVideoWatched(false)
-        // Refresh courses list
-        const updatedCertsRes = await api.get('/training/certifications')
-        const updatedCerts = updatedCertsRes.data
-        const mappedCourses: TrainingCourse[] = updatedCerts.map((cert: any) => ({
+        // Fallback: refresh courses if flag isn't set yet
+        const certsRes = await api.get('/training/certifications')
+        setCourses(certsRes.data.map((cert: any) => ({
           id: cert.id,
           name: cert.name || 'Video Reviewing Mastery',
           description: cert.description || 'Master the essentials of video assessment in this focused module.',
@@ -99,8 +92,7 @@ export default function Training() {
           videoUrl: cert.video_url || '',
           status: cert.status,
           icon: '🎬'
-        }))
-        setCourses(mappedCourses)
+        })))
       }
     } catch (err) {
       console.error('Failed to complete training', err)
