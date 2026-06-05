@@ -82,7 +82,8 @@ function App() {
             <Route path="/payments/history" element={<PaymentHistory />} />
             <Route path="/payments/recharge" element={<Recharge />} />
             <Route path="/payments/payout" element={<WithdrawFunds />} />
-            <Route path="/payments/withdrawal" element={<WithdrawalAccounts />} />
+            <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
+            <Route path="/payments/withdrawal" element={<Placeholder title="Withdrawal Accounts" />} />
             <Route path="/payments/deposit" element={<Placeholder title="Deposit Wallet Details" />} />
             <Route path="/payments/earnings" element={<Placeholder title="Total Earnings" />} />
             <Route path="/payments/referral" element={<Placeholder title="Referral Commission" />} />
