@@ -601,8 +601,21 @@ export default function Recharge() {
               <p style={{ color: '#6B7280', fontSize: '13px' }}>Loading history...</p>
             </div>
           ) : depositHistory.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {depositHistory.slice(0, 5).map((payment) => {
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E5E7EB', backgroundColor: 'white' }}>
+              {/* Header Row */}
+              <div style={{
+                backgroundColor: '#f9fafb', padding: '12px 16px',
+                display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px',
+                borderBottom: '1px solid #E5E7EB'
+              }}>
+                <p style={{ fontSize: '11px', color: '#6B7280', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Amount</p>
+                <p style={{ fontSize: '11px', color: '#6B7280', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Date</p>
+                <p style={{ fontSize: '11px', color: '#6B7280', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Method</p>
+                <p style={{ fontSize: '11px', color: '#6B7280', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Status</p>
+              </div>
+
+              {/* Data Rows */}
+              {depositHistory.slice(0, 5).map((payment, index) => {
                 const statusColors: { [key: string]: { bg: string; text: string; icon: string } } = {
                   pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳' },
                   paid: { bg: '#ecfdf5', text: '#065f46', icon: '✓' },
@@ -611,39 +624,39 @@ export default function Recharge() {
                 }
                 const statusColor = statusColors[payment.status] || statusColors.pending
                 
+                const formattedDate = payment.created_at
+                  ? new Date(payment.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })
+                  : payment.period
+                
                 return (
                   <div
                     key={payment.id}
                     style={{
-                      backgroundColor: 'white', borderRadius: '12px', padding: '14px',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #E5E7EB',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                      padding: '14px 16px',
+                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px',
+                      alignItems: 'center', borderBottom: index < depositHistory.length - 1 ? '1px solid #E5E7EB' : 'none'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                      <div style={{
-                        width: '40px', height: '40px', borderRadius: '10px',
-                        backgroundColor: '#dbeafe', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center',
-                        fontSize: '20px'
-                      }}>
-                        📥
-                      </div>
-                      <div>
-                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#111827', margin: 0 }}>Deposit</p>
-                        <p style={{ fontSize: '11px', color: '#6B7280', margin: '2px 0 0' }}>{payment.period}</p>
-                      </div>
-                    </div>
+                    {/* Amount */}
+                    <p style={{ fontSize: '14px', fontWeight: 700, color: '#111827', margin: 0 }}>${payment.amount.toFixed(2)}</p>
 
-                    <div style={{ textAlign: 'right', marginRight: '12px' }}>
-                      <p style={{ fontSize: '14px', fontWeight: 700, color: '#111827', margin: 0 }}>${payment.amount.toFixed(2)}</p>
-                    </div>
+                    {/* Date */}
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: 0 }}>{formattedDate}</p>
 
+                    {/* Method */}
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: 0 }}>{payment.payment_method || 'N/A'}</p>
+
+                    {/* Status */}
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', gap: '4px',
                       backgroundColor: statusColor.bg, color: statusColor.text,
                       padding: '4px 10px', borderRadius: '16px',
-                      fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap'
+                      fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap',
+                      width: 'fit-content'
                     }}>
                       <span>{statusColor.icon}</span>
                       {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
