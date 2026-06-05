@@ -172,9 +172,20 @@ export default function WithdrawFunds() {
           ))}
         </select>
         {accounts.length === 0 && (
-          <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '8px', fontWeight: 600 }}>
-            No withdrawal accounts found. Please add one in settings.
-          </p>
+          <div style={{ marginTop: '12px' }}>
+            <p style={{ fontSize: '12px', color: '#ef4444', marginBottom: '12px', fontWeight: 600 }}>
+              ❌ No withdrawal accounts found.
+            </p>
+            <button 
+              onClick={() => navigate('/withdrawal-accounts')}
+              style={{ 
+                width: '100%', padding: '12px', borderRadius: '12px', backgroundColor: '#319795', 
+                color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer' 
+              }}
+            >
+              + Add Withdrawal Account
+            </button>
+          </div>
         )}
       </div>
 

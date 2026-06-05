@@ -214,6 +214,27 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
         </button>
       </div>
 
+      {/* Withdrawal Accounts Section */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '18px' }}>💳</span>
+          <div>
+            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Withdrawal Accounts</h2>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Manage your payout destinations</p>
+          </div>
+        </div>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 12px' }}>Add and manage your crypto wallets and mobile money accounts for withdrawals.</p>
+        <button 
+          onClick={() => navigate('/withdrawal-accounts')}
+          style={{
+            padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+            backgroundColor: '#319795', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
+          }}
+        >
+          Manage Accounts
+        </button>
+      </div>
+
       {/* Security Section */}
       <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
