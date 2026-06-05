@@ -24,6 +24,8 @@ export default function Recharge() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [depositHistory, setDepositHistory] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
 
   const amounts = [20, 50, 100, 150, 200]
 
@@ -31,6 +33,12 @@ export default function Recharge() {
     api.get('/auth/me').then(res => {
       setBalance(res.data.deposit_wallet_balance)
     }).catch(console.error)
+
+    setLoadingHistory(true)
+    api.get('/payments/history').then(res => {
+      const deposits = res.data.filter((p: any) => p.type === 'deposit')
+      setDepositHistory(deposits)
+    }).catch(console.error).finally(() => setLoadingHistory(false))
   }, [])
 
   const finalAmount = customAmount ? parseFloat(customAmount) : (selectedAmount || 0)
@@ -581,6 +589,79 @@ export default function Recharge() {
       <p style={{ textAlign: 'center', fontSize: '12px', color: '#111827', fontWeight: 600, marginTop: '4px' }}>
         * Funds will be credited after admin approval and payment confirmation.
       </p>
+
+      {/* Deposit History Section */}
+      {!showCryptoDetails && !submitSuccess && (
+        <div style={{ marginTop: '32px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '16px' }}>Your Deposit History</h3>
+          
+          {loadingHistory ? (
+            <div style={{ textAlign: 'center', padding: '24px' }}>
+              <div style={{ width: '32px', height: '32px', border: '3px solid #E5E7EB', borderTopColor: '#319795', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+              <p style={{ color: '#6B7280', fontSize: '13px' }}>Loading history...</p>
+            </div>
+          ) : depositHistory.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {depositHistory.slice(0, 5).map((payment) => {
+                const statusColors: { [key: string]: { bg: string; text: string; icon: string } } = {
+                  pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳' },
+                  paid: { bg: '#ecfdf5', text: '#065f46', icon: '✓' },
+                  rejected: { bg: '#fef2f2', text: '#991b1b', icon: '✕' },
+                  cancelled: { bg: '#f3f4f6', text: '#374151', icon: '−' },
+                }
+                const statusColor = statusColors[payment.status] || statusColors.pending
+                
+                return (
+                  <div
+                    key={payment.id}
+                    style={{
+                      backgroundColor: 'white', borderRadius: '12px', padding: '14px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #E5E7EB',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                      <div style={{
+                        width: '40px', height: '40px', borderRadius: '10px',
+                        backgroundColor: '#dbeafe', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        fontSize: '20px'
+                      }}>
+                        📥
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#111827', margin: 0 }}>Deposit</p>
+                        <p style={{ fontSize: '11px', color: '#6B7280', margin: '2px 0 0' }}>{payment.period}</p>
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right', marginRight: '12px' }}>
+                      <p style={{ fontSize: '14px', fontWeight: 700, color: '#111827', margin: 0 }}>${payment.amount.toFixed(2)}</p>
+                    </div>
+
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '4px',
+                      backgroundColor: statusColor.bg, color: statusColor.text,
+                      padding: '4px 10px', borderRadius: '16px',
+                      fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap'
+                    }}>
+                      <span>{statusColor.icon}</span>
+                      {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div style={{
+              backgroundColor: '#f9fafb', borderRadius: '12px', padding: '20px',
+              textAlign: 'center', border: '1px solid #E5E7EB'
+            }}>
+              <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>No deposit history yet</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
