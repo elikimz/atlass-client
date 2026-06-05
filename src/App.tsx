@@ -14,6 +14,9 @@ import Settings from './pages/Settings'
 import AdminDashboard from './pages/AdminDashboard'
 import TaskPlayer from './pages/TaskPlayer'
 import InvestmentPlans from './pages/InvestmentPlans'
+import WithdrawFunds from './pages/WithdrawFunds'
+import WithdrawalAccounts from './pages/WithdrawalAccounts'
+import Recharge from './pages/Recharge'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
@@ -74,9 +77,9 @@ function App() {
             <Route path="/referrals" element={<Invite />} />
             <Route path="/referrals-old" element={<Referrals />} />
             <Route path="/payments" element={<Payments />} />
-            <Route path="/payments/recharge" element={<Placeholder title="Recharge Wallet" />} />
-            <Route path="/payments/payout" element={<Placeholder title="Send Payout" />} />
-            <Route path="/payments/withdrawal" element={<Placeholder title="Manage Withdrawal Accounts" />} />
+            <Route path="/payments/recharge" element={<Recharge />} />
+            <Route path="/payments/payout" element={<WithdrawFunds />} />
+            <Route path="/payments/withdrawal" element={<WithdrawalAccounts />} />
             <Route path="/payments/deposit" element={<Placeholder title="Deposit Wallet Details" />} />
             <Route path="/payments/earnings" element={<Placeholder title="Total Earnings" />} />
             <Route path="/payments/referral" element={<Placeholder title="Referral Commission" />} />
