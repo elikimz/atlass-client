@@ -5,6 +5,10 @@ import api from '../services/api'
 const USDT_ADDRESS = '0xcfed1cdcce064dc27f60bbf2292fc5c15082fc86'
 const USDT_NETWORK = 'ERC20 (Ethereum)'
 
+// Cloudinary configuration (unsigned upload preset)
+const CLOUDINARY_UPLOAD_PRESET = "task_images"
+const CLOUDINARY_CLOUD_NAME = "doste1wr0"
+
 export default function Recharge() {
   const navigate = useNavigate()
   const [balance, setBalance] = useState(0)
@@ -67,14 +71,24 @@ export default function Recharge() {
     try {
       const formData = new FormData()
       formData.append('file', proofFile)
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
 
-      const response = await api.post('/payments/upload-proof', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      )
 
-      setUploadedProofUrl(response.data.url)
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      setUploadedProofUrl(data.secure_url)
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to upload proof')
+      setError(err.message || 'Failed to upload proof')
     } finally {
       setUploading(false)
     }
@@ -331,173 +345,128 @@ export default function Recharge() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
           <span style={{ color: '#111827', fontWeight: 500 }}>Fees:</span>
-          <span style={{ fontWeight: 700, color: '#111827' }}>$0.00</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-          <span style={{ color: '#111827', fontWeight: 500 }}>Total Credit:</span>
-          <span style={{ fontWeight: 800, color: '#111827' }}>${finalAmount.toFixed(2)} USD</span>
+          <span style={{ fontWeight: 700, color: '#111827' }}>None</span>
         </div>
       </div>
 
       {/* Proceed Button */}
       {!showCryptoDetails && (
         <button
-          disabled={finalAmount < 20}
           onClick={handleProceed}
+          disabled={finalAmount < 20}
           style={{
-            width: '100%', padding: '18px', borderRadius: '30px',
+            width: '100%', padding: '16px', borderRadius: '20px',
             backgroundColor: finalAmount < 20 ? '#a0aec0' : '#319795',
-            color: 'white', fontSize: '17px', fontWeight: 700, border: 'none',
+            border: 'none', color: 'white', fontSize: '16px', fontWeight: 700,
             cursor: finalAmount < 20 ? 'not-allowed' : 'pointer',
-            boxShadow: '0 4px 15px rgba(49, 151, 149, 0.3)',
+            boxShadow: finalAmount < 20 ? 'none' : '0 4px 12px rgba(49,151,149,0.3)',
             marginBottom: '12px'
           }}
         >
-          Proceed to pay ${finalAmount.toFixed(2)} USD
+          Proceed to Pay
         </button>
       )}
 
-      {/* ── USDT Payment Details Panel ── */}
+      {/* Crypto Details Panel */}
       {showCryptoDetails && (
         <div style={{
-          backgroundColor: 'white', borderRadius: '24px', padding: '24px',
-          border: '2px solid #319795', marginBottom: '16px',
-          boxShadow: '0 4px 20px rgba(49,151,149,0.15)'
+          backgroundColor: 'white', borderRadius: '20px', padding: '24px',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.08)', marginBottom: '24px',
+          border: '1px solid #e5e7eb', animation: 'slideIn 0.3s ease-out'
         }}>
-          {/* Title */}
-          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <div style={{ fontSize: '28px', marginBottom: '6px' }}>₮</div>
-            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
-              Send {finalAmount.toFixed(2)} USDT
-            </h2>
-            <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>
-              Network: <strong style={{ color: '#319795' }}>{USDT_NETWORK}</strong>
-            </p>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '20px', margin: 0 }}>Payment Details</h2>
+
+          {/* QR Code Section */}
+          <div style={{ textAlign: 'center', marginBottom: '24px', padding: '20px', backgroundColor: '#f9fafb', borderRadius: '16px' }}>
+            <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600, margin: '0 0 12px' }}>SCAN TO PAY</p>
+            <img src={qrUrl} alt="USDT Address QR Code" style={{ width: '140px', height: '140px', borderRadius: '12px' }} />
           </div>
 
-          {/* QR Code */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          {/* Wallet Address Section */}
+          <div style={{ marginBottom: '20px' }}>
+            <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600, margin: '0 0 8px' }}>WALLET ADDRESS</p>
             <div style={{
-              padding: '12px', borderRadius: '16px', border: '2px solid #e0f2f1',
-              backgroundColor: '#f0fdfa', display: 'inline-block'
+              display: 'flex', alignItems: 'center', gap: '8px',
+              backgroundColor: '#f9fafb', padding: '12px', borderRadius: '12px',
+              border: '1px solid #e5e7eb'
             }}>
-              <img
-                src={qrUrl}
-                alt="USDT ERC20 QR Code"
-                width={180}
-                height={180}
-                style={{ display: 'block', borderRadius: '8px' }}
-              />
-            </div>
-          </div>
-
-          {/* Wallet Address */}
-          <div style={{ marginBottom: '16px' }}>
-            <p style={{ fontSize: '13px', color: '#6b7280', fontWeight: 600, marginBottom: '8px', textAlign: 'center' }}>
-              USDT (ERC20) Wallet Address
-            </p>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '10px',
-              backgroundColor: '#f8fafc', borderRadius: '12px',
-              border: '1px solid #e2e8f0', padding: '12px 14px'
-            }}>
-              <span style={{
-                flex: 1, fontSize: '13px', fontWeight: 600, color: '#1e293b',
-                wordBreak: 'break-all', fontFamily: 'monospace', letterSpacing: '0.02em'
-              }}>
-                {USDT_ADDRESS}
-              </span>
+              <code style={{
+                flex: 1, fontSize: '13px', fontFamily: 'monospace', color: '#111827',
+                wordBreak: 'break-all', fontWeight: 600
+              }}>{USDT_ADDRESS}</code>
               <button
                 onClick={handleCopy}
                 style={{
-                  flexShrink: 0, padding: '8px 14px', borderRadius: '8px',
-                  backgroundColor: copied ? '#22c55e' : '#319795',
-                  color: 'white', border: 'none', cursor: 'pointer',
-                  fontSize: '13px', fontWeight: 700, transition: 'background 0.2s',
-                  whiteSpace: 'nowrap'
+                  padding: '8px 12px', borderRadius: '8px', border: 'none',
+                  backgroundColor: copied ? '#d1fae5' : '#e5e7eb',
+                  color: copied ? '#065f46' : '#374151',
+                  cursor: 'pointer', fontSize: '12px', fontWeight: 700,
+                  transition: 'all 0.2s', whiteSpace: 'nowrap'
                 }}
               >
-                {copied ? '✓ Copied!' : 'Copy'}
+                {copied ? '✓ Copied' : 'Copy'}
               </button>
             </div>
           </div>
 
-          {/* Warning */}
+          {/* Network Warning */}
           <div style={{
-            backgroundColor: '#fff7ed', border: '1px solid #fed7aa',
-            borderRadius: '12px', padding: '12px 14px', marginBottom: '16px'
+            backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px',
+            padding: '12px', marginBottom: '20px', display: 'flex', gap: '8px'
           }}>
-            <p style={{ fontSize: '12px', color: '#92400e', margin: 0, fontWeight: 600, lineHeight: 1.6 }}>
-              ⚠️ <strong>Important:</strong> Only send <strong>USDT on the ERC20 (Ethereum) network</strong> to this address.
-              Sending any other token or using a different network will result in permanent loss of funds.
-            </p>
+            <span style={{ fontSize: '16px', flexShrink: 0 }}>⚠️</span>
+            <div>
+              <p style={{ fontSize: '12px', fontWeight: 700, color: '#92400e', margin: '0 0 4px' }}>Use ERC20 Network Only</p>
+              <p style={{ fontSize: '11px', color: '#b45309', margin: 0 }}>Sending from other networks will result in loss of funds.</p>
+            </div>
           </div>
 
           {/* Steps */}
-          <div style={{ marginBottom: '20px' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '10px' }}>How to complete your payment:</p>
-            {[
-              `Send exactly ${finalAmount.toFixed(2)} USDT to the address above`,
-              'Use the ERC20 (Ethereum) network only',
-              'Your balance will be credited after 1–3 network confirmations',
-              'Contact support if funds do not appear within 30 minutes',
-            ].map((step, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
-                <div style={{
-                  width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#319795',
-                  color: 'white', fontSize: '11px', fontWeight: 800,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>{i + 1}</div>
-                <span style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{step}</span>
-              </div>
-            ))}
+          <div style={{ backgroundColor: '#f3f4f6', borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: '#374151', margin: '0 0 12px' }}>STEPS TO COMPLETE PAYMENT:</p>
+            <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#4b5563', lineHeight: '1.8' }}>
+              <li>Open your wallet (MetaMask, Trust Wallet, etc.)</li>
+              <li>Send exactly <strong>{finalAmount.toFixed(2)} USDT</strong> to the address above</li>
+              <li>Take a screenshot of the transaction confirmation</li>
+              <li>Upload the screenshot below</li>
+            </ol>
           </div>
 
-          {/* Proof Upload Section */}
-          <div style={{ marginBottom: '20px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
-            <p style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '12px' }}>Upload Payment Proof</p>
-            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '12px' }}>
-              Take a screenshot of your transaction confirmation and upload it here.
-            </p>
+          {/* File Upload Section */}
+          <div style={{ marginBottom: '20px' }}>
+            <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: 600, margin: '0 0 12px' }}>UPLOAD PAYMENT PROOF</p>
 
             {/* File Input */}
-            <label style={{
-              display: 'block', padding: '16px', borderRadius: '12px',
-              border: '2px dashed #d1d5db', backgroundColor: '#f9fafb',
-              cursor: 'pointer', textAlign: 'center', marginBottom: '12px',
-              transition: 'all 0.2s'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#319795'
-                e.currentTarget.style.backgroundColor = '#f0fdfa'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#d1d5db'
-                e.currentTarget.style.backgroundColor = '#f9fafb'
-              }}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-              />
-              <div style={{ fontSize: '24px', marginBottom: '8px' }}>📸</div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#374151', margin: '0 0 4px' }}>
-                {proofFile ? proofFile.name : 'Click to upload or drag and drop'}
-              </p>
-              <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>PNG, JPG, GIF up to 10MB</p>
-            </label>
+            {!uploadedProofUrl && (
+              <label style={{
+                display: 'block', padding: '24px', borderRadius: '12px',
+                border: '2px dashed #d1d5db', backgroundColor: '#f9fafb',
+                cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s'
+              }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+                <div style={{ fontSize: '28px', marginBottom: '8px' }}>📸</div>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Click to upload or drag and drop</p>
+                <p style={{ fontSize: '11px', color: '#6b7280', margin: 0 }}>PNG, JPG, GIF up to 5MB</p>
+              </label>
+            )}
 
             {/* Preview */}
-            {proofPreview && (
-              <div style={{ marginBottom: '12px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-                <img src={proofPreview} alt="Proof preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
+            {proofPreview && !uploadedProofUrl && (
+              <div style={{
+                marginTop: '12px', borderRadius: '12px', overflow: 'hidden',
+                border: '1px solid #e5e7eb'
+              }}>
+                <img src={proofPreview} alt="Preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />
               </div>
             )}
 
             {/* Upload Button */}
-            {proofFile && !uploadedProofUrl && (
+            {proofPreview && !uploadedProofUrl && (
               <button
                 onClick={handleUploadProof}
                 disabled={uploading}
@@ -505,7 +474,7 @@ export default function Recharge() {
                   width: '100%', padding: '12px', borderRadius: '8px',
                   backgroundColor: uploading ? '#a0aec0' : '#319795',
                   color: 'white', border: 'none', cursor: uploading ? 'not-allowed' : 'pointer',
-                  fontSize: '13px', fontWeight: 700, marginBottom: '12px'
+                  fontSize: '13px', fontWeight: 700, marginTop: '12px'
                 }}
               >
                 {uploading ? '⏳ Uploading...' : '📤 Upload Proof'}
