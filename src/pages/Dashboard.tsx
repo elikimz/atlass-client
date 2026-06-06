@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 interface DashboardData {
   footage_labeled_min: number
   approved_roles: string
   certifications_earned: number
-  earnings_history: { day: string, value: number }[]
 }
 
 interface UserData {
@@ -16,11 +14,9 @@ interface UserData {
   deposit_wallet_balance: number
   withdrawal_wallet_balance: number
   performance_bonus_balance: number
-  current_plan_id?: number
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate()
   const [data, setData] = useState<DashboardData | null>(null)
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,16 +26,13 @@ export default function Dashboard() {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
 
+    // Fetch dashboard summary and user info (which now includes wallet balances) in parallel
     Promise.all([
       api.get('/dashboard/summary'),
       api.get('/auth/me')
     ]).then(([summaryRes, userRes]) => {
       setData(summaryRes.data)
       setUser(userRes.data)
-      
-      if (!userRes.data.is_trained) {
-        navigate('/training', { replace: true })
-      }
     }).catch(console.error)
       .finally(() => setLoading(false))
 
@@ -63,24 +56,20 @@ export default function Dashboard() {
 
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
 
+  // Real wallet balances from API
   const depositBalance = user?.deposit_wallet_balance ?? 0
   const withdrawalBalance = user?.withdrawal_wallet_balance ?? 0
   const bonusBalance = user?.performance_bonus_balance ?? 0
   const totalBalance = depositBalance + withdrawalBalance + bonusBalance
 
-  const earningsData = data?.earnings_history && data.earnings_history.length > 0 
-    ? data.earnings_history 
-    : [
-        { day: 'Mon', value: 0 }, { day: 'Tue', value: 0 }, { day: 'Wed', value: 0 },
-        { day: 'Thu', value: 0 }, { day: 'Fri', value: 0 }, { day: 'Sat', value: 0 }, { day: 'Sun', value: 0 },
-      ]
+  const earningsData = [
+    { day: 'Mon', value: 100 }, { day: 'Tue', value: 220 }, { day: 'Wed', value: 150 },
+    { day: 'Thu', value: 300 }, { day: 'Fri', value: 450 }, { day: 'Sat', value: 350 }, { day: 'Sun', value: 600 },
+  ]
 
-  const maxValue = Math.max(...earningsData.map(d => d.value), 10)
+  const maxValue = Math.max(...earningsData.map(d => d.value))
   const chartHeight = 200
   const chartWidth = isMobile ? windowWidth - 80 : (isTablet ? windowWidth - 360 : windowWidth - 460)
-  
-  const lastPointX = 50 + ((earningsData.length - 1) / (earningsData.length - 1)) * (chartWidth > 0 ? chartWidth : 200)
-  const lastPointY = chartHeight - (earningsData[earningsData.length - 1].value / maxValue) * (chartHeight - 40) + 20
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
@@ -103,10 +92,10 @@ export default function Dashboard() {
           <div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Deposit Wallet</div>
             <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--text-heading)' }}>${depositBalance.toFixed(2)}</div>
-            <div style={{ fontSize: '11px', color: '#5932EA', marginTop: '4px' }}>Available to use</div>
+            <div style={{ fontSize: '11px', color: 'var(--accent-primary)', marginTop: '4px' }}>Available to use</div>
           </div>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(89, 50, 234, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5932EA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
               <line x1="1" y1="10" x2="23" y2="10"/>
             </svg>
@@ -160,7 +149,7 @@ export default function Dashboard() {
       {/* Main Content Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: isDesktop ? '2fr 1fr' : '1fr', gap: '24px' }}>
         {/* Earnings Chart */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px' }}>
             <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>Earnings Overview</h2>
             <div style={{ padding: '8px 12px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', fontSize: '12px', color: 'var(--text-muted)', cursor: 'pointer' }}>This Week</div>
@@ -177,7 +166,7 @@ export default function Dashboard() {
                   const x = 50 + (i / (earningsData.length - 1)) * (chartWidth > 0 ? chartWidth : 200)
                   const y = chartHeight - (d.value / maxValue) * (chartHeight - 40) + 20
                   return `${x},${y}`
-                }).join(' ') + ` ${lastPointX + 20},${lastPointY - 10}`}
+                }).join(' ')}
                 fill="none" stroke="var(--accent-primary)" strokeWidth="3"
               />
               {earningsData.map((d, i) => {
@@ -185,12 +174,6 @@ export default function Dashboard() {
                 const y = chartHeight - (d.value / maxValue) * (chartHeight - 40) + 20
                 return <circle key={i} cx={x} cy={y} r="6" fill="var(--bg-card)" stroke="var(--accent-primary)" strokeWidth="3" />
               })}
-              {/* Live Indicator Dot */}
-              <circle cx={lastPointX} cy={lastPointY} r="8" fill="var(--accent-primary)" fillOpacity="0.2">
-                <animate attributeName="r" from="8" to="14" dur="1.5s" repeatCount="indefinite" />
-                <animate attributeName="fill-opacity" from="0.2" to="0" dur="1.5s" repeatCount="indefinite" />
-              </circle>
-              <circle cx={lastPointX} cy={lastPointY} r="4" fill="var(--accent-primary)" />
             </svg>
             <div style={{ display: 'flex', justifyContent: 'space-around', paddingLeft: '50px', marginTop: '10px' }}>
               {earningsData.map((d) => <span key={d.day} style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{d.day}</span>)}
@@ -199,11 +182,11 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Summary */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
           <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 24px' }}>Wallet Summary</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {[
-              { label: 'Deposit Wallet', value: `$${depositBalance.toFixed(2)}`, color: '#5932EA', icon: <><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></> },
+              { label: 'Deposit Wallet', value: `$${depositBalance.toFixed(2)}`, color: 'var(--accent-primary)', icon: <><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></> },
               { label: 'Withdrawal Wallet', value: `$${withdrawalBalance.toFixed(2)}`, color: '#00AC4F', icon: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/></> },
               { label: 'Total Balance', value: `$${totalBalance.toFixed(2)}`, color: '#F59E0B', icon: <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/> },
             ].map((item, i) => (
@@ -223,22 +206,20 @@ export default function Dashboard() {
 
       {/* Progress Section */}
       {data && (
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
           <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 20px' }}>Training Progress</h2>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '24px' }}>
             <div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Footage Watched</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>0 min</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Footage Labeled</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>{data.footage_labeled_min} min</div>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Approved Roles</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                {user?.current_plan_id && user.current_plan_id > 1 ? 'Employee' : 'Intern'}
-              </div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>{data.approved_roles || 'None'}</div>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Certifications</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>1</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>{data.certifications_earned}</div>
             </div>
           </div>
         </div>
