@@ -48,11 +48,8 @@ export default function AdminPayments() {
     try {
       await api.post(`/admin/payments/${id}/approve`)
       showNotify('Payment approved successfully')
-      setReviewingPayment(null)
-      fetchPayments()
-    } catch (err: any) {
-      showNotify(err.response?.data?.detail || 'Failed to approve payment', 'error')
-    }
+      setReviewingPayment(null); fetchPayments()
+    } catch (err: any) { showNotify(err.response?.data?.detail || 'Failed to approve payment', 'error') }
   }
 
   const handleReject = async (id: number) => {
@@ -60,12 +57,8 @@ export default function AdminPayments() {
     try {
       await api.post(`/admin/payments/${id}/reject`, { admin_notes: rejectionReason })
       showNotify('Payment rejected successfully')
-      setReviewingPayment(null)
-      setRejectionReason('')
-      fetchPayments()
-    } catch (err: any) {
-      showNotify(err.response?.data?.detail || 'Failed to reject payment', 'error')
-    }
+      setReviewingPayment(null); setRejectionReason(''); fetchPayments()
+    } catch (err: any) { showNotify(err.response?.data?.detail || 'Failed to reject payment', 'error') }
   }
 
   const filteredPayments = payments.filter(p => {
@@ -77,9 +70,9 @@ export default function AdminPayments() {
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
-        <div className="loading-container">
-          <div className="loading-bar-bg" style={{ width: '150px' }}><div className="loading-bar-fill"></div></div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: 500, margin: 0 }}>Loading payments...</p>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Loading payments...</p>
         </div>
       </div>
     )
@@ -95,7 +88,7 @@ export default function AdminPayments() {
 
       {reviewingPayment && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: 'var(--bg-card)', padding: '32px', borderRadius: '16px', maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ backgroundColor: 'var(--bg-card)', padding: '32px', borderRadius: '16px', maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto', border: '1px solid var(--border-main)' }}>
             <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', color: 'var(--text-heading)' }}>Review {reviewingPayment.type}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '8px' }}>
@@ -144,7 +137,7 @@ export default function AdminPayments() {
                 <td style={{ padding: '16px' }}><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{payment.user?.first_name} {payment.user?.last_name}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{payment.user?.email}</div></td>
                 <td style={{ padding: '16px', fontSize: '14px', fontWeight: 700, color: activeTab === 'deposit' ? '#059669' : '#DC2626' }}>{activeTab === 'deposit' ? '+' : '-'}${payment.amount.toFixed(2)}</td>
                 <td style={{ padding: '16px' }}><div style={{ fontSize: '14px', color: 'var(--text-main)' }}>{payment.payment_method}</div><div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{payment.network || 'N/A'}</div></td>
-                <td style={{ padding: '16px' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, backgroundColor: payment.status === 'paid' ? 'rgba(34, 197, 94, 0.1)' : payment.status === 'pending' ? '#FEF3C7' : 'rgba(220, 38, 38, 0.1)', color: payment.status === 'paid' ? '#166534' : payment.status === 'pending' ? '#92400E' : '#991B1B' }}>{payment.status.toUpperCase()}</span></td>
+                <td style={{ padding: '16px' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, backgroundColor: payment.status === 'paid' ? 'rgba(34, 197, 94, 0.1)' : payment.status === 'pending' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: payment.status === 'paid' ? '#166534' : payment.status === 'pending' ? '#92400E' : '#991B1B' }}>{payment.status.toUpperCase()}</span></td>
                 <td style={{ padding: '16px', fontSize: '13px', color: 'var(--text-muted)' }}>{new Date(payment.created_at).toLocaleDateString()}</td>
                 <td style={{ padding: '16px', textAlign: 'center' }}>{payment.status === 'pending' ? <button onClick={() => setReviewingPayment(payment)} style={{ padding: '8px 16px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Review</button> : <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Processed</span>}</td>
               </tr>
