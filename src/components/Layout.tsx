@@ -11,6 +11,7 @@ interface UserData {
   last_name: string
   email: string
   is_admin: boolean
+  is_trained: boolean
 }
 
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
@@ -34,6 +35,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         localStorage.setItem('user_last_name', res.data.last_name)
         localStorage.setItem('user_email', res.data.email)
         localStorage.setItem('user_is_admin', res.data.is_admin ? 'true' : 'false')
+        localStorage.setItem('user_is_trained', res.data.is_trained ? 'true' : 'false')
       })
       .catch(err => {
         console.error('Failed to fetch user data:', err)
@@ -60,6 +62,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
   const isAdminUser = user?.is_admin || localStorage.getItem('user_is_admin') === 'true'
   const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
+  const isTrained = user?.is_trained || localStorage.getItem('user_is_trained') === 'true'
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: (
@@ -83,7 +86,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
       </svg>
     )},
-    { label: 'Training', path: '/training', icon: (
+    { label: 'Training', path: '/training', hide: isTrained, icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
       </svg>
@@ -132,7 +135,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
-            {navItems.filter(item => item.label !== 'Admin' || isAdminUser).map((item) => (
+            {navItems.filter(item => (!item.hide) && (item.label !== 'Admin' || isAdminUser)).map((item) => (
               <Link
                 key={item.label}
                 to={item.path}

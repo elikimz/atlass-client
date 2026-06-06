@@ -169,6 +169,8 @@ export default function Training() {
     icon: '🎬'
   }
 
+  const isTrained = course.status === 'completed'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', backgroundColor: '#FAFBFF', minHeight: '100vh' }}>
       {/* Header Section */}
@@ -224,8 +226,8 @@ export default function Training() {
               {course.description}
             </p>
 
-            {/* Start Training Button */}
-            {course.status !== 'completed' && (
+            {/* Start/Complete Training Button */}
+            {course.status !== 'completed' ? (
               <button
                 onClick={() => handleStartTraining(course.id)}
                 style={{
@@ -240,6 +242,28 @@ export default function Training() {
                 START TRAINING
                 <span>→</span>
               </button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ padding: '12px', backgroundColor: '#DCFCE7', borderRadius: '10px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#15803D', margin: 0 }}>✓ Training Completed Successfully</p>
+                </div>
+                <button
+                  onClick={() => window.open(`${api.defaults.baseURL}/training/certificate`, '_blank')}
+                  style={{
+                    width: '100%', padding: '16px', backgroundColor: '#5932EA', color: 'white',
+                    fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#4A28C7' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#5932EA' }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  DOWNLOAD CERTIFICATE
+                </button>
+              </div>
             )}
         </div>
       </div>

@@ -92,6 +92,8 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
     )
   }
 
+  const isTrained = localStorage.getItem('user_is_trained') === 'true'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
@@ -99,6 +101,33 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
         <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Settings</h1>
         <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Manage your account and preferences.</p>
       </div>
+
+      {/* Certificate Section */}
+      {isTrained && (
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <span style={{ fontSize: '18px' }}>🎓</span>
+            <div>
+              <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Training Certificate</h2>
+              <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>You have successfully completed your training</p>
+            </div>
+          </div>
+          <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 12px' }}>Download your official Video Reviewing Mastery certificate to showcase your skills.</p>
+          <button
+            onClick={() => window.open(`${api.defaults.baseURL}/training/certificate`, '_blank')}
+            style={{
+              padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+              backgroundColor: '#5932EA', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '8px'
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Certificate (PDF)
+          </button>
+        </div>
+      )}
 
       {/* Profile Section */}
       <div style={card}>
