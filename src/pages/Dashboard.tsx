@@ -26,7 +26,7 @@ export default function Dashboard() {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
 
-    // Fetch dashboard summary and user info (which now includes wallet balances) in parallel
+    // Fetch dashboard summary and user info in parallel
     Promise.all([
       api.get('/dashboard/summary'),
       api.get('/auth/me')
@@ -81,67 +81,61 @@ export default function Dashboard() {
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Welcome back, {firstName}! Here's your overview.</p>
       </div>
 
-      {/* Wallet Balances Section */}
+      {/* Wallet Balances Section - Compact Box Layout */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'),
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : (isTablet ? 'repeat(4, 1fr)' : 'repeat(4, 1fr)'),
         gap: '16px',
       }}>
         {/* Deposit Wallet */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px', boxShadow: 'var(--card-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-main)' }}>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Deposit Wallet</div>
-            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--text-heading)' }}>${depositBalance.toFixed(2)}</div>
-            <div style={{ fontSize: '11px', color: 'var(--accent-primary)', marginTop: '4px' }}>Available to use</div>
-          </div>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-              <line x1="1" y1="10" x2="23" y2="10"/>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '16px', boxShadow: 'var(--card-shadow)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: '1px solid var(--border-main)', gap: '8px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
             </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>Deposit</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>${depositBalance.toFixed(2)}</div>
           </div>
         </div>
 
         {/* Withdrawal Wallet */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px', boxShadow: 'var(--card-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-main)' }}>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Withdrawal Wallet</div>
-            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--text-heading)' }}>${withdrawalBalance.toFixed(2)}</div>
-            <div style={{ fontSize: '11px', color: '#00AC4F', marginTop: '4px' }}>Earned from tasks</div>
-          </div>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(0, 172, 79, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/>
-              <polyline points="17 6 23 6 23 12"/>
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '16px', boxShadow: 'var(--card-shadow)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: '1px solid var(--border-main)', gap: '8px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'rgba(0, 172, 79, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00AC4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 17"/><polyline points="17 6 23 6 23 12"/>
             </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>Earnings</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>${withdrawalBalance.toFixed(2)}</div>
           </div>
         </div>
 
         {/* Performance Bonus */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px', boxShadow: 'var(--card-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-main)' }}>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Performance Bonus</div>
-            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--text-heading)' }}>${bonusBalance.toFixed(2)}</div>
-            <div style={{ fontSize: '11px', color: '#0EA5E9', marginTop: '4px' }}>Upgrade refunds</div>
-          </div>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(14, 165, 233, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '16px', boxShadow: 'var(--card-shadow)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: '1px solid var(--border-main)', gap: '8px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'rgba(14, 165, 233, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>Bonus</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>${bonusBalance.toFixed(2)}</div>
           </div>
         </div>
 
         {/* Total Balance */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '20px', boxShadow: 'var(--card-shadow)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-main)' }}>
-          <div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Total Balance</div>
-            <div style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--text-heading)' }}>${totalBalance.toFixed(2)}</div>
-            <div style={{ fontSize: '11px', color: '#F59E0B', marginTop: '4px' }}>Combined wallets</div>
-          </div>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '16px', boxShadow: 'var(--card-shadow)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: '1px solid var(--border-main)', gap: '8px' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 10.26 24 10.27 17.18 16.70 20.27 25 12 19.54 3.73 25 6.82 16.70 0 10.27 8.91 10.26 12 2"/>
             </svg>
+          </div>
+          <div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>Total</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>${totalBalance.toFixed(2)}</div>
           </div>
         </div>
       </div>
