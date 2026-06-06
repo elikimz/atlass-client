@@ -2,14 +2,19 @@ import { useEffect, useState } from 'react'
 import api from '../services/api'
 
 interface DashboardStats {
-  totalUsers: number
-  totalTasks: number
-  totalTraining: number
-  totalRevenue: number
+  total_users: number
+  pending_payments: number
+  total_payouts: number
+  total_deposits: number
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({ totalUsers: 0, totalTasks: 0, totalTraining: 0, totalRevenue: 0 })
+  const [stats, setStats] = useState<DashboardStats>({ 
+    total_users: 0, 
+    pending_payments: 0, 
+    total_payouts: 0, 
+    total_deposits: 0 
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -18,19 +23,8 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      // Fetch various stats from backend
-      const [usersRes, tasksRes, certsRes] = await Promise.all([
-        api.get('/admin/users').catch(() => ({ data: [] })),
-        api.get('/admin/video-tasks').catch(() => ({ data: [] })),
-        api.get('/admin/certifications').catch(() => ({ data: [] })),
-      ])
-
-      setStats({
-        totalUsers: usersRes.data?.length || 0,
-        totalTasks: tasksRes.data?.length || 0,
-        totalTraining: certsRes.data?.length || 0,
-        totalRevenue: 0, // To be fetched from payments endpoint
-      })
+      const res = await api.get('/admin/stats')
+      setStats(res.data)
     } catch (err) {
       console.error('Failed to fetch stats:', err)
     } finally {
@@ -50,10 +44,10 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { label: 'Total Users', value: stats.totalUsers, icon: '👥', color: '#3B82F6' },
-    { label: 'Video Tasks', value: stats.totalTasks, icon: '🎬', color: '#10B981' },
-    { label: 'Training Courses', value: stats.totalTraining, icon: '📚', color: '#F59E0B' },
-    { label: 'Total Revenue', value: `$${stats.totalRevenue}`, icon: '💰', color: '#8B5CF6' },
+    { label: 'Total Users', value: stats.total_users, icon: '👥', color: '#3B82F6' },
+    { label: 'Pending Payments', value: stats.pending_payments, icon: '⏳', color: '#F59E0B' },
+    { label: 'Total Payouts', value: `$${stats.total_payouts.toLocaleString()}`, icon: '💸', color: '#EF4444' },
+    { label: 'Total Deposits', value: `$${stats.total_deposits.toLocaleString()}`, icon: '💰', color: '#10B981' },
   ]
 
   return (

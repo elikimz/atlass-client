@@ -66,6 +66,7 @@ function App() {
             <Route path="/admin/users" element={<Placeholder title="Manage Users" />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/plans" element={<Placeholder title="Manage Plans" />} />
+            <Route path="/admin/invites" element={<Placeholder title="Manage Invites" />} />
             <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>

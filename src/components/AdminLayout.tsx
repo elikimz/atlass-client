@@ -49,6 +49,8 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
     { label: 'Training', path: '/admin/training', icon: '📚' },
     { label: 'Users', path: '/admin/users', icon: '👥' },
     { label: 'Payments', path: '/admin/payments', icon: '💳' },
+    { label: 'Plans', path: '/admin/plans', icon: '💎' },
+    { label: 'Invites', path: '/admin/invites', icon: '✉️' },
   ]
 
   const isActive = (path: string) => location.pathname === path

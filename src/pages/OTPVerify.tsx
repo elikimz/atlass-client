@@ -32,15 +32,16 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
       const userRes = await api.get('/auth/me')
       const user = userRes.data
       
-      localStorage.setItem('user_first_name', user.first_name)
-      localStorage.setItem('user_last_name', user.last_name)
+      localStorage.setItem('user_first_name', user.first_name || '')
+      localStorage.setItem('user_last_name', user.last_name || '')
       localStorage.setItem('user_email', user.email)
-      localStorage.setItem('user_is_admin', user.is_admin ? 'true' : 'false')
+      localStorage.setItem('user_role', user.role || 'user')
+      localStorage.setItem('user_is_admin', (user.role === 'admin' || user.is_admin) ? 'true' : 'false')
       localStorage.setItem('user_is_trained', user.is_trained ? 'true' : 'false')
       
       setIsAuthenticated(true)
       
-      if (user.is_admin) {
+      if (user.role === 'admin' || user.is_admin) {
         navigate('/admin')
       } else if (user.is_trained) {
         navigate('/dashboard')
