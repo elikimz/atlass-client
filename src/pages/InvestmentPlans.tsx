@@ -7,98 +7,88 @@ interface Plan {
   price: number
   daily_tasks_limit: number
   validity_days: number
-  description: string
-  is_upgrade_only: boolean
+  is_active: boolean
 }
 
-interface UserData {
+interface User {
   id: number
-  first_name: string
-  last_name: string
-  deposit_wallet_balance: number
-  performance_bonus_balance: number
   current_plan_id: number | null
-  plan_start_date?: string
-  plan_expiry_date?: string
-  current_plan?: Plan
-}
-
-const PLAN_FINANCIALS: Record<string, { daily_earnings: number; total_return: number; profit: number; icon: string }> = {
-  'Intern': { daily_earnings: 0.7, total_return: 2.1, profit: 2.1, icon: '💻' },
-  'LV1': { daily_earnings: 0.7, total_return: 42, profit: 22, icon: '💎' },
-  'LV2': { daily_earnings: 1.7, total_return: 102, profit: 52, icon: '💎' },
-  'LV3': { daily_earnings: 3.5, total_return: 210, profit: 110, icon: '👑' },
-  'LV4': { daily_earnings: 5.0, total_return: 300, profit: 150, icon: '👑' },
+  deposit_wallet_balance: number
 }
 
 export default function InvestmentPlans() {
   const [plans, setPlans] = useState<Plan[]>([])
-  const [user, setUser] = useState<UserData | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
-
-  const fetchData = async () => {
-    try {
-      const [plansRes, userRes] = await Promise.all([api.get('/plans'), api.get('/auth/me')])
-      setPlans((plansRes.data || []).sort((a: Plan, b: Plan) => a.price - b.price))
-      setUser(userRes.data)
-    } catch (err) { console.error('Failed to fetch data', err) } finally { setLoading(false) }
-  }
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [plansRes, userRes] = await Promise.all([api.get('/training/plans'), api.get('/auth/me')])
+        setPlans(plansRes.data); setUser(userRes.data)
+      } catch (err) { console.error('Failed to fetch data', err) } finally { setLoading(false) }
+    }
     fetchData()
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   const handleAction = async (plan: Plan) => {
-    if (user?.current_plan_id === plan.id) return
-    setActionLoading(plan.id); setMessage(null)
+    if (plan.id === user?.current_plan_id) return
+    if (!window.confirm(`Are you sure you want to ${user?.current_plan_id ? 'upgrade to' : 'purchase'} the ${plan.name} plan?`)) return
     try {
-      const endpoint = user?.current_plan_id ? `/plans/upgrade/${plan.id}` : `/plans/purchase/${plan.id}`
-      await api.post(endpoint)
-      setMessage({ type: 'success', text: plan.name === 'Intern' ? 'Free Intern trial activated!' : user?.current_plan_id ? `Upgraded to ${plan.name}!` : `Purchased ${plan.name}!` })
-      await fetchData()
-    } catch (err: any) { setMessage({ type: 'error', text: err.response?.data?.detail || 'Transaction failed.' }) } finally { setActionLoading(null) }
+      setActionLoading(plan.id)
+      await api.post(`/training/plans/${plan.id}/purchase`)
+      alert('Plan activated successfully!'); window.location.reload()
+    } catch (err: any) { alert(err.response?.data?.detail || 'Failed to activate plan') } finally { setActionLoading(null) }
   }
 
-  if (loading) return (<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}><div style={{ width: '40px', height: '40px', border: '4px solid var(--border-main)', borderTop: '4px solid var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} /></div>)
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}><div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /></div>
 
-  const isMobile = windowWidth < 768
-  const getPlanColors = (name: string) => {
-    if (name.includes('Intern')) return { bg: '#28A745', btn: '#218838' }
-    if (name.includes('LV1')) return { bg: '#3F51B5', btn: '#303F9F' }
-    if (name.includes('LV2')) return { bg: '#1976D2', btn: '#1565C0' }
-    if (name.includes('LV3')) return { bg: '#F59E0B', btn: '#1D4ED8' }
-    if (name.includes('LV4')) return { bg: '#EAB308', btn: '#B45309' }
-    return { bg: '#64748B', btn: '#475569' }
-  }
-  const isExpired = user?.plan_expiry_date && new Date(user.plan_expiry_date) < new Date()
+  const currentPlanPrice = plans.find(p => p.id === user?.current_plan_id)?.price || 0
 
   return (
-    <div style={{ maxWidth: '100%', margin: '0 auto', padding: isMobile ? '12px' : '24px', fontFamily: 'Inter, system-ui, sans-serif', backgroundColor: 'var(--bg-main)', minHeight: '100vh' }}>
-      <div style={{ backgroundColor: '#003399', color: 'white', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '8px 8px 0 0' }}><div style={{ fontWeight: 800, fontSize: '14px' }}>AdPulseAI</div><div style={{ fontSize: '18px' }}>🔍</div></div>
-      <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', border: '1px solid var(--border-main)', borderTop: 'none' }}>
-        <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-heading)' }}>My Status</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}><div style={{ width: '44px', height: '44px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--bg-main)' }}><img src="https://via.placeholder.com/44" alt="user" /></div><div><div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)' }}>User_{user?.id || '1234'}</div><div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>DEPOSIT: {user?.deposit_wallet_balance?.toFixed(2) || '0.00'} USD</div><div style={{ fontSize: '12px', fontWeight: 600, color: '#0EA5E9' }}>BONUS: {user?.performance_bonus_balance?.toFixed(2) || '0.00'} USD</div></div></div>
-        <div style={{ backgroundColor: 'var(--bg-main)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-main)', fontSize: '12px', fontWeight: 600, color: 'var(--text-main)' }}>ACTIVE PLAN: <span style={{ color: 'var(--accent-primary)' }}>{user?.current_plan?.name || 'None'}</span> | VALIDITY: {isExpired ? '⚠️ EXPIRED' : (user?.current_plan?.validity_days || 0) + ' Days'}</div>
-      </div>
-      {message && <div style={{ padding: '12px', borderRadius: '8px', margin: '16px 0', backgroundColor: message.type === 'success' ? 'rgba(0, 172, 79, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: message.type === 'success' ? '#00AC4F' : '#DC2626', fontSize: '13px', fontWeight: 600, textAlign: 'center' }}>{message.text}</div>}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px', marginTop: '16px', marginBottom: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div><h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Investment Plans</h1><p style={{ fontSize: '14px', color: 'var(--text-muted)', marginTop: '4px' }}>Choose a plan that fits your goals and start earning</p></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
         {plans.map((plan) => {
-          const colors = getPlanColors(plan.name); const financials = PLAN_FINANCIALS[Object.keys(PLAN_FINANCIALS).find(k => plan.name.includes(k)) || 'Intern']; const isActive = user?.current_plan_id === plan.id; const isLowerTier = user?.current_plan && plan.price < user.current_plan.price; const currentPlanPrice = user?.current_plan?.price || 0; const requiredBalance = user?.current_plan_id ? Math.max(plan.price - currentPlanPrice, 0) : plan.price; const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= requiredBalance; const canPurchase = !isActive && hasEnoughBalance && (!user?.current_plan_id || isExpired || !isLowerTier);
+          const isActive = plan.id === user?.current_plan_id
+          const isLowerTier = plan.price < currentPlanPrice
+          const canPurchase = !isActive && !isLowerTier
+          const hasEnoughBalance = (user?.deposit_wallet_balance || 0) >= (plan.price - currentPlanPrice)
+          
+          const getPlanColors = (name: string) => {
+            switch(name.toLowerCase()) {
+              case 'intern': return { bg: '#6366F1', btn: '#4F46E5' }
+              case 'associate': return { bg: '#8B5CF6', btn: '#7C3AED' }
+              case 'partner': return { bg: '#EC4899', btn: '#DB2777' }
+              case 'executive': return { bg: '#F59E0B', btn: '#D97706' }
+              default: return { bg: 'var(--accent-primary)', btn: 'var(--accent-primary)' }
+            }
+          }
+          const colors = getPlanColors(plan.name)
+          const financials = { icon: '💼', daily_earnings: plan.price * 0.05, total_return: plan.price * 1.5, profit: plan.price * 0.5 }
+
           return (
-            <div key={plan.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', overflow: 'hidden', boxShadow: 'var(--card-shadow)', border: isActive ? `2px solid ${colors.bg}` : '1px solid var(--border-main)', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ backgroundColor: colors.bg, padding: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: 'white', fontWeight: 700, fontSize: '12px' }}>{plan.name}</span>{isActive ? <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>Active</span> : plan.name === 'Intern' ? <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>Free Trial</span> : null}</div>
-              <div style={{ padding: '12px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}><div style={{ fontSize: '24px', marginBottom: '8px' }}>{financials.icon}</div><div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-heading)', marginBottom: '2px' }}>{plan.price} USD</div><div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '12px' }}>(Approx. {(plan.price * 130).toLocaleString()} KSH)</div><div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-main)', marginBottom: '16px', flex: 1 }}><div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Daily:</span><span style={{ fontWeight: 700 }}>{financials.daily_earnings.toFixed(1)} USD ({plan.daily_tasks_limit} Tasks)</span></div><div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Validity:</span><span style={{ fontWeight: 700 }}>{plan.validity_days} Days</span></div><div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total Return:</span><span style={{ fontWeight: 700 }}>{financials.total_return.toFixed(1)} USD</span></div><div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Profit:</span><span style={{ fontWeight: 700 }}>{financials.profit.toFixed(1)} USD</span></div></div><button onClick={() => handleAction(plan)} disabled={!canPurchase || actionLoading !== null} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: 'none', backgroundColor: isActive ? 'var(--bg-main)' : isLowerTier ? 'var(--bg-main)' : colors.btn, color: isActive ? 'var(--text-muted)' : isLowerTier ? 'var(--text-muted)' : 'white', fontSize: '11px', fontWeight: 800, cursor: !canPurchase ? 'not-allowed' : 'pointer', textTransform: 'uppercase' }}>{actionLoading === plan.id ? '...' : isActive ? 'ACTIVE' : isLowerTier ? 'LOCKED' : !hasEnoughBalance ? 'INSUFFICIENT BALANCE' : plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' : user?.current_plan_id ? `UPGRADE ($${(plan.price - currentPlanPrice).toFixed(2)})` : 'PURCHASE'}</button></div>
+            <div key={plan.id} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-main)', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: 'var(--card-shadow)', transition: 'transform 0.2s' }}>
+              <div style={{ backgroundColor: 'var(--bg-main)', color: 'var(--text-heading)', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-main)' }}><div style={{ fontWeight: 800, fontSize: '14px' }}>AdPulseAI</div><div style={{ fontSize: '18px' }}>🔍</div></div>
+              <div style={{ backgroundColor: colors.bg, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span style={{ color: 'white', fontWeight: 700, fontSize: '14px' }}>{plan.name}</span>{isActive && <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>Active</span>}</div>
+              <div style={{ padding: '24px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>{financials.icon}</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-heading)', marginBottom: '4px' }}>${plan.price} USD</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '20px' }}>(Approx. {(plan.price * 130).toLocaleString()} KSH)</div>
+                <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-main)', marginBottom: '24px', flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Daily Tasks:</span><span style={{ fontWeight: 700 }}>{plan.daily_tasks_limit}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Validity:</span><span style={{ fontWeight: 700 }}>{plan.validity_days} Days</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total Return:</span><span style={{ fontWeight: 700 }}>${financials.total_return.toFixed(2)}</span></div>
+                </div>
+                <button onClick={() => handleAction(plan)} disabled={!canPurchase || actionLoading !== null} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: isActive ? 'var(--bg-main)' : isLowerTier ? 'var(--bg-main)' : colors.btn, color: isActive ? 'var(--text-muted)' : isLowerTier ? 'var(--text-muted)' : 'white', fontSize: '13px', fontWeight: 700, cursor: !canPurchase ? 'not-allowed' : 'pointer' }}>
+                  {actionLoading === plan.id ? '...' : isActive ? 'ACTIVE' : isLowerTier ? 'LOCKED' : !hasEnoughBalance ? 'INSUFFICIENT BALANCE' : user?.current_plan_id ? 'UPGRADE' : 'PURCHASE'}
+                </button>
+              </div>
             </div>
           )
         })}
       </div>
-      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', padding: '16px', border: '1px solid var(--border-main)' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid var(--border-main)', paddingBottom: '8px' }}><h3 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>PLAN INFORMATION & PLATFORM GUIDELINES</h3><span style={{ color: 'var(--text-muted)' }}>▲</span></div><div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px', color: 'var(--text-main)', lineHeight: '1.4' }}><div><div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Single Package Restriction:</div><ul style={{ margin: '4px 0', paddingLeft: '18px' }}><li>You may only have one active plan at any time. Purchases overwrite.</li></ul></div><div><div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Important Note:</div><ul style={{ margin: '4px 0', paddingLeft: '18px' }}><li>After your plan's validity expires, you are required to upgrade to continue earning. Lower-tier repeats are locked.</li></ul></div><div><div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Upgrade Refund:</div><ul style={{ margin: '4px 0', paddingLeft: '18px' }}><li>When you upgrade, the initial price of your previous plan is refunded back to your balance.</li></ul></div></div></div>
     </div>
   )
 }
