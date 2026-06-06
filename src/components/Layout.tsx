@@ -254,8 +254,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         }}>
           <div style={{
             display: 'flex',
-            width: mobileNavItems.length > 5 ? 'auto' : '100%',
-            justifyContent: mobileNavItems.length > 5 ? 'flex-start' : 'space-around',
+            width: '100%',
+            justifyContent: 'space-between',
             height: '100%',
             alignItems: 'center'
           }}>
@@ -268,8 +268,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                   textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
                   fontSize: '10px', fontWeight: 500,
                   flexShrink: 0,
-                  width: mobileNavItems.length > 5 ? '75px' : `${100 / mobileNavItems.length}%`,
-                  height: '100%'
+                  flex: 1,
+                  height: '100%',
+                  minWidth: '60px'
                 }}
               >
                 <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
