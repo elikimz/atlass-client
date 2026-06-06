@@ -174,7 +174,7 @@ export default function Training() {
     icon: '🎬'
   }
 
-  const isTrained = course.status === 'completed'
+  // Training completion status check
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', backgroundColor: '#FAFBFF', minHeight: '100vh' }}>
