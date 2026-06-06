@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 interface DashboardData {
@@ -19,6 +20,7 @@ interface UserData {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [data, setData] = useState<DashboardData | null>(null)
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -35,6 +37,11 @@ export default function Dashboard() {
     ]).then(([summaryRes, userRes]) => {
       setData(summaryRes.data)
       setUser(userRes.data)
+      
+      // Redirect to training if user is not trained
+      if (!userRes.data.is_trained) {
+        navigate('/training', { replace: true })
+      }
     }).catch(console.error)
       .finally(() => setLoading(false))
 

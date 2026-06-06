@@ -115,20 +115,41 @@ export default function Training() {
   // If watching a video
   if (watchingCourseId !== null) {
     const course = courses.find(c => c.id === watchingCourseId)
+    const isYoutube = course?.videoUrl?.includes('youtube.com') || course?.videoUrl?.includes('youtu.be')
+    
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', backgroundColor: '#FAFBFF', minHeight: '100vh' }}>
         {/* Video Player Section */}
         <div style={{ backgroundColor: 'black', width: '100%', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
           {course?.videoUrl ? (
-            <video
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              controls
-              autoPlay
-              onEnded={() => handleVideoComplete(watchingCourseId)}
-            >
-              <source src={course.videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            isYoutube ? (
+              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <iframe
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  src={course.videoUrl.replace('watch?v=', 'embed/').split('&')[0] + "?autoplay=1"}
+                  title="Training Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+                <button 
+                  onClick={() => handleVideoComplete(watchingCourseId)}
+                  style={{ position: 'absolute', bottom: '20px', right: '20px', padding: '12px 24px', backgroundColor: '#8B5CF6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+                >
+                  COMPLETE TRAINING
+                </button>
+              </div>
+            ) : (
+              <video
+                key={course.videoUrl}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                controls
+                autoPlay
+                onEnded={() => handleVideoComplete(watchingCourseId)}
+              >
+                <source src={course.videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            )
           ) : (
             <div style={{ color: 'white', textAlign: 'center' }}>
               <p>No video available for this training.</p>
