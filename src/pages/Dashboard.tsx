@@ -14,6 +14,7 @@ interface UserData {
   deposit_wallet_balance: number
   withdrawal_wallet_balance: number
   performance_bonus_balance: number
+  current_plan_id?: number
 }
 
 export default function Dashboard() {
