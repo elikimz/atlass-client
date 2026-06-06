@@ -58,7 +58,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
   const isAdminUser = user?.is_admin || localStorage.getItem('user_is_admin') === 'true'
   const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
-  const isTrained = user?.is_trained || localStorage.getItem('user_is_trained') === 'true'
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: (
@@ -131,7 +130,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
-            {navItems.filter(item => (!item.hide) && (item.label !== 'Admin' || isAdminUser)).map((item) => (
+            {navItems.filter(item => (item.label !== 'Admin' || isAdminUser)).map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
@@ -240,7 +239,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '75px', zIndex: 100,
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
-          {navItems.filter(item => (!item.hide) && (item.label !== 'Admin' || isAdminUser)).slice(0, 6).map((item) => (
+          {navItems.filter(item => (item.label !== 'Admin' || isAdminUser)).slice(0, 6).map((item) => (
             <Link
               key={item.label}
               to={item.path}
