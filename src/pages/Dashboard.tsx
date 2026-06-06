@@ -5,6 +5,7 @@ interface DashboardData {
   footage_labeled_min: number
   approved_roles: string
   certifications_earned: number
+  earnings_history: { day: string, value: number }[]
 }
 
 interface UserData {
@@ -63,12 +64,15 @@ export default function Dashboard() {
   const bonusBalance = user?.performance_bonus_balance ?? 0
   const totalBalance = depositBalance + withdrawalBalance + bonusBalance
 
-  const earningsData = [
-    { day: 'Mon', value: 100 }, { day: 'Tue', value: 220 }, { day: 'Wed', value: 150 },
-    { day: 'Thu', value: 300 }, { day: 'Fri', value: 450 }, { day: 'Sat', value: 350 }, { day: 'Sun', value: 600 },
-  ]
+  // Use real earnings data from API or fallback to empty if none
+  const earningsData = data?.earnings_history && data.earnings_history.length > 0 
+    ? data.earnings_history 
+    : [
+        { day: 'Mon', value: 0 }, { day: 'Tue', value: 0 }, { day: 'Wed', value: 0 },
+        { day: 'Thu', value: 0 }, { day: 'Fri', value: 0 }, { day: 'Sat', value: 0 }, { day: 'Sun', value: 0 },
+      ]
 
-  const maxValue = Math.max(...earningsData.map(d => d.value))
+  const maxValue = Math.max(...earningsData.map(d => d.value), 10) // Ensure at least 10 for scale
   const chartHeight = 200
   const chartWidth = isMobile ? windowWidth - 80 : (isTablet ? windowWidth - 360 : windowWidth - 460)
   
