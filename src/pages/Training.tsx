@@ -37,12 +37,6 @@ export default function Training() {
         }))
 
         setCourses(mappedCourses)
-        
-        // If all courses are completed, redirect to plans automatically
-        const allCompleted = mappedCourses.length > 0 && mappedCourses.every(c => c.status === 'completed')
-        if (allCompleted) {
-          navigate('/plans')
-        }
       } catch (err) {
         console.error('Failed to fetch training data', err)
       } finally {
@@ -215,12 +209,13 @@ export default function Training() {
 
   // Main Training Center View - Single Course Card
   // Use a fallback if the API returns an empty list to prevent the "No training courses" message
+  const isTrained = localStorage.getItem('user_is_trained') === 'true'
   const course = courses.length > 0 ? courses[0] : {
     id: 1,
     name: 'Video Reviewing Mastery',
     description: 'Master the essentials of video assessment in this focused module.',
     duration: '15 mins / 1 Video',
-    status: 'available' as const,
+    status: (isTrained ? 'completed' : 'available') as any,
     icon: '🎬'
   }
 
