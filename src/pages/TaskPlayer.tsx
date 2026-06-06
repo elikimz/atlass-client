@@ -19,6 +19,7 @@ export default function TaskPlayer() {
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState('')
   const [videoWatched, setVideoWatched] = useState(false)
+  const [isYouTube, setIsYouTube] = useState(false)
 
   useEffect(() => {
     api.get('/tasks/all')
@@ -27,6 +28,7 @@ export default function TaskPlayer() {
         const foundTask = tasks.find((t: TaskData) => t.id === parseInt(taskId || '0'))
         if (foundTask) {
           setTask(foundTask)
+          setIsYouTube(foundTask.video_url.includes('youtube.com') || foundTask.video_url.includes('youtu.be'))
         } else {
           setError('Task not found')
         }
@@ -40,6 +42,13 @@ export default function TaskPlayer() {
 
   const handleVideoEnded = () => {
     setVideoWatched(true)
+  }
+
+  const handleWatchOnYouTube = () => {
+    if (task) {
+      window.open(task.video_url, '_blank')
+      setVideoWatched(true) // Mark as watched when they click the link
+    }
   }
 
   const handleCompleteTask = async () => {
@@ -115,12 +124,28 @@ export default function TaskPlayer() {
 
       {/* Video Player */}
       <div style={{ backgroundColor: 'black', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-main)' }}>
-        <video
-          src={task.video_url}
-          controls
-          onEnded={handleVideoEnded}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-        />
+        {isYouTube ? (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="#FF0000" style={{ marginBottom: '16px' }}>
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            <h3 style={{ color: 'white', marginBottom: '20px' }}>This video is on YouTube</h3>
+            <button 
+              onClick={handleWatchOnYouTube}
+              style={{ backgroundColor: '#FF0000', color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto' }}
+            >
+              Watch on YouTube
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </button>
+          </div>
+        ) : (
+          <video
+            src={task.video_url}
+            controls
+            onEnded={handleVideoEnded}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        )}
       </div>
 
       {/* Task Info and Completion */}

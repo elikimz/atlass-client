@@ -23,8 +23,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('access_token')
-      window.location.href = '/login'
+      // Don't clear token or redirect here, let the components handle it
+      // This prevents redirect loops if multiple requests fail at once
+      console.warn('Unauthorized access - 401')
     }
     return Promise.reject(error)
   }

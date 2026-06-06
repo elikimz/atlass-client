@@ -27,21 +27,25 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     window.addEventListener('resize', handleResize)
 
     // Fetch real user data from backend
-    api.get('/auth/me')
-      .then(res => {
+    const fetchUser = async () => {
+      try {
+        const res = await api.get('/auth/me')
         setUser(res.data)
         // Store in localStorage for other components to use if needed
         localStorage.setItem('user_first_name', res.data.first_name)
         localStorage.setItem('user_last_name', res.data.last_name)
         localStorage.setItem('user_email', res.data.email)
         localStorage.setItem('user_is_admin', res.data.is_admin ? 'true' : 'false')
-      })
-      .catch(err => {
+      } catch (err: any) {
         console.error('Failed to fetch user data:', err)
+        // Only sign out if it's definitely an auth error and not a network error
         if (err.response?.status === 401) {
           handleSignOut()
         }
-      })
+      }
+    }
+    
+    fetchUser()
 
     return () => window.removeEventListener('resize', handleResize)
   }, [])
