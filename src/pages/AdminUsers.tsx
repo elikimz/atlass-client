@@ -149,7 +149,7 @@ export default function AdminUsers() {
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user.id} style={{ borderBottom: '1px solid #E5E7EB', hoverBackgroundColor: '#F9FAFB' }}>
+              <tr key={user.id} style={{ borderBottom: '1px solid #E5E7EB' }}>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
                   {user.first_name} {user.last_name}
                 </td>
