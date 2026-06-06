@@ -12,6 +12,12 @@ import Payments from './pages/Payments'
 import Feedback from './pages/Feedback'
 import Settings from './pages/Settings'
 import AdminDashboard from './pages/AdminDashboard'
+import AdminTasks from './pages/AdminTasks'
+import AdminTraining from './pages/AdminTraining'
+import AdminUsers from './pages/AdminUsers'
+import AdminPayments from './pages/AdminPayments'
+import AdminPlans from './pages/AdminPlans'
+import AdminInvites from './pages/AdminInvites'
 import TaskPlayer from './pages/TaskPlayer'
 import InvestmentPlans from './pages/InvestmentPlans'
 import WithdrawFunds from './pages/WithdrawFunds'
@@ -20,7 +26,6 @@ import Recharge from './pages/Recharge'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
-import AdminPayments from './pages/AdminPayments'
 import PaymentHistory from './pages/PaymentHistory'
 
 function App() {
@@ -65,12 +70,12 @@ function App() {
         {isAuthenticated && isAdmin ? (
           <Route element={<AdminLayout setIsAuthenticated={checkAuth} />}>
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/tasks" element={<Placeholder title="Manage Video Tasks" />} />
-            <Route path="/admin/training" element={<Placeholder title="Manage Training" />} />
-            <Route path="/admin/users" element={<Placeholder title="Manage Users" />} />
+            <Route path="/admin/tasks" element={<AdminTasks />} />
+            <Route path="/admin/training" element={<AdminTraining />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
-            <Route path="/admin/plans" element={<Placeholder title="Manage Plans" />} />
-            <Route path="/admin/invites" element={<Placeholder title="Manage Invites" />} />
+            <Route path="/admin/plans" element={<AdminPlans />} />
+            <Route path="/admin/invites" element={<AdminInvites />} />
             <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>
