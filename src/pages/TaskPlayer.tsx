@@ -21,8 +21,6 @@ export default function TaskPlayer() {
   const [videoWatched, setVideoWatched] = useState(false)
 
   useEffect(() => {
-    // Fetch task details from /tasks/all so we can load any task by ID
-    // regardless of whether it has already been completed by the user
     api.get('/tasks/all')
       .then(res => {
         const tasks = res.data
@@ -60,7 +58,6 @@ export default function TaskPlayer() {
 
       setCompleted(true)
       
-      // Show success message for 2 seconds then navigate back
       setTimeout(() => {
         navigate('/tasks')
       }, 2000)
@@ -74,10 +71,10 @@ export default function TaskPlayer() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#5932EA', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading task...</p>
+          <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading task...</p>
         </div>
       </div>
     )
@@ -85,12 +82,12 @@ export default function TaskPlayer() {
 
   if (error && !task) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '16px', color: '#DC2626', marginBottom: '16px' }}>{error}</p>
           <button 
             onClick={() => navigate('/tasks')}
-            style={{ backgroundColor: '#5932EA', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
+            style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
           >
             Back to Tasks
           </button>
@@ -108,16 +105,16 @@ export default function TaskPlayer() {
       <div>
         <button 
           onClick={() => navigate('/tasks')}
-          style={{ background: 'none', border: 'none', color: '#5932EA', cursor: 'pointer', fontSize: '14px', fontWeight: 600, marginBottom: '16px', padding: 0 }}
+          style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '14px', fontWeight: 600, marginBottom: '16px', padding: 0 }}
         >
           ← Back to Tasks
         </button>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'black', margin: '0 0 8px' }}>{task.title}</h1>
-        {task.description && <p style={{ fontSize: '14px', color: '#757575', margin: 0 }}>{task.description}</p>}
+        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px' }}>{task.title}</h1>
+        {task.description && <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>{task.description}</p>}
       </div>
 
       {/* Video Player */}
-      <div style={{ backgroundColor: 'black', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ backgroundColor: 'black', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-main)' }}>
         <video
           src={task.video_url}
           controls
@@ -127,10 +124,10 @@ export default function TaskPlayer() {
       </div>
 
       {/* Task Info and Completion */}
-      <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }}>
+      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>
-            <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 4px' }}>Reward Amount</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Reward Amount</p>
             <p style={{ fontSize: '24px', fontWeight: 700, color: '#00AC4F', margin: 0 }}>${task.reward_amount.toFixed(2)}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -141,13 +138,13 @@ export default function TaskPlayer() {
         </div>
 
         {error && (
-          <div style={{ backgroundColor: '#FEE2E2', border: '1px solid #FECACA', color: '#DC2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
+          <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', color: '#DC2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
             {error}
           </div>
         )}
 
         {completed && (
-          <div style={{ backgroundColor: '#DCFCE7', border: '1px solid #BBF7D0', color: '#15803D', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
+          <div style={{ backgroundColor: 'rgba(21, 128, 61, 0.1)', border: '1px solid rgba(21, 128, 61, 0.2)', color: '#15803D', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
             ✓ Task completed successfully! Reward added to your withdrawal wallet. Redirecting...
           </div>
         )}
@@ -157,8 +154,8 @@ export default function TaskPlayer() {
           disabled={!videoWatched || completing || completed}
           style={{
             width: '100%',
-            backgroundColor: videoWatched && !completed ? '#5932EA' : '#D1D5DB',
-            color: 'white',
+            backgroundColor: videoWatched && !completed ? 'var(--accent-primary)' : 'var(--border-main)',
+            color: videoWatched && !completed ? 'white' : 'var(--text-muted)',
             padding: '14px 24px',
             borderRadius: '8px',
             border: 'none',
@@ -173,19 +170,19 @@ export default function TaskPlayer() {
       </div>
 
       {/* Task Details */}
-      <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 16px' }}>Task Details</h2>
+      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 16px' }}>Task Details</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 4px' }}>Task ID</p>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'black', margin: 0 }}>{task.id}</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Task ID</p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{task.id}</p>
           </div>
           <div>
-            <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 4px' }}>Reward</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Reward</p>
             <p style={{ fontSize: '14px', fontWeight: 600, color: '#00AC4F', margin: 0 }}>${task.reward_amount.toFixed(2)}</p>
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
-            <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 4px' }}>Status</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Status</p>
             <p style={{ fontSize: '14px', fontWeight: 600, color: videoWatched ? '#00AC4F' : '#F59E0B', margin: 0 }}>
               {completed ? 'Completed ✓' : (videoWatched ? 'Ready to Submit' : 'In Progress')}
             </p>

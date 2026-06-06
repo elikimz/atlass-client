@@ -36,8 +36,8 @@ export default function AdminDashboard() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid #E5E7EB', borderTopColor: '#3B82F6', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: '#6B7280' }}>Loading dashboard...</p>
+          <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+          <p style={{ color: 'var(--text-muted)' }}>Loading dashboard...</p>
         </div>
       </div>
     )
@@ -53,19 +53,19 @@ export default function AdminDashboard() {
   return (
     <div>
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1F2937', margin: '0 0 8px' }}>Dashboard</h1>
-        <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>Welcome to the AdPulseAI Admin Portal</p>
+        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px' }}>Dashboard</h1>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Welcome to the AdPulseAI Admin Portal</p>
       </div>
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '32px' }}>
         {statCards.map((card, idx) => (
           <div key={idx} style={{
-            backgroundColor: 'white',
+            backgroundColor: 'var(--bg-card)',
             borderRadius: '12px',
             padding: '24px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            border: `1px solid #E5E7EB`,
+            boxShadow: 'var(--card-shadow)',
+            border: `1px solid var(--border-main)`,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div style={{ fontSize: '32px' }}>{card.icon}</div>
@@ -73,31 +73,31 @@ export default function AdminDashboard() {
                 📈
               </div>
             </div>
-            <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 8px' }}>{card.label}</p>
-            <p style={{ fontSize: '28px', fontWeight: 700, color: '#1F2937', margin: 0 }}>{card.value}</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 8px' }}>{card.label}</p>
+            <p style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{card.value}</p>
           </div>
         ))}
       </div>
 
       {/* Quick Actions */}
-      <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#1F2937', margin: '0 0 16px' }}>Quick Actions</h2>
+      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 16px' }}>Quick Actions</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           <a href="/admin/tasks" style={{
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            backgroundColor: '#F0F9FF',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
             borderRadius: '10px',
             textDecoration: 'none',
-            color: '#1E40AF',
+            color: '#3B82F6',
             fontSize: '14px',
             fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E0F2FE' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)' }}
           >
             <span style={{ fontSize: '20px' }}>🎬</span>
             <span>Manage Video Tasks</span>
@@ -108,16 +108,16 @@ export default function AdminDashboard() {
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            backgroundColor: '#FFFBEB',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
             borderRadius: '10px',
             textDecoration: 'none',
-            color: '#92400E',
+            color: '#F59E0B',
             fontSize: '14px',
             fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF3C7' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FFFBEB' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.2)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(245, 158, 11, 0.1)' }}
           >
             <span style={{ fontSize: '20px' }}>📚</span>
             <span>Manage Training</span>
@@ -128,16 +128,16 @@ export default function AdminDashboard() {
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            backgroundColor: '#F0FDF4',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
             borderRadius: '10px',
             textDecoration: 'none',
-            color: '#166534',
+            color: '#22C55E',
             fontSize: '14px',
             fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#DCFCE7' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F0FDF4' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.2)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.1)' }}
           >
             <span style={{ fontSize: '20px' }}>👥</span>
             <span>View Users</span>
@@ -148,16 +148,16 @@ export default function AdminDashboard() {
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            backgroundColor: '#F5F3FF',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
             borderRadius: '10px',
             textDecoration: 'none',
-            color: '#6B21A8',
+            color: '#8B5CF6',
             fontSize: '14px',
             fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#EDE9FE' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F5F3FF' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.2)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(139, 92, 246, 0.1)' }}
           >
             <span style={{ fontSize: '20px' }}>💳</span>
             <span>View Payments</span>
@@ -168,16 +168,16 @@ export default function AdminDashboard() {
             alignItems: 'center',
             gap: '12px',
             padding: '16px',
-            backgroundColor: '#FEF2F2',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
             borderRadius: '10px',
             textDecoration: 'none',
-            color: '#991B1B',
+            color: '#EF4444',
             fontSize: '14px',
             fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEE2E2' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)' }}
           >
             <span style={{ fontSize: '20px' }}>💎</span>
             <span>Manage Plans</span>
