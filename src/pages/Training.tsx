@@ -101,8 +101,13 @@ export default function Training() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#FAFBFF' }}>
-        <div style={{ width: '40px', height: '40px', border: '3px solid #E2E8F0', borderTopColor: '#8B5CF6', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#F8FAFC' }}>
+        <div className="loading-container">
+          <div className="loading-bar-bg">
+            <div className="loading-bar-fill"></div>
+          </div>
+          <p style={{ color: '#64748B', fontSize: '14px', fontWeight: 500, margin: 0 }}>Preparing training courses...</p>
+        </div>
       </div>
     )
   }

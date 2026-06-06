@@ -87,7 +87,12 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
-        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <div className="loading-container">
+          <div className="loading-bar-bg" style={{ width: '150px' }}>
+            <div className="loading-bar-fill"></div>
+          </div>
+          <p style={{ color: '#64748B', fontSize: '13px', fontWeight: 500, margin: 0 }}>Loading your profile...</p>
+        </div>
       </div>
     )
   }

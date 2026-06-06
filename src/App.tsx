@@ -38,10 +38,16 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: '#6b7280', fontSize: '14px' }}>Loading...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#F8FAFC' }}>
+        <div className="loading-container">
+          <div className="pulse-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <img src="/assets/logo.png" alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '12px' }} />
+            <span style={{ fontSize: '24px', fontWeight: 700, color: '#0F172A' }}>AdPulseAI</span>
+          </div>
+          <div className="loading-bar-bg">
+            <div className="loading-bar-fill"></div>
+          </div>
+          <p style={{ color: '#64748B', fontSize: '14px', fontWeight: 500, margin: 0 }}>Initializing your workspace...</p>
         </div>
       </div>
     )
