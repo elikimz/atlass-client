@@ -25,6 +25,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
   const [lastName, setLastName] = useState('')
   const [withdrawalPassword, setWithdrawalPassword] = useState('')
   const [settingWithdrawalPassword, setSettingWithdrawalPassword] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     api.get('/settings/profile')
@@ -84,6 +85,36 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
     }
   }
 
+  const handleDownloadCertificate = async () => {
+    if (downloading) return
+    setDownloading(true)
+    try {
+      // Use axios instance to ensure Authorization header is included
+      const response = await api.get('/training/certificate', {
+        responseType: 'blob'
+      })
+
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'AdPulseAI_Certificate.pdf')
+      document.body.appendChild(link)
+      link.click()
+
+      // Cleanup
+      setTimeout(() => {
+        link.parentNode?.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
+    } catch (err) {
+      console.error('Failed to download certificate', err)
+      alert('Failed to download certificate. Please ensure training is completed.')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
@@ -119,17 +150,19 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
           </div>
           <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 12px' }}>Download your official Video Reviewing Mastery certificate to showcase your skills.</p>
           <button
-            onClick={() => window.open(`${api.defaults.baseURL}/training/certificate`, '_blank')}
+            onClick={handleDownloadCertificate}
+            disabled={downloading}
             style={{
               padding: '8px 16px', fontSize: '13px', fontWeight: 600,
               backgroundColor: '#5932EA', color: 'white', border: 'none', borderRadius: '7px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px'
+              display: 'flex', alignItems: 'center', gap: '8px',
+              opacity: downloading ? 0.7 : 1
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Download Certificate (PDF)
+            {downloading ? 'Downloading...' : 'Download Certificate (PDF)'}
           </button>
         </div>
       )}
@@ -349,29 +382,18 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
           <span style={{ fontSize: '18px' }}>📱</span>
           <div>
             <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>Session</h2>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Your current session information</p>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>Manage your active session</p>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            onClick={handleSignOut}
-            style={{
-              width: '100%', padding: '8px 12px', fontSize: '13px', fontWeight: 600,
-              backgroundColor: 'white', color: '#374151', border: '1px solid #d1d5db', borderRadius: '7px', cursor: 'pointer',
-            }}
-          >
-            Sign out this session
-          </button>
-          <button
-            onClick={handleSignOut}
-            style={{
-              width: '100%', padding: '8px 12px', fontSize: '13px', fontWeight: 600,
-              backgroundColor: 'white', color: '#374151', border: '1px solid #d1d5db', borderRadius: '7px', cursor: 'pointer',
-            }}
-          >
-            Sign out all sessions
-          </button>
-        </div>
+        <button
+          onClick={handleSignOut}
+          style={{
+            padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+            backgroundColor: 'white', color: '#dc2626', border: '1px solid #fee2e2', borderRadius: '7px', cursor: 'pointer',
+          }}
+        >
+          Sign Out
+        </button>
       </div>
     </div>
   )

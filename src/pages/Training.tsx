@@ -19,6 +19,7 @@ export default function Training() {
   const [watchingCourseId, setWatchingCourseId] = useState<number | null>(null)
   const [videoWatched, setVideoWatched] = useState(false)
   const [isTrained, setIsTrained] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,23 +106,32 @@ export default function Training() {
   }
 
   const handleDownloadCertificate = async () => {
+    if (downloading) return
+    setDownloading(true)
     try {
+      // Use axios instance to ensure Authorization header is included
       const response = await api.get('/training/certificate', {
         responseType: 'blob'
       })
 
-      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', 'AdPulseAI_Certificate.pdf')
       document.body.appendChild(link)
       link.click()
 
-      link.parentNode?.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      // Cleanup
+      setTimeout(() => {
+        link.parentNode?.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      }, 100)
     } catch (err) {
       console.error('Failed to download certificate', err)
       alert('Failed to download certificate. Please ensure training is completed.')
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -200,19 +210,27 @@ export default function Training() {
             {/* Download Certificate Button */}
             <button
               onClick={handleDownloadCertificate}
+              disabled={downloading}
               style={{
                 width: '100%', padding: '16px', backgroundColor: '#5932EA', color: 'white',
                 fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                opacity: downloading ? 0.7 : 1
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#4A28C7' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#5932EA' }}
+              onMouseEnter={(e) => { if(!downloading) e.currentTarget.style.backgroundColor = '#4A28C7' }}
+              onMouseLeave={(e) => { if(!downloading) e.currentTarget.style.backgroundColor = '#5932EA' }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              DOWNLOAD CERTIFICATE
+              {downloading ? (
+                <span>Downloading...</span>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  DOWNLOAD CERTIFICATE
+                </>
+              )}
             </button>
 
             {/* Go to Plans */}
@@ -396,19 +414,27 @@ export default function Training() {
               </div>
               <button
                 onClick={handleDownloadCertificate}
+                disabled={downloading}
                 style={{
                   width: '100%', padding: '16px', backgroundColor: '#5932EA', color: 'white',
                   fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  transition: 'all 0.2s'
+                  transition: 'all 0.2s',
+                  opacity: downloading ? 0.7 : 1
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#4A28C7' }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#5932EA' }}
+                onMouseEnter={(e) => { if(!downloading) e.currentTarget.style.backgroundColor = '#4A28C7' }}
+                onMouseLeave={(e) => { if(!downloading) e.currentTarget.style.backgroundColor = '#5932EA' }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                DOWNLOAD CERTIFICATE
+                {downloading ? (
+                  <span>Downloading...</span>
+                ) : (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    DOWNLOAD CERTIFICATE
+                  </>
+                )}
               </button>
             </div>
           )}
