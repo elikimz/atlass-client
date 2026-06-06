@@ -28,11 +28,15 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const checkAuth = () => {
     const token = localStorage.getItem('access_token')
     const adminStatus = localStorage.getItem('user_is_admin') === 'true'
     setIsAuthenticated(!!token)
     setIsAdmin(adminStatus)
+  }
+
+  useEffect(() => {
+    checkAuth()
     setLoading(false)
   }, [])
 
@@ -56,10 +60,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-        <Route path="/verify" element={<OTPVerify setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
+        <Route path="/verify" element={<OTPVerify setIsAuthenticated={checkAuth} />} />
         {isAuthenticated && isAdmin ? (
-          <Route element={<AdminLayout setIsAuthenticated={setIsAuthenticated} />}>
+          <Route element={<AdminLayout setIsAuthenticated={checkAuth} />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/tasks" element={<Placeholder title="Manage Video Tasks" />} />
             <Route path="/admin/training" element={<Placeholder title="Manage Training" />} />
@@ -71,7 +75,7 @@ function App() {
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>
         ) : isAuthenticated ? (
-          <Route element={<Layout setIsAuthenticated={setIsAuthenticated} />}>
+          <Route element={<Layout setIsAuthenticated={checkAuth} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/product" element={<Placeholder title="Product" />} />
             <Route path="/customers" element={<Placeholder title="Customers" />} />

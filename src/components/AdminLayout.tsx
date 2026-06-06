@@ -34,11 +34,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
   }, [])
 
   const handleSignOut = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user_first_name')
-    localStorage.removeItem('user_last_name')
-    localStorage.removeItem('user_email')
-    localStorage.removeItem('user_is_admin')
+    localStorage.clear()
     setIsAuthenticated(false)
     navigate('/login')
   }

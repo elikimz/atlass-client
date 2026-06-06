@@ -126,7 +126,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Elijah"
+                  placeholder="First Name"
                   required
                   style={inputStyle}
                   onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
@@ -139,7 +139,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Kimani"
+                  placeholder="Last Name"
                   required
                   style={inputStyle}
                   onFocus={(e) => { e.target.style.borderColor = '#5932EA'; e.target.style.boxShadow = '0px 0px 0px 4px rgba(89, 50, 234, 0.1)' }}
@@ -247,24 +247,6 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
             {isRegistering ? 'Sign In' : 'Create Account'}
           </a>
         </p>
-        <button 
-          onClick={() => {
-            setEmail('elijahkimani1293@gmail.com')
-            setFirstName('Elijah')
-            setLastName('Kimani')
-            setAcceptedTerms(true)
-          }}
-          style={{
-            background: 'none', border: 'none', padding: 0,
-            fontSize: '13px', fontWeight: 600, color: '#94A3B8',
-            cursor: 'pointer', textDecoration: 'underline',
-            transition: 'color 0.2s'
-          }}
-          onMouseOver={(e) => (e.currentTarget as HTMLElement).style.color = '#5932EA'}
-          onMouseOut={(e) => (e.currentTarget as HTMLElement).style.color = '#94A3B8'}
-        >
-          Admin Access
-        </button>
       </div>
     </div>
   )

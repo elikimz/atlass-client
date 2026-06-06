@@ -53,7 +53,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
   }
 
   const handleSignOut = () => {
-    localStorage.removeItem('access_token')
+    localStorage.clear()
     setIsAuthenticated(false)
     navigate('/login')
   }
