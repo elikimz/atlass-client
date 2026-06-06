@@ -6,7 +6,7 @@ interface Profile {
   first_name: string
   last_name: string
   email: string
-  has_withdrawal_password: bool
+  has_withdrawal_password: boolean
 }
 
 interface AppConfig {
