@@ -32,9 +32,11 @@ export default function AdminUsers() {
     try {
       setLoading(true)
       const response = await api.get('/admin/users')
-      setUsers(response.data)
+      // Ensure we always have an array
+      setUsers(Array.isArray(response.data) ? response.data : [])
       setError('')
     } catch (err: any) {
+      console.error('Fetch users error:', err)
       setError(err.response?.data?.detail || 'Failed to fetch users')
     } finally {
       setLoading(false)
@@ -42,28 +44,33 @@ export default function AdminUsers() {
   }
 
   const handleEdit = (user: User) => {
+    if (!user) return
     setEditingId(user.id)
     setEditData({ ...user })
   }
 
   const handleSave = async () => {
+    if (!editingId) return
     try {
       await api.put(`/admin/users/${editingId}`, editData)
       setSuccess('User updated successfully')
       setEditingId(null)
       fetchUsers()
     } catch (err: any) {
+      console.error('Update user error:', err)
       setError(err.response?.data?.detail || 'Failed to update user')
     }
   }
 
   const handleDelete = async (id: number) => {
+    if (!id) return
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await api.delete(`/admin/users/${id}`)
         setSuccess('User deleted successfully')
         fetchUsers()
       } catch (err: any) {
+        console.error('Delete user error:', err)
         setError(err.response?.data?.detail || 'Failed to delete user')
       }
     }
@@ -74,11 +81,16 @@ export default function AdminUsers() {
     setEditData({})
   }
 
-  const filteredUsers = users.filter(
-    (user) =>
-      (user.first_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (user.last_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+  // Ultra-safe filtering
+  const filteredUsers = (users || []).filter(
+    (user) => {
+      if (!user) return false
+      const search = (searchTerm || '').toLowerCase()
+      const firstName = (user.first_name || '').toLowerCase()
+      const lastName = (user.last_name || '').toLowerCase()
+      const email = (user.email || '').toLowerCase()
+      return firstName.includes(search) || lastName.includes(search) || email.includes(search)
+    }
   )
 
   if (loading) {
@@ -148,132 +160,135 @@ export default function AdminUsers() {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} style={{ borderBottom: '1px solid #E5E7EB' }}>
-                <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
-                  {user.first_name} {user.last_name}
-                </td>
-                <td style={{ padding: '12px 16px', fontSize: '14px', color: '#6B7280' }}>{user.email}</td>
-                <td style={{ padding: '12px 16px', fontSize: '14px' }}>
-                  {editingId === user.id ? (
-                    <select
-                      value={editData.role || 'user'}
-                      onChange={(e) => setEditData({ ...editData, role: e.target.value })}
-                      style={{
-                        padding: '6px 8px',
-                        fontSize: '13px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        outline: 'none',
-                      }}
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  ) : (
+            {filteredUsers.map((user) => {
+              if (!user) return null
+              return (
+                <tr key={user.id || Math.random()} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                  <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
+                    {(user.first_name || '')} {(user.last_name || '')}
+                  </td>
+                  <td style={{ padding: '12px 16px', fontSize: '14px', color: '#6B7280' }}>{user.email || 'N/A'}</td>
+                  <td style={{ padding: '12px 16px', fontSize: '14px' }}>
+                    {editingId === user.id ? (
+                      <select
+                        value={editData.role || 'user'}
+                        onChange={(e) => setEditData({ ...editData, role: e.target.value })}
+                        style={{
+                          padding: '6px 8px',
+                          fontSize: '13px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '6px',
+                          outline: 'none',
+                        }}
+                      >
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    ) : (
+                      <span
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: (user.role || 'user') === 'admin' ? '#FEF3C7' : '#DBEAFE',
+                          color: (user.role || 'user') === 'admin' ? '#92400E' : '#1E40AF',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {user.role || 'user'}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ padding: '12px 16px', fontSize: '14px' }}>
                     <span
                       style={{
                         padding: '4px 8px',
-                        backgroundColor: user.role === 'admin' ? '#FEF3C7' : '#DBEAFE',
-                        color: user.role === 'admin' ? '#92400E' : '#1E40AF',
+                        backgroundColor: user.is_trained ? '#DCFCE7' : '#FEE2E2',
+                        color: user.is_trained ? '#166534' : '#DC2626',
                         borderRadius: '4px',
                         fontSize: '12px',
                         fontWeight: 600,
                       }}
                     >
-                      {user.role}
+                      {user.is_trained ? 'Trained' : 'Not Trained'}
                     </span>
-                  )}
-                </td>
-                <td style={{ padding: '12px 16px', fontSize: '14px' }}>
-                  <span
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: user.is_trained ? '#DCFCE7' : '#FEE2E2',
-                      color: user.is_trained ? '#166534' : '#DC2626',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {user.is_trained ? 'Trained' : 'Not Trained'}
-                  </span>
-                </td>
-                <td style={{ padding: '12px 16px', fontSize: '12px', color: '#6B7280' }}>
-                  <div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div>
-                  <div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div>
-                </td>
-                <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                  {editingId === user.id ? (
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                      <button
-                        onClick={handleSave}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#10B981',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '12px',
-                        }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#F3F4F6',
-                          color: '#374151',
-                          border: '1px solid #D1D5DB',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '12px',
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-                      <button
-                        onClick={() => handleEdit(user)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#F0F4FF',
-                          color: '#5932EA',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '12px',
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: '#FEE2E2',
-                          color: '#DC2626',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontWeight: 600,
-                          fontSize: '12px',
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td style={{ padding: '12px 16px', fontSize: '12px', color: '#6B7280' }}>
+                    <div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div>
+                    <div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div>
+                  </td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                    {editingId === user.id ? (
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                        <button
+                          onClick={handleSave}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#10B981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '12px',
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#F3F4F6',
+                            color: '#374151',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '12px',
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => handleEdit(user)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#F0F4FF',
+                            color: '#5932EA',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '12px',
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#FEE2E2',
+                            color: '#DC2626',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '12px',
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
