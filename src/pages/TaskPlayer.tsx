@@ -28,7 +28,14 @@ export default function TaskPlayer() {
         const foundTask = tasks.find((t: TaskData) => t.id === parseInt(taskId || '0'))
         if (foundTask) {
           setTask(foundTask)
-          setIsYouTube(foundTask.video_url.includes('youtube.com') || foundTask.video_url.includes('youtu.be'))
+          const isYT = foundTask.video_url.includes('youtube.com') || foundTask.video_url.includes('youtu.be')
+          setIsYouTube(isYT)
+          
+          // If it's a YouTube video, open it immediately and mark as watched
+          if (isYT) {
+            window.open(foundTask.video_url, '_blank')
+            setVideoWatched(true)
+          }
         } else {
           setError('Task not found')
         }
