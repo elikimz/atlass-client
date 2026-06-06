@@ -61,7 +61,13 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
         </div>
         <h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)', textAlign: 'center', marginBottom: '8px' }}>Check your email</h1>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '4px' }}>We sent a 6-digit verification code to</p>
-        <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', textAlign: 'center', marginBottom: '28px' }}>{email}</p>
+        <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', textAlign: 'center', marginBottom: '16px' }}>{email}</p>
+
+        {/* Spam Folder Notification */}
+        <div style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p style={{ fontSize: '12px', color: '#D97706', margin: 0, lineHeight: 1.4 }}>If you don't see the email, please check your <strong>spam folder</strong>.</p>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Verification Code</label>
