@@ -16,22 +16,33 @@ interface ReferralCodeData {
   task_rebate: number
 }
 
+interface ReferralSummary {
+  earnings: number
+  users_referred: number
+  task_rebate: number
+  total_invites: number
+  active_invites: number
+}
+
 export default function Invite() {
 
   const [activeInvites, setActiveInvites] = useState<InvitedUser[]>([])
   const [referralCodes, setReferralCodes] = useState<ReferralCodeData[]>([])
+  const [summary, setSummary] = useState<ReferralSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [activeRes, codesRes] = await Promise.all([
+        const [activeRes, codesRes, summaryRes] = await Promise.all([
           api.get('/referrals/active'),
-          api.get('/referrals/codes')
+          api.get('/referrals/codes'),
+          api.get('/referrals/summary')
         ])
         setActiveInvites(activeRes.data)
         setReferralCodes(codesRes.data)
+        setSummary(summaryRes.data)
       } catch (err) {
         console.error('Failed to fetch referral data', err)
       } finally {
@@ -101,8 +112,57 @@ export default function Invite() {
         </p>
       </div>
 
+      {/* Metrics Section */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          {/* Total Invites */}
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #E2E8F0', boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px', fontWeight: 500 }}>Total Invites</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: 0 }}>{summary?.total_invites || 0}</p>
+          </div>
+
+          {/* Active Invites */}
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #E2E8F0', boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px', fontWeight: 500 }}>Active Invites</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: 0 }}>{summary?.active_invites || 0}</p>
+          </div>
+
+          {/* Total Invite Commission */}
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #E2E8F0', boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px', fontWeight: 500 }}>Total Commission</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: 0 }}>${summary?.earnings?.toFixed(2) || '0.00'}</p>
+          </div>
+
+          {/* Total Task Rebate */}
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #E2E8F0', boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+            <p style={{ fontSize: '11px', color: '#64748B', margin: '0 0 4px', fontWeight: 500 }}>Total Task Rebate</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: 0 }}>${summary?.task_rebate?.toFixed(2) || '0.00'}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Content Section */}
-      <div style={{ flex: 1, padding: '16px' }}>
+      <div style={{ flex: 1, padding: '0 16px 16px' }}>
         {/* Your Invite Link */}
         <div style={{ marginBottom: '16px' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', margin: '0 0 12px', padding: '0 12px' }}>Your Invite Link</h3>
