@@ -18,8 +18,11 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const ref = params.get('ref')
-    if (ref) {
-      setReferralCode(ref)
+    const mode = params.get('mode')
+    
+    // If a referral code is present OR mode=register is in the URL, switch to registration view
+    if (ref || mode === 'register') {
+      if (ref) setReferralCode(ref)
       setIsRegistering(true)
     }
   }, [location])
