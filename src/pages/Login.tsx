@@ -70,7 +70,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
       <div style={{ width: '100%', maxWidth: '460px', backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '48px 40px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', textAlign: 'center', marginBottom: '12px', letterSpacing: '-0.02em' }}>{isRegistering ? 'Create Account' : 'Welcome Back'}</h1>
-        <p style={{ fontSize: '15px', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '36px', lineHeight: 1.6 }}>{isRegistering ? 'Join the community and start building the future of AI today.' : 'Sign in with your email to access your dashboard.'}</p>
+        <p style={{ fontSize: '15px', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '36px', lineHeight: 1.6 }}>{isRegistering ? 'Join the community and start earning from simple tasks.' : 'Sign in with your email to access your dashboard.'}</p>
 
         <form onSubmit={handleSubmit}>
           {isRegistering && (
