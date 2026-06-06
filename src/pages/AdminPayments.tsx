@@ -167,7 +167,7 @@ export default function AdminPayments() {
                         <div style={{ fontSize: '12px', color: '#6B7280' }}>{payment.user.email}</div>
                       </td>
                       <td style={{ padding: '16px', fontSize: '14px', fontWeight: 700, color: '#111827' }}>
-                        ${payment.amount.toFixed(2)}
+                        ${(payment.amount || 0).toFixed(2)}
                       </td>
                       <td style={{ padding: '16px', fontSize: '14px', color: '#6B7280' }}>
                         {payment.payment_method} ({payment.network})
@@ -248,7 +248,7 @@ export default function AdminPayments() {
               <div>
                 <p style={{ fontSize: '12px', color: '#6B7280', fontWeight: 600, margin: '0 0 6px' }}>Amount</p>
                 <p style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: 0 }}>
-                  ${selectedPayment.amount.toFixed(2)}
+                  ${(selectedPayment.amount || 0).toFixed(2)}
                 </p>
               </div>
               <div>

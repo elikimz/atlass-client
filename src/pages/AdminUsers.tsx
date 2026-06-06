@@ -200,8 +200,8 @@ export default function AdminUsers() {
                   </span>
                 </td>
                 <td style={{ padding: '12px 16px', fontSize: '12px', color: '#6B7280' }}>
-                  <div>Deposit: ${user.deposit_wallet_balance.toFixed(2)}</div>
-                  <div>Withdrawal: ${user.withdrawal_wallet_balance.toFixed(2)}</div>
+                  <div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div>
+                  <div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div>
                 </td>
                 <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                   {editingId === user.id ? (

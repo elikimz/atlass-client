@@ -285,7 +285,7 @@ export default function AdminTasks() {
             </p>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid #F3F4F6' }}>
               <span style={{ fontSize: '13px', fontWeight: 600, color: '#5932EA' }}>
-                Reward: ${task.reward_amount.toFixed(2)}
+                Reward: ${(task.reward_amount || 0).toFixed(2)}
               </span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button

@@ -374,9 +374,9 @@ export default function AdminPlans() {
               {plan.description || 'No description'}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px', color: '#6B7280', padding: '12px 0', borderTop: '1px solid #F3F4F6', borderBottom: '1px solid #F3F4F6' }}>
-              <div>💰 ${plan.price.toFixed(2)}</div>
-              <div>📋 {plan.daily_tasks_limit} tasks/day</div>
-              <div>📅 {plan.validity_days} days</div>
+              <div>💰 ${(plan.price || 0).toFixed(2)}</div>
+              <div>📋 {plan.daily_tasks_limit || 0} tasks/day</div>
+              <div>📅 {plan.validity_days || 0} days</div>
               <div>{plan.is_upgrade_only ? '🔒 Upgrade Only' : '✅ Available'}</div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
