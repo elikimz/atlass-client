@@ -11,6 +11,11 @@ interface Certification {
   is_active: boolean
 }
 
+interface Notification {
+  message: string
+  type: 'success' | 'error'
+}
+
 export default function AdminTraining() {
   const [certifications, setCertifications] = useState<Certification[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,21 +29,32 @@ export default function AdminTraining() {
     steps_count: 0,
     is_active: true,
   })
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const [notification, setNotification] = useState<Notification | null>(null)
+  const [showConfirm, setShowConfirm] = useState<number | null>(null)
 
   useEffect(() => {
     fetchCertifications()
   }, [])
 
+  // Auto-clear notifications
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [notification])
+
+  const showNotify = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type })
+  }
+
   const fetchCertifications = async () => {
     try {
       setLoading(true)
       const response = await api.get('/admin/certifications')
-      setCertifications(response.data)
-      setError('')
+      setCertifications(Array.isArray(response.data) ? response.data : [])
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to fetch certifications')
+      showNotify(err.response?.data?.detail || 'Failed to fetch certifications', 'error')
     } finally {
       setLoading(false)
     }
@@ -49,17 +65,17 @@ export default function AdminTraining() {
     try {
       if (editingId) {
         await api.put(`/admin/certifications/${editingId}`, formData)
-        setSuccess('Certification updated successfully')
+        showNotify('Certification updated successfully')
       } else {
         await api.post('/admin/certifications', formData)
-        setSuccess('Certification created successfully')
+        showNotify('Certification created successfully')
       }
       setFormData({ name: '', description: '', estimated_time: '', video_url: '', steps_count: 0, is_active: true })
       setEditingId(null)
       setShowForm(false)
       fetchCertifications()
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to save certification')
+      showNotify(err.response?.data?.detail || 'Failed to save certification', 'error')
     }
   }
 
@@ -74,17 +90,18 @@ export default function AdminTraining() {
     })
     setEditingId(cert.id)
     setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this certification?')) {
-      try {
-        await api.delete(`/admin/certifications/${id}`)
-        setSuccess('Certification deleted successfully')
-        fetchCertifications()
-      } catch (err: any) {
-        setError(err.response?.data?.detail || 'Failed to delete certification')
-      }
+    try {
+      await api.delete(`/admin/certifications/${id}`)
+      showNotify('Certification deleted successfully')
+      setShowConfirm(null)
+      fetchCertifications()
+    } catch (err: any) {
+      showNotify(err.response?.data?.detail || 'Failed to delete certification. It may be in use by users.', 'error')
+      setShowConfirm(null)
     }
   }
 
@@ -108,7 +125,61 @@ export default function AdminTraining() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', position: 'relative' }}>
+      {/* Custom Notification Toast */}
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          right: '24px',
+          padding: '16px 24px',
+          borderRadius: '12px',
+          backgroundColor: notification.type === 'success' ? '#10B981' : '#EF4444',
+          color: 'white',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          fontWeight: 600,
+          animation: 'slideIn 0.3s ease-out'
+        }}>
+          <span>{notification.type === 'success' ? '✅' : '❌'}</span>
+          {notification.message}
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '90%', textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Delete Certification?</h3>
+            <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '24px' }}>
+              This action cannot be undone. It may fail if users are currently enrolled.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowConfirm(null)}
+                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', backgroundColor: 'white', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(showConfirm)}
+                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: '#EF4444', color: 'white', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -131,18 +202,6 @@ export default function AdminTraining() {
           {showForm ? 'Cancel' : '+ Add Certification'}
         </button>
       </div>
-
-      {/* Messages */}
-      {error && (
-        <div style={{ backgroundColor: '#FEE2E2', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', color: '#DC2626', fontSize: '14px' }}>
-          {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ backgroundColor: '#DCFCE7', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '12px 16px', color: '#166534', fontSize: '14px' }}>
-          {success}
-        </div>
-      )}
 
       {/* Form */}
       {showForm && (
@@ -356,7 +415,7 @@ export default function AdminTraining() {
                 Edit
               </button>
               <button
-                onClick={() => handleDelete(cert.id)}
+                onClick={() => setShowConfirm(cert.id)}
                 style={{
                   flex: 1,
                   padding: '6px 12px',
@@ -381,6 +440,13 @@ export default function AdminTraining() {
           <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>No certifications found. Create your first certification to get started.</p>
         </div>
       )}
+
+      <style>{`
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   )
 }
