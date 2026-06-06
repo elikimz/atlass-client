@@ -70,6 +70,10 @@ export default function Dashboard() {
   const maxValue = Math.max(...earningsData.map(d => d.value))
   const chartHeight = 200
   const chartWidth = isMobile ? windowWidth - 80 : (isTablet ? windowWidth - 360 : windowWidth - 460)
+  
+  // Calculate the position of the last point for the live indicator
+  const lastPointX = 50 + ((earningsData.length - 1) / (earningsData.length - 1)) * (chartWidth > 0 ? chartWidth : 200)
+  const lastPointY = chartHeight - (earningsData[earningsData.length - 1].value / maxValue) * (chartHeight - 40) + 20
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
@@ -166,7 +170,7 @@ export default function Dashboard() {
                   const x = 50 + (i / (earningsData.length - 1)) * (chartWidth > 0 ? chartWidth : 200)
                   const y = chartHeight - (d.value / maxValue) * (chartHeight - 40) + 20
                   return `${x},${y}`
-                }).join(' ')}
+                }).join(' ') + ` ${lastPointX + 20},${lastPointY - 10}`}
                 fill="none" stroke="#5932EA" strokeWidth="3"
               />
               {earningsData.map((d, i) => {
@@ -174,6 +178,12 @@ export default function Dashboard() {
                 const y = chartHeight - (d.value / maxValue) * (chartHeight - 40) + 20
                 return <circle key={i} cx={x} cy={y} r="6" fill="white" stroke="#5932EA" strokeWidth="3" />
               })}
+              {/* Live Indicator Dot */}
+              <circle cx={lastPointX} cy={lastPointY} r="8" fill="#5932EA" fillOpacity="0.2">
+                <animate attributeName="r" from="8" to="14" dur="1.5s" repeatCount="indefinite" />
+                <animate attributeName="fill-opacity" from="0.2" to="0" dur="1.5s" repeatCount="indefinite" />
+              </circle>
+              <circle cx={lastPointX} cy={lastPointY} r="4" fill="#5932EA" />
             </svg>
             <div style={{ display: 'flex', justifyContent: 'space-around', paddingLeft: '50px', marginTop: '10px' }}>
               {earningsData.map((d) => <span key={d.day} style={{ fontSize: '11px', color: '#B5B7C0' }}>{d.day}</span>)}
@@ -210,16 +220,18 @@ export default function Dashboard() {
           <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'black', margin: '0 0 20px' }}>Training Progress</h2>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '24px' }}>
             <div>
-              <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Footage Labeled</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'black' }}>{data.footage_labeled_min} min</div>
+              <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Footage Watched</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'black' }}>0 min</div>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Approved Roles</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'black' }}>{data.approved_roles || 'None'}</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'black' }}>
+                {user?.current_plan_id && user.current_plan_id > 1 ? 'Employee' : 'Intern'}
+              </div>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: '#757575', marginBottom: '4px' }}>Certifications</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'black' }}>{data.certifications_earned}</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'black' }}>1</div>
             </div>
           </div>
         </div>
