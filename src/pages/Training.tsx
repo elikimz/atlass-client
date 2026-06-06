@@ -71,18 +71,24 @@ export default function Training() {
       setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'completed' } : c))
       setVideoWatched(true)
 
-      // 3. Fetch fresh user data to check is_trained flag
+      // 3. Update localStorage so the navigation updates immediately
+      localStorage.setItem('user_is_trained', 'true')
+
+      // 4. Fetch fresh user data to check is_trained flag
       const userRes = await api.get('/auth/me')
       const user = userRes.data
       
       if (user.is_trained) {
         setWatchingCourseId(null)
         setVideoWatched(false)
-        navigate('/plans', { replace: true })
+        // Give a small delay for the user to see the success message
+        setTimeout(() => {
+          navigate('/plans', { replace: true })
+        }, 2000)
       } else {
         setWatchingCourseId(null)
         setVideoWatched(false)
-        // Fallback: refresh courses if flag isn't set yet
+        // Refresh certifications to show completed state
         const certsRes = await api.get('/training/certifications')
         setCourses(certsRes.data.map((cert: any) => ({
           id: cert.id,
@@ -96,6 +102,29 @@ export default function Training() {
       }
     } catch (err) {
       console.error('Failed to complete training', err)
+    }
+  }
+
+  const handleDownloadCertificate = async () => {
+    try {
+      const response = await api.get('/training/certificate', {
+        responseType: 'blob'
+      })
+      
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'AdPulseAI_Certificate.pdf')
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup
+      link.parentNode?.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to download certificate', err)
+      alert('Failed to download certificate. Please ensure training is completed.')
     }
   }
 
@@ -274,7 +303,7 @@ export default function Training() {
                   <p style={{ fontSize: '14px', fontWeight: 600, color: '#15803D', margin: 0 }}>✓ Training Completed Successfully</p>
                 </div>
                 <button
-                  onClick={() => window.open(`${api.defaults.baseURL}/training/certificate`, '_blank')}
+                  onClick={handleDownloadCertificate}
                   style={{
                     width: '100%', padding: '16px', backgroundColor: '#5932EA', color: 'white',
                     fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px',

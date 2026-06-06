@@ -240,7 +240,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '75px', zIndex: 100,
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}>
-          {navItems.filter(item => item.label !== 'Admin' || isAdminUser).slice(0, 6).map((item) => (
+          {navItems.filter(item => (!item.hide) && (item.label !== 'Admin' || isAdminUser)).slice(0, 6).map((item) => (
             <Link
               key={item.label}
               to={item.path}
