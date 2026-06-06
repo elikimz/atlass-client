@@ -8,6 +8,7 @@ interface User {
   email: string
   role: string
   is_admin: boolean
+  is_suspended: boolean
   is_trained: boolean
   deposit_wallet_balance: number
   withdrawal_wallet_balance: number
@@ -32,7 +33,6 @@ export default function AdminUsers() {
     try {
       setLoading(true)
       const response = await api.get('/admin/users')
-      // Ensure we always have an array
       setUsers(Array.isArray(response.data) ? response.data : [])
       setError('')
     } catch (err: any) {
@@ -64,7 +64,7 @@ export default function AdminUsers() {
 
   const handleDelete = async (id: number) => {
     if (!id) return
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm('Are you sure you want to delete this user? This will also delete all their associated data (payments, tasks, etc.)')) {
       try {
         await api.delete(`/admin/users/${id}`)
         setSuccess('User deleted successfully')
@@ -76,12 +76,22 @@ export default function AdminUsers() {
     }
   }
 
+  const toggleSuspension = async (user: User) => {
+    try {
+      await api.put(`/admin/users/${user.id}`, { is_suspended: !user.is_suspended })
+      setSuccess(`User ${user.is_suspended ? 'unsuspended' : 'suspended'} successfully`)
+      fetchUsers()
+    } catch (err: any) {
+      console.error('Toggle suspension error:', err)
+      setError(err.response?.data?.detail || 'Failed to update suspension status')
+    }
+  }
+
   const handleCancel = () => {
     setEditingId(null)
     setEditData({})
   }
 
-  // Ultra-safe filtering
   const filteredUsers = (users || []).filter(
     (user) => {
       if (!user) return false
@@ -111,7 +121,7 @@ export default function AdminUsers() {
       {/* Header */}
       <div>
         <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 4px' }}>Manage Users</h1>
-        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>View and manage user accounts and roles</p>
+        <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>View and manage user accounts, roles, and status</p>
       </div>
 
       {/* Messages */}
@@ -163,9 +173,10 @@ export default function AdminUsers() {
             {filteredUsers.map((user) => {
               if (!user) return null
               return (
-                <tr key={user.id || Math.random()} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                <tr key={user.id || Math.random()} style={{ borderBottom: '1px solid #E5E7EB', backgroundColor: user.is_suspended ? '#FFF1F2' : 'transparent' }}>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: '#111827' }}>
                     {(user.first_name || '')} {(user.last_name || '')}
+                    {user.is_suspended && <span style={{ marginLeft: '8px', color: '#E11D48', fontSize: '11px', fontWeight: 700 }}>[SUSPENDED]</span>}
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: '#6B7280' }}>{user.email || 'N/A'}</td>
                   <td style={{ padding: '12px 16px', fontSize: '14px' }}>
@@ -200,18 +211,34 @@ export default function AdminUsers() {
                     )}
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '14px' }}>
-                    <span
-                      style={{
-                        padding: '4px 8px',
-                        backgroundColor: user.is_trained ? '#DCFCE7' : '#FEE2E2',
-                        color: user.is_trained ? '#166534' : '#DC2626',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {user.is_trained ? 'Trained' : 'Not Trained'}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span
+                        style={{
+                          padding: '2px 6px',
+                          backgroundColor: user.is_trained ? '#DCFCE7' : '#F3F4F6',
+                          color: user.is_trained ? '#166534' : '#6B7280',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          width: 'fit-content'
+                        }}
+                      >
+                        {user.is_trained ? 'Trained' : 'Not Trained'}
+                      </span>
+                      <span
+                        style={{
+                          padding: '2px 6px',
+                          backgroundColor: user.is_suspended ? '#FEE2E2' : '#DCFCE7',
+                          color: user.is_suspended ? '#991B1B' : '#166534',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          width: 'fit-content'
+                        }}
+                      >
+                        {user.is_suspended ? 'Suspended' : 'Active'}
+                      </span>
+                    </div>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: '12px', color: '#6B7280' }}>
                     <div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div>
@@ -253,6 +280,21 @@ export default function AdminUsers() {
                       </div>
                     ) : (
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => toggleSuspension(user)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: user.is_suspended ? '#DCFCE7' : '#FFF1F2',
+                            color: user.is_suspended ? '#166534' : '#E11D48',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            fontSize: '12px',
+                          }}
+                        >
+                          {user.is_suspended ? 'Unsuspend' : 'Suspend'}
+                        </button>
                         <button
                           onClick={() => handleEdit(user)}
                           style={{
