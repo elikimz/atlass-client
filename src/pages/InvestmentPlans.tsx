@@ -139,8 +139,8 @@ export default function InvestmentPlans() {
       <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderBottom: '1px solid var(--border-main)' }}>
         <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-heading)' }}>My Status</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--bg-main)' }}>
-             <img src="https://via.placeholder.com/44" alt="user" />
+          <div style={{ width: '44px', height: '44px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-main)' }}>
+             <img src="/assets/plan-icon.jpg" alt="user" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
             <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)' }}>User_{user?.id || '1234'}</div>
@@ -213,11 +213,11 @@ export default function InvestmentPlans() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Total Return:</span>
-                    <span style={{ fontWeight: 700 }}>{financials.total_return.toFixed(1)} USD</span>
+                    <span style={{ fontWeight: 700 }}>{financials.total_return.toFixed(1) || '0.0'} USD</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Profit:</span>
-                    <span style={{ fontWeight: 700 }}>{financials.profit.toFixed(1)} USD</span>
+                    <span style={{ fontWeight: 700 }}>{financials.profit.toFixed(1) || '0.0'} USD</span>
                   </div>
                   
                   {/* Mockup specific fields for higher tiers */}
