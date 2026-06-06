@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
+import toast from 'react-hot-toast'
 
 interface User {
   id: number
@@ -47,8 +48,15 @@ export default function AdminUsers() {
 
   const handleDelete = async (id: number) => {
     if (!id) return
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try { await api.delete(`/admin/users/${id}`); setSuccess('User deleted successfully'); fetchUsers() } catch (err: any) { setError(err.response?.data?.detail || 'Failed to delete user') }
+    if (window.confirm('Are you sure you want to delete this user? This will permanently remove all their data, including payments and referrals.')) {
+      const toastId = toast.loading('Deleting user...')
+      try { 
+        await api.delete(`/admin/users/${id}`)
+        toast.success('User deleted successfully', { id: toastId })
+        fetchUsers() 
+      } catch (err: any) { 
+        toast.error(err.response?.data?.detail || 'Failed to delete user', { id: toastId })
+      }
     }
   }
 
