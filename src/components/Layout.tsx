@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import ThemeToggle from './ThemeToggle'
 
 interface LayoutProps {
   setIsAuthenticated: (value: boolean) => void
@@ -26,11 +27,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     }
     window.addEventListener('resize', handleResize)
 
-    // Fetch real user data from backend
     api.get('/auth/me')
       .then(res => {
         setUser(res.data)
-        // Store in localStorage for other components to use if needed
         localStorage.setItem('user_first_name', res.data.first_name)
         localStorage.setItem('user_last_name', res.data.last_name)
         localStorage.setItem('user_email', res.data.email)
@@ -57,7 +56,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const lastName = user?.last_name || localStorage.getItem('user_last_name') || ''
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
   const isAdminUser = user?.is_admin || localStorage.getItem('user_is_admin') === 'true'
-  // Use live user state first, then fall back to localStorage
   const isTrainedUser = user !== null ? user.is_trained : localStorage.getItem('user_is_trained') === 'true'
   const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
 
@@ -83,9 +81,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
       </svg>
     )},
-    // Training nav item: shows "Certificate" with download icon for trained users,
-    // or "Training" with the graduation cap icon for untrained users.
-    // Both point to /training — the page itself handles the branching.
     isTrainedUser
       ? {
           label: 'Certificate',
@@ -110,14 +105,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
       </svg>
     )},
-    { label: 'Admin', path: '/admin', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
-      </svg>
-    )},
     { label: 'Settings', path: '/settings', icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
     )},
   ]
@@ -128,121 +118,146 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     <div style={{
       display: 'flex',
       height: '100vh',
-      backgroundColor: '#FAFBFF',
-      fontFamily: 'Poppins, Inter, system-ui, sans-serif',
+      backgroundColor: 'var(--bg-main)',
+      fontFamily: 'Inter, system-ui, sans-serif',
       overflow: 'hidden',
+      transition: 'background-color 0.3s ease'
     }}>
-      {/* Sidebar (Desktop Only) */}
+      {/* Sidebar (Desktop) */}
       {!isMobile && (
         <div style={{
-          width: '280px',
-          minWidth: '280px',
-          backgroundColor: 'white',
+          width: '306px',
+          minWidth: '306px',
+          backgroundColor: 'var(--bg-sidebar)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '2px 0px 10px rgba(0, 0, 0, 0.02)',
+          boxShadow: 'var(--sidebar-shadow)',
           zIndex: 20,
+          transition: 'background-color 0.3s ease, box-shadow 0.3s ease'
         }}>
-          <div style={{ padding: '30px 24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
-            <span style={{ fontSize: '22px', fontWeight: 700, color: 'black' }}>AdPulseAI</span>
+          <div style={{ padding: '36px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <img src="/assets/logo.png" alt="Logo" style={{ width: '36px', height: '36px', borderRadius: '10px' }} />
+              <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)' }}>AdPulseAI</span>
+            </div>
+            <ThemeToggle />
           </div>
 
-          <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
-            {navItems.filter(item => (item.label !== 'Admin' || isAdminUser)).map((item) => (
+          <div style={{ flex: 1, padding: '0 28px', overflowY: 'auto' }}>
+            {navItems.map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  padding: '12px 16px',
+                  gap: '14px',
+                  padding: '14px 16px',
                   borderRadius: '12px',
-                  marginBottom: '4px',
+                  marginBottom: '8px',
                   textDecoration: 'none',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: isActive(item.path) ? 'white' : '#9197B3',
-                  backgroundColor: isActive(item.path) ? '#5932EA' : 'transparent',
+                  color: isActive(item.path) ? '#FFFFFF' : 'var(--text-muted)',
+                  backgroundColor: isActive(item.path) ? 'var(--accent-primary)' : 'transparent',
                   transition: 'all 0.2s',
                 }}
               >
-                <div style={{ color: 'inherit' }}>{item.icon}</div>
+                <div style={{ color: isActive(item.path) ? '#FFFFFF' : 'var(--text-muted)' }}>{item.icon}</div>
                 <span>{item.label}</span>
               </Link>
             ))}
+            
+            {isAdminUser && (
+              <Link
+                to="/admin"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  padding: '14px 16px',
+                  borderRadius: '12px',
+                  marginTop: '24px',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: isActive('/admin') ? '#FFFFFF' : 'var(--text-muted)',
+                  backgroundColor: isActive('/admin') ? 'var(--accent-primary)' : 'var(--bg-main)',
+                  border: '1px dashed var(--border-main)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Admin Panel</span>
+              </Link>
+            )}
           </div>
 
-          <div style={{ padding: '24px', borderTop: '1px solid #F8F9FB' }}>
-            <button
-              onClick={handleSignOut}
-              style={{
-                width: '100%', padding: '12px', borderRadius: '12px',
-                backgroundColor: '#FFF1F1', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                fontSize: '14px', fontWeight: 600, color: '#D0004B',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Sign Out
-            </button>
+          <div style={{ padding: '28px' }}>
+            <div style={{
+              background: 'linear-gradient(107.91deg, #EAABF0 7.37%, #4623E9 95.19%)',
+              borderRadius: '20px',
+              padding: '24px',
+              color: 'white',
+              textAlign: 'center',
+              marginBottom: '32px'
+            }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>Upgrade to PRO to get all features!</p>
+              <button style={{
+                backgroundColor: 'white', color: '#4925E9', border: 'none', borderRadius: '12px',
+                padding: '10px 24px', fontWeight: 700, fontSize: '12px', cursor: 'pointer'
+              }}>Upgrade Now</button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: 'var(--accent-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700, color: 'var(--accent-primary)' }}>
+                {initials}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{firstName} {lastName}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{userEmail}</p>
+              </div>
+              <button onClick={handleSignOut} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Main Area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Top Bar */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: isMobile ? '16px 20px' : '20px 40px',
-          backgroundColor: 'white',
-          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.04)',
-          zIndex: 10,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {isMobile && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-                <span style={{ fontSize: '20px', fontWeight: 700, color: 'black' }}>AdPulseAI</span>
-              </div>
-            )}
-            {!isMobile && (
-              <div style={{ fontSize: '18px', fontWeight: 500, color: '#292D32' }}>Overview</div>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', position: 'relative' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#292D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-              </svg>
-              <span style={{ position: 'absolute', top: '4px', right: '4px', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#5932EA', color: 'white', fontSize: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>4</span>
-            </button>
-
-            <div
-              onClick={() => navigate('/settings')}
-              style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-            >
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#F2EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 600, color: '#5932EA' }}>
-                {initials}
-              </div>
-              {!isMobile && (
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'black' }}>{firstName} {lastName}</span>
-                  <span style={{ fontSize: '12px', color: '#757575' }}>{userEmail}</span>
-                </div>
-              )}
+        {/* Top Bar (Mobile Only) */}
+        {isMobile && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 20px',
+            backgroundColor: 'var(--bg-sidebar)',
+            boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.05)',
+            zIndex: 10,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img src="/assets/logo.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
+              <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>AdPulseAI</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <ThemeToggle />
+              <button onClick={handleSignOut} style={{ background: 'none', border: 'none', color: 'var(--text-muted)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Content */}
+        {/* Content Area */}
         <div style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '80px' : '0' }}>
           <div style={{ padding: isMobile ? '20px' : '40px' }}>
             <Outlet />
@@ -255,24 +270,22 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-around',
-          backgroundColor: 'white', borderTop: '1px solid #F0F0F0', height: '75px', zIndex: 100,
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          backgroundColor: 'var(--bg-sidebar)',
+          borderTop: '1px solid var(--border-main)',
+          height: '70px', zIndex: 100,
         }}>
-          {navItems.filter(item => (item.label !== 'Admin' || isAdminUser)).slice(0, 6).map((item) => (
+          {navItems.slice(0, 5).map((item) => (
             <Link
               key={item.label}
               to={item.path}
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                textDecoration: 'none', color: isActive(item.path) ? '#5932EA' : '#B5B7C0',
-                fontSize: '10px', fontWeight: 500, flex: 1,
-                minWidth: '0',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
+                fontSize: '10px', fontWeight: 600,
               }}
             >
-              <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
-              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>
-                {item.label === 'Payments' ? 'Pay' : item.label}
-              </span>
+              <div style={{ color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)' }}>{item.icon}</div>
+              <span>{item.label}</span>
             </Link>
           ))}
         </div>

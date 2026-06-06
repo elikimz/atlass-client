@@ -5,14 +5,43 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Theme Variables - Defaults to Original Light Theme */
+  --bg-main: #FAFBFF;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --text-main: #2D3748;
+  --text-heading: #111827;
+  --text-muted: #9197B3;
+  --border-main: #E2E8F0;
+  --accent-primary: #5932EA;
+  --accent-light: #F2EFFF;
+  --sidebar-shadow: 2px 0px 10px rgba(0, 0, 0, 0.02);
+  --card-shadow: 0px 2px 8px rgba(0, 0, 0, 0.04);
+
   color-scheme: light;
-  color: #0F1729;
-  background-color: #F8FAFC;
+  color: var(--text-main);
+  background-color: var(--bg-main);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark Mode Overrides */
+[data-theme='dark'] {
+  --bg-main: #0F172A;
+  --bg-card: #1E293B;
+  --bg-sidebar: #1E293B;
+  --text-main: #CBD5E1;
+  --text-heading: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border-main: #334155;
+  --accent-primary: #8B5CF6;
+  --accent-light: rgba(139, 92, 246, 0.1);
+  --sidebar-shadow: 4px 0px 15px rgba(0, 0, 0, 0.3);
+  --card-shadow: 0px 4px 12px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
 }
 
 *, *::before, *::after {
@@ -23,11 +52,14 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
 }
 
 body {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -48,6 +80,10 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
 @keyframes spin {
@@ -81,7 +117,7 @@ body {
 .loading-bar-bg {
   width: 200px;
   height: 4px;
-  background-color: #E2E8F0;
+  background-color: var(--border-main);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -89,7 +125,7 @@ body {
 
 .loading-bar-fill {
   height: 100%;
-  background-color: #5932EA;
+  background-color: var(--accent-primary);
   border-radius: 10px;
   animation: progress-bar 2s infinite ease-in-out;
 }
