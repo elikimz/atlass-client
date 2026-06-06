@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
 import Login from './pages/Login'
 import OTPVerify from './pages/OTPVerify'
 import Dashboard from './pages/Dashboard'
@@ -69,6 +70,7 @@ function AppContent() {
 
   return (
     <Router>
+      <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
         <Route path="/verify" element={<OTPVerify setIsAuthenticated={checkAuth} />} />

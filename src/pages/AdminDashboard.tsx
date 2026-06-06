@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
+import toast from 'react-hot-toast'
 
 interface DashboardStats {
   total_users: number
@@ -41,10 +42,10 @@ export default function AdminDashboard() {
     try {
       setSavingConfig(key)
       await api.put('/admin/config', { key, value })
-      alert(`${key} updated successfully!`)
+      toast.success(`${key.replace(/_/g, ' ')} updated successfully!`)
     } catch (err) {
       console.error(err)
-      alert('Failed to update configuration')
+      toast.error('Failed to update configuration')
     } finally {
       setSavingConfig(null)
     }

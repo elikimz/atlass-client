@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import toast from 'react-hot-toast'
 
 interface TrainingCourse {
   id: number
@@ -64,10 +65,12 @@ export default function Training() {
       setWatchingCourseId(courseId)
     } catch (err) {
       console.error('Failed to start training', err)
+      toast.error('Failed to start training. Please try again.')
     }
   }
 
   const handleVideoComplete = async (courseId: number) => {
+    const toastId = toast.loading('Completing training...')
     try {
       await api.post(`/training/certifications/${courseId}/complete`)
       setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'completed' } : c))
@@ -76,15 +79,18 @@ export default function Training() {
       localStorage.setItem('user_is_trained', 'true')
       setWatchingCourseId(null)
       setVideoWatched(false)
+      toast.success('Training completed successfully!', { id: toastId })
       setTimeout(() => navigate('/plans', { replace: true }), 2000)
     } catch (err) {
       console.error('Failed to complete training', err)
+      toast.error('Failed to complete training. Please try again.', { id: toastId })
     }
   }
 
   const handleDownloadCertificate = async () => {
     if (downloading) return
     setDownloading(true)
+    const toastId = toast.loading('Generating certificate...')
     try {
       const response = await api.get('/training/certificate', { responseType: 'blob' })
       const blob = new Blob([response.data], { type: 'application/pdf' })
@@ -98,9 +104,10 @@ export default function Training() {
         link.parentNode?.removeChild(link)
         window.URL.revokeObjectURL(url)
       }, 100)
+      toast.success('Certificate downloaded successfully!', { id: toastId })
     } catch (err) {
       console.error('Failed to download certificate', err)
-      alert('Failed to download certificate. Please ensure training is completed.')
+      toast.error('Failed to download certificate. Please ensure training is completed.', { id: toastId })
     } finally {
       setDownloading(false)
     }

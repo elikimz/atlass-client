@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import toast from 'react-hot-toast'
 
 interface WithdrawalAccount {
   id: number
@@ -38,13 +39,16 @@ export default function WithdrawalAccounts() {
   const handleAddAccount = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+    const toastId = toast.loading('Adding account...')
     try {
       await api.post('/withdrawal-accounts', { type, label: type === 'crypto' ? 'Crypto Wallet' : 'M-Pesa Account', address, network, is_primary: isPrimary })
+      toast.success('Account added successfully!', { id: toastId })
       setShowAddModal(false)
       fetchAccounts()
       setAddress('')
     } catch (err) {
-      alert('Failed to add account')
+      console.error(err)
+      toast.error('Failed to add account. Please try again.', { id: toastId })
     } finally {
       setSubmitting(false)
     }

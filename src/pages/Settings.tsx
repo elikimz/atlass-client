@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import toast from 'react-hot-toast'
 
 interface Profile {
   first_name: string
@@ -71,9 +72,10 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
       await api.put('/settings/profile', { first_name: firstName, last_name: lastName })
       setProfile({ ...profile!, first_name: firstName, last_name: lastName })
       setEditing(false)
+      toast.success('Profile updated successfully!')
     } catch (err) {
       console.error(err)
-      alert('Failed to update profile')
+      toast.error('Failed to update profile')
     } finally {
       setSaving(false)
     }
@@ -89,15 +91,15 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
     const hasExisting = profile?.has_withdrawal_password
     
     if (hasExisting && !currentWithdrawalPassword) {
-      alert('Please enter your current withdrawal password')
+      toast.error('Please enter your current withdrawal password')
       return
     }
     if (!newWithdrawalPassword || newWithdrawalPassword.length < 4) {
-      alert('New password must be at least 4 characters')
+      toast.error('New password must be at least 4 characters')
       return
     }
     if (newWithdrawalPassword !== confirmWithdrawalPassword) {
-      alert('New passwords do not match')
+      toast.error('New passwords do not match')
       return
     }
 
@@ -107,7 +109,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
         current_password: hasExisting ? currentWithdrawalPassword : null,
         new_password: newWithdrawalPassword
       })
-      alert('Withdrawal password updated successfully!')
+      toast.success('Withdrawal password updated successfully!')
       setCurrentWithdrawalPassword('')
       setNewWithdrawalPassword('')
       setConfirmWithdrawalPassword('')
@@ -115,7 +117,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
       const profileRes = await api.get('/settings/profile')
       setProfile(profileRes.data)
     } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to update withdrawal password')
+      toast.error(err.response?.data?.detail || 'Failed to update withdrawal password')
     } finally {
       setSettingWithdrawalPassword(false)
     }
@@ -124,6 +126,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
   const handleDownloadCertificate = async () => {
     if (downloading) return
     setDownloading(true)
+    const toastId = toast.loading('Generating certificate...')
     try {
       const response = await api.get('/training/certificate', { responseType: 'blob' })
       const blob = new Blob([response.data], { type: 'application/pdf' })
@@ -137,8 +140,9 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
         link.parentNode?.removeChild(link)
         window.URL.revokeObjectURL(url)
       }, 100)
+      toast.success('Certificate downloaded successfully!', { id: toastId })
     } catch (err) {
-      alert('Failed to download certificate. Please ensure training is completed.')
+      toast.error('Failed to download certificate. Please ensure training is completed.', { id: toastId })
     } finally {
       setDownloading(false)
     }
@@ -247,48 +251,47 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
             </>
           ) : (
             <>
-              <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Set a withdrawal password to protect your funds. This password will be required for all payout requests.</p>
-              <input type="password" placeholder="Enter new withdrawal password" value={newWithdrawalPassword} onChange={(e) => setNewWithdrawalPassword(e.target.value)} style={{ width: '100%', padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
-              <input type="password" placeholder="Confirm withdrawal password" value={confirmWithdrawalPassword} onChange={(e) => setConfirmWithdrawalPassword(e.target.value)} style={{ width: '100%', padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
+              <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Set a withdrawal password to protect your funds. This will be required for all payouts.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <input type="password" placeholder="Enter Withdrawal Password" value={newWithdrawalPassword} onChange={(e) => setNewWithdrawalPassword(e.target.value)} style={{ width: '100%', padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
+                <input type="password" placeholder="Confirm Withdrawal Password" value={confirmWithdrawalPassword} onChange={(e) => setConfirmWithdrawalPassword(e.target.value)} style={{ width: '100%', padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
+              </div>
             </>
           )}
-          
-          <button onClick={handleUpdateWithdrawalPassword} disabled={settingWithdrawalPassword || !newWithdrawalPassword || newWithdrawalPassword !== confirmWithdrawalPassword} style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '14px', fontWeight: 700, backgroundColor: '#14B8A6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', opacity: (settingWithdrawalPassword || !newWithdrawalPassword || newWithdrawalPassword !== confirmWithdrawalPassword) ? 0.6 : 1 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-            {settingWithdrawalPassword ? 'Updating...' : hasWithdrawalPass ? 'Update Password' : 'Set Password'}
+          <button 
+            onClick={handleUpdateWithdrawalPassword}
+            disabled={settingWithdrawalPassword}
+            style={{ padding: '12px', fontSize: '14px', fontWeight: 700, backgroundColor: '#14B8A6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+          >
+            {settingWithdrawalPassword ? '...' : hasWithdrawalPass ? 'Update Password' : 'Set Password'}
           </button>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>Withdrawal passwords must be at least 4 characters long. Never share this password with anyone.</p>
         </div>
       </div>
 
       {/* Certificate Section */}
-      {isTrained && (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🎓</div>
-            <div>
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Training Certificate</h2>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>You have successfully completed your training</p>
-            </div>
-          </div>
-          <p style={{ fontSize: '14px', color: 'var(--text-main)', margin: '0 0 16px' }}>Download your official Video Reviewing Mastery certificate to showcase your professional skills.</p>
-          <button onClick={handleDownloadCertificate} disabled={downloading} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 700, backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', opacity: downloading ? 0.7 : 1 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            {downloading ? 'Downloading...' : 'Download Certificate (PDF)'}
-          </button>
+      <div style={cardStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🎓</div>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Certifications</h2>
         </div>
-      )}
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '0 0 20px' }}>Download your official AdPulseAI Training Certificate once you have completed all required training modules.</p>
+        <button 
+          onClick={handleDownloadCertificate}
+          disabled={!isTrained || downloading}
+          style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, backgroundColor: isTrained ? '#F59E0B' : 'var(--bg-main)', color: isTrained ? 'white' : 'var(--text-muted)', border: isTrained ? 'none' : '1px solid var(--border-main)', borderRadius: '8px', cursor: isTrained ? 'pointer' : 'not-allowed' }}
+        >
+          {downloading ? 'Downloading...' : isTrained ? 'Download Certificate' : 'Training Not Completed'}
+        </button>
+      </div>
 
       {/* Danger Zone */}
-      <div style={{ ...cardStyle, borderColor: 'rgba(220, 38, 38, 0.2)' }}>
+      <div style={{ ...cardStyle, borderColor: 'rgba(239, 68, 68, 0.2)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🔐</div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Account Management</h2>
+          <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🚪</div>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#EF4444', margin: 0 }}>Account Session</h2>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-          <button onClick={handleSignOut} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 700, backgroundColor: 'transparent', color: '#DC2626', border: '1px solid #DC2626', borderRadius: '8px', cursor: 'pointer' }}>Sign Out</button>
-          <button onClick={() => { if (window.confirm('Are you sure? This cannot be undone.')) api.delete('/settings/account').then(handleSignOut) }} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 700, backgroundColor: 'transparent', color: 'var(--text-muted)', border: 'none', borderRadius: '8px', cursor: 'pointer', textDecoration: 'underline' }}>Delete Account</button>
-        </div>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '0 0 20px' }}>Signing out will end your current session. You will need to log in again to access your dashboard.</p>
+        <button onClick={handleSignOut} style={{ padding: '12px 24px', fontSize: '14px', fontWeight: 700, backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Sign Out</button>
       </div>
     </div>
   )
