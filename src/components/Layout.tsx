@@ -108,6 +108,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
 
   const isActive = (path: string) => location.pathname === path
 
+  const mobileNavItems = navItems.filter(item => (item.label !== 'Admin' || isAdminUser) && item.label !== 'Settings')
+
   return (
     <div style={{
       display: 'flex',
@@ -248,27 +250,35 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           overflowX: 'auto',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          padding: '0 10px'
+          padding: '0 5px'
         }}>
-          {navItems.filter(item => (item.label !== 'Admin' || isAdminUser) && item.label !== 'Settings').map((item) => (
-            <Link
-              key={item.label}
-              to={item.path}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
-                fontSize: '10px', fontWeight: 500,
-                flexShrink: 0,
-                width: '70px',
-                height: '100%'
-              }}
-            >
-              <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
-              <span style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
-                {item.label === 'Payments' ? 'Pay' : item.label}
-              </span>
-            </Link>
-          ))}
+          <div style={{
+            display: 'flex',
+            width: mobileNavItems.length > 5 ? 'auto' : '100%',
+            justifyContent: mobileNavItems.length > 5 ? 'flex-start' : 'space-around',
+            height: '100%',
+            alignItems: 'center'
+          }}>
+            {mobileNavItems.map((item) => (
+              <Link
+                key={item.label}
+                to={item.path}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+                  textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
+                  fontSize: '10px', fontWeight: 500,
+                  flexShrink: 0,
+                  width: mobileNavItems.length > 5 ? '75px' : `${100 / mobileNavItems.length}%`,
+                  height: '100%'
+                }}
+              >
+                <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
+                <span style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
+                  {item.label === 'Payments' ? 'Pay' : item.label}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
