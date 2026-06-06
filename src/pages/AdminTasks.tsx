@@ -27,7 +27,6 @@ export default function AdminTasks() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({ title: '', description: '', video_url: '', reward_amount: 0, plan_id: '' as string | number })
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
 
   useEffect(() => { 
     fetchTasks()
@@ -130,7 +129,6 @@ export default function AdminTasks() {
       </div>
 
       {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', color: '#DC2626', fontSize: '14px' }}>{error}</div>}
-      {success && <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '12px 16px', color: '#166534', fontSize: '14px' }}>{success}</div>}
 
       {showForm && (
         <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border-main)', boxShadow: 'var(--card-shadow)' }}>
