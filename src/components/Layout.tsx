@@ -94,14 +94,14 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
       </svg>
     )},
-    { label: 'Admin', path: '/admin', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
-      </svg>
-    )},
     { label: 'Settings', path: '/settings', icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    )},
+    { label: 'Admin', path: '/admin', icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
       </svg>
     )},
   ]
@@ -242,12 +242,13 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       {isMobile && (
         <div style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+          display: 'flex', alignItems: 'center',
           backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-main)', height: '75px', zIndex: 100,
           paddingBottom: 'env(safe-area-inset-bottom)',
           overflowX: 'auto',
           scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          msOverflowStyle: 'none',
+          padding: '0 10px'
         }}>
           {navItems.filter(item => item.label !== 'Admin' || isAdminUser).map((item) => (
             <Link
@@ -256,12 +257,14 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                 textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
-                fontSize: '10px', fontWeight: 500, flex: '0 0 20%',
-                minWidth: '60px',
+                fontSize: '10px', fontWeight: 500,
+                flexShrink: 0,
+                width: '70px',
+                height: '100%'
               }}
             >
               <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
-              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%', textAlign: 'center' }}>
+              <span style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
                 {item.label === 'Payments' ? 'Pay' : item.label}
               </span>
             </Link>
