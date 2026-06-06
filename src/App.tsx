@@ -27,22 +27,13 @@ import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
 import PaymentHistory from './pages/PaymentHistory'
+import { ThemeProvider } from './context/ThemeContext'
 
-/**
- * Route guard: if the user has already completed training, redirect them to
- * the Training page itself (which will render the certificate-download UI)
- * rather than allowing them to re-enter the video flow via a direct URL visit.
- * The Training component itself handles the trained/untrained branching, so
- * simply rendering <Training /> is safe — the guard here is a belt-and-suspenders
- * redirect for any future deep-link attempts to the video player sub-flow.
- */
 function TrainingRoute() {
-  // Training.tsx fetches /auth/me on mount and handles the trained branch internally.
-  // This wrapper exists so we can add additional guards here if needed in the future.
   return <Training />
 }
 
-function App() {
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -61,16 +52,16 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#F8FAFC' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div className="loading-container">
           <div className="pulse-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <img src="/assets/logo.png" alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '12px' }} />
-            <span style={{ fontSize: '24px', fontWeight: 700, color: '#0F172A' }}>AdPulseAI</span>
+            <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)' }}>AdPulseAI</span>
           </div>
           <div className="loading-bar-bg">
             <div className="loading-bar-fill"></div>
           </div>
-          <p style={{ color: '#64748B', fontSize: '14px', fontWeight: 500, margin: 0 }}>Initializing your workspace...</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500, margin: 0 }}>Initializing your workspace...</p>
         </div>
       </div>
     )
@@ -101,7 +92,6 @@ function App() {
             <Route path="/income" element={<Placeholder title="Income" />} />
             <Route path="/promote" element={<Placeholder title="Promote" />} />
             <Route path="/help" element={<Placeholder title="Help" />} />
-            {/* Training route — the component itself handles the trained/untrained split */}
             <Route path="/training" element={<TrainingRoute />} />
             <Route path="/training/hub" element={<LearningHub />} />
             <Route path="/tasks" element={<Tasks />} />
@@ -133,4 +123,10 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  )
+}
