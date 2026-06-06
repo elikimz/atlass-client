@@ -250,7 +250,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           msOverflowStyle: 'none',
           padding: '0 10px'
         }}>
-          {navItems.filter(item => item.label !== 'Admin' || isAdminUser).map((item) => (
+          {navItems.filter(item => (item.label !== 'Admin' || isAdminUser) && item.label !== 'Settings').map((item) => (
             <Link
               key={item.label}
               to={item.path}
