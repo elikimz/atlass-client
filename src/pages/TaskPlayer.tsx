@@ -30,12 +30,6 @@ export default function TaskPlayer() {
           setTask(foundTask)
           const isYT = foundTask.video_url.includes('youtube.com') || foundTask.video_url.includes('youtu.be')
           setIsYouTube(isYT)
-          
-          // If it's a YouTube video, open it immediately and mark as watched
-          if (isYT) {
-            window.open(foundTask.video_url, '_blank')
-            setVideoWatched(true)
-          }
         } else {
           setError('Task not found')
         }
@@ -54,7 +48,7 @@ export default function TaskPlayer() {
   const handleWatchOnYouTube = () => {
     if (task) {
       window.open(task.video_url, '_blank')
-      setVideoWatched(true) // Mark as watched when they click the link
+      setVideoWatched(true)
     }
   }
 

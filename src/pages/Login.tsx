@@ -16,6 +16,14 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   const location = useLocation()
 
   useEffect(() => {
+    // If already authenticated, redirect to dashboard
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      const isAdmin = localStorage.getItem('user_is_admin') === 'true'
+      navigate(isAdmin ? '/admin' : '/dashboard')
+      return
+    }
+
     const params = new URLSearchParams(location.search)
     const ref = params.get('ref')
     const mode = params.get('mode')

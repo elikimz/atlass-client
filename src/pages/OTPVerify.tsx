@@ -10,6 +10,14 @@ export default function OTPVerify({ setIsAuthenticated }: { setIsAuthenticated: 
   const navigate = useNavigate()
 
   useEffect(() => {
+    // If already authenticated, redirect to dashboard
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      const isAdmin = localStorage.getItem('user_is_admin') === 'true'
+      navigate(isAdmin ? '/admin' : '/dashboard')
+      return
+    }
+
     const storedEmail = localStorage.getItem('email')
     if (!storedEmail) navigate('/login')
     else setEmail(storedEmail)
