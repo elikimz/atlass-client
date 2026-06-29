@@ -157,7 +157,7 @@ export default function Training() {
                 DOWNLOAD CERTIFICATE
               </>}
             </button>
-            <button onClick={() => navigate('/plans')} style={{ width: '100%', padding: '14px', backgroundColor: 'transparent', color: 'var(--accent-primary)', fontSize: '14px', fontWeight: 600, border: '2px solid var(--accent-primary)', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s' }}>Go to Investment Plans →</button>
+            <button onClick={() => navigate('/plans')} style={{ width: '100%', padding: '14px', backgroundColor: 'transparent', color: 'var(--accent-primary)', fontSize: '14px', fontWeight: 600, border: '2px solid var(--accent-primary)', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s' }}>Go to Active Packages/Plans →</button>
           </div>
         </div>
       </div>

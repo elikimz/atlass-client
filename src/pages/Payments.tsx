@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
@@ -27,6 +27,9 @@ interface PaymentHistory {
 }
 
 interface DashboardSummary {
+  today_earnings: number
+  this_week_earnings: number
+  this_month_earnings: number
   recent_activity: {
     id: number
     description: string
@@ -86,31 +89,16 @@ export default function Payments() {
     )
   }
 
-  const now = new Date()
-  const todayStr = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-  const recentTaskEarnings = dashboard?.recent_activity && Array.isArray(dashboard.recent_activity)
-    ? dashboard.recent_activity
-      .filter(act => act.status === 'Completed' || act.status === 'Paid')
-      .map(act => parseFloat(act.amount.replace(/[^0-9.]/g, '')))
-      .reduce((sum, amt) => sum + (isNaN(amt) ? 0 : amt), 0)
-    : 0
-
-  const safeHistory = Array.isArray(history) ? history : []
-  const todayEarnings = safeHistory
-    .filter(h => h.status === 'paid' && (h.period.includes(todayStr) || !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getFullYear(), now.getMonth(), now.getDate())))
-    .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
-  const weekEarnings = safeHistory
-    .filter(h => h.status === 'paid' && !isNaN(Date.parse(h.period)) && new Date(h.period) >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000))
-    .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
-  const monthEarnings = safeHistory
-    .filter(h => h.status === 'paid' && h.period.includes(todayStr))
-    .reduce((sum, h) => sum + h.amount, 0) + (recentTaskEarnings > 0 ? recentTaskEarnings : 0)
+  // Use dashboard earnings data directly
+  const todayEarnings = dashboard?.today_earnings || 0
+  const weekEarnings = dashboard?.this_week_earnings || 0
+  const monthEarnings = dashboard?.this_month_earnings || 0
   const totalEarnings = (overview?.total_paid || 0) + (user?.withdrawal_wallet_balance || 0)
 
   const actionButtons = [
     { label: 'Recharge', subtext: 'Add Funds', icon: '⚡', route: '/payments/recharge' },
     { label: 'Payout', subtext: 'Send Payment', icon: '💸', route: '/payments/payout' },
-    { label: 'Withdrawal Accounts', subtext: 'Manage Accounts', icon: '🏦', route: '/payments/withdrawal' },
+    { label: 'Withdrawal Accounts', subtext: 'Manage Accounts', icon: '🏦', route: '/withdrawal-accounts' },
   ]
 
   const walletCards = [
@@ -126,6 +114,8 @@ export default function Payments() {
     { label: "This Week's Earnings", amount: weekEarnings },
     { label: "This Month's Earnings", amount: monthEarnings },
   ]
+
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>

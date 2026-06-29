@@ -252,7 +252,7 @@ export default function InvestmentPlans() {
                    isLowerTier ? 'LOCKED' :
                    !hasEnoughBalance ? 'INSUFFICIENT BALANCE' :
                    plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' :
-                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${(plan.price - (plans.find(p => p.id === user?.current_plan_id)?.price || 0)).toFixed(2)})` : 'PURCHASE'}
+                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${Math.max(plan.price - (plans.find(p => p.id === user?.current_plan_id)?.price || 0), 0).toFixed(2)})` : 'PURCHASE'}
                 </button>
               </div>
             </div>

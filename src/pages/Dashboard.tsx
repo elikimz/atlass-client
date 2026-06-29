@@ -3,8 +3,12 @@ import api from '../services/api'
 
 interface DashboardData {
   footage_labeled_min: number
+  today_earnings: number
+  this_week_earnings: number
+  this_month_earnings: number
   approved_roles: string
   certifications_earned: number
+  earnings_history: { day: string; value: number }[]
 }
 
 interface UserData {
@@ -198,14 +202,35 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Earnings Summary Section */}
+      {data && (
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 20px' }}>Earnings Summary</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '24px' }}>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Today's Earnings</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>${data.today_earnings.toFixed(2)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>This Week's Earnings</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>${data.this_week_earnings.toFixed(2)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>This Month's Earnings</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>${data.this_month_earnings.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Progress Section */}
       {data && (
         <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
           <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 20px' }}>Training Progress</h2>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '24px' }}>
             <div>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Footage Labeled</div>
-              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>{data.footage_labeled_min} min</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Footage Watched</div>
+              <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>{data.footage_labeled_min} sec</div>
             </div>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Approved Roles</div>
