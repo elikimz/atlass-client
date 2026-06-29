@@ -20,11 +20,7 @@ interface ReferralSummary {
   task_rebate: number
 }
 
-interface PaymentHistory {
-  period: string
-  amount: number
-  status: string
-}
+
 
 interface DashboardSummary {
   today_earnings: number
@@ -55,7 +51,7 @@ export default function Payments() {
   const [overview, setOverview] = useState<PaymentOverview | null>(null)
   const [user, setUser] = useState<UserData | null>(null)
   const [referrals, setReferrals] = useState<ReferralSummary | null>(null)
-  const [history, setHistory] = useState<PaymentHistory[]>([])
+
   const [dashboard, setDashboard] = useState<DashboardSummary | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -64,14 +60,12 @@ export default function Payments() {
       api.get('/payments/overview'),
       api.get('/auth/me'),
       api.get('/referrals/summary'),
-      api.get('/payments/history'),
       api.get('/dashboard/summary'),
     ])
-      .then(([overviewRes, userRes, referralsRes, historyRes, dashboardRes]) => {
+      .then(([overviewRes, userRes, referralsRes, dashboardRes]) => {
         setOverview(overviewRes.data)
         setUser(userRes.data)
         setReferrals(referralsRes.data)
-        setHistory(historyRes.data)
         setDashboard(dashboardRes.data)
       })
       .catch(console.error)
