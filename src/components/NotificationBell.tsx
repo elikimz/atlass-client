@@ -14,7 +14,6 @@ interface Notification {
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -35,13 +34,10 @@ export default function NotificationBell() {
 
   const handleMarkAsRead = async (notificationIds: number[]) => {
     try {
-      setLoading(true)
       await api.post('/notifications/mark-read', { notification_ids: notificationIds })
       await fetchNotifications()
     } catch (error) {
       console.error('Error marking notifications as read:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
