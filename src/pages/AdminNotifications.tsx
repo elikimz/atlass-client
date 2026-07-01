@@ -116,11 +116,11 @@ export default function AdminNotifications() {
               </button>
             </div>
 
-            {selectedUserId !== null && selectedUserId !== -1 && (
-              <div>
+            {(selectedUserId === -1 || (selectedUserId !== null && selectedUserId !== -1)) && (
+              <div style={{ marginTop: '12px' }}>
                 <input
                   type="text"
-                  placeholder="Search users..."
+                  placeholder="Search by name or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{
@@ -131,59 +131,75 @@ export default function AdminNotifications() {
                     backgroundColor: 'var(--bg-main)',
                     color: 'var(--text-main)',
                     fontSize: '14px',
-                    marginBottom: '8px'
+                    marginBottom: '8px',
+                    boxSizing: 'border-box'
                   }}
                 />
-                <div style={{
-                  maxHeight: '200px',
-                  overflowY: 'auto',
-                  border: '1px solid var(--border-main)',
-                  borderRadius: '8px',
-                  backgroundColor: 'var(--bg-main)'
-                }}>
-                  {filteredUsers.map(user => (
-                    <div
-                      key={user.id}
-                      onClick={() => {
-                        setSelectedUserId(user.id)
-                        setSearchTerm('')
-                      }}
-                      style={{
-                        padding: '10px 12px',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid var(--border-main)',
-                        backgroundColor: selectedUserId === user.id ? 'rgba(93, 50, 234, 0.1)' : 'transparent',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(93, 50, 234, 0.05)'
-                      }}
-                      onMouseLeave={(e) => {
-                        if (selectedUserId !== user.id) {
-                          (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
-                        }
-                      }}
-                    >
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
-                        {user.first_name} {user.last_name}
+                
+                {searchTerm.trim() !== '' && (
+                  <div style={{
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                    border: '1px solid var(--border-main)',
+                    borderRadius: '8px',
+                    backgroundColor: 'var(--bg-card)',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.05)'
+                  }}>
+                    {filteredUsers.length > 0 ? (
+                      filteredUsers.map(user => (
+                        <div
+                          key={user.id}
+                          onClick={() => {
+                            setSelectedUserId(user.id)
+                            setSearchTerm('')
+                          }}
+                          style={{
+                            padding: '10px 12px',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid var(--border-main)',
+                            backgroundColor: selectedUserId === user.id ? 'rgba(93, 50, 234, 0.1)' : 'transparent',
+                            transition: 'background-color 0.2s'
+                          }}
+                        >
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                            {user.first_name} {user.last_name}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{user.email}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: '12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+                        No users found
                       </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{user.email}</div>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
-            {selectedUserId && selectedUserId !== -1 && (
+            {selectedUserId !== null && selectedUserId !== -1 && (
               <div style={{
                 marginTop: '12px',
-                padding: '10px 12px',
-                backgroundColor: 'rgba(93, 50, 234, 0.1)',
+                padding: '12px',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
                 borderRadius: '8px',
                 fontSize: '13px',
-                color: 'var(--text-heading)'
+                color: '#166534',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}>
-                Selected: {users.find(u => u.id === selectedUserId)?.first_name} {users.find(u => u.id === selectedUserId)?.last_name}
+                <span>
+                  <b>Target User:</b> {users.find(u => u.id === selectedUserId)?.first_name} {users.find(u => u.id === selectedUserId)?.last_name} ({users.find(u => u.id === selectedUserId)?.email})
+                </span>
+                <button 
+                  type="button"
+                  onClick={() => setSelectedUserId(-1)}
+                  style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 700 }}
+                >
+                  Change
+                </button>
               </div>
             )}
           </div>
