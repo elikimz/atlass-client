@@ -252,8 +252,13 @@ export default function InvestmentPlans() {
                    isLowerTier ? 'LOCKED' :
                    !hasEnoughBalance ? 'INSUFFICIENT BALANCE' :
                    plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' :
-                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${Math.max(plan.price - (plans.find(p => p.id === user?.current_plan_id)?.price || 0), 0).toFixed(2)})` : 'PURCHASE'}
+                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${plan.price.toFixed(2)})` : 'PURCHASE'}
                 </button>
+                {user?.current_plan_id && !isActive && !isLowerTier && plan.name !== 'Intern' && (
+                  <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4', fontStyle: 'italic' }}>
+                    The full plan amount will be deducted. If upgrading from an active paid tier, your previous package price will be automatically refunded to your balance after 3 days (Note: Expired plans are not eligible for a refund).
+                  </div>
+                )}
               </div>
             </div>
           )

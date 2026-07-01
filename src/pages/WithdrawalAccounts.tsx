@@ -21,6 +21,8 @@ export default function WithdrawalAccounts() {
   const [type, setType] = useState('crypto')
   const [address, setAddress] = useState('')
   const [network, setNetwork] = useState('ERC20')
+  const [fullName, setFullName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [isPrimary, setIsPrimary] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
@@ -41,11 +43,22 @@ export default function WithdrawalAccounts() {
     setSubmitting(true)
     const toastId = toast.loading('Adding account...')
     try {
-      await api.post('/withdrawal-accounts', { type, label: type === 'crypto' ? 'Crypto Wallet' : 'M-Pesa Account', address, network, is_primary: isPrimary })
+      const payload: any = { type, label: type === 'crypto' ? 'Crypto Wallet' : 'M-Pesa Account', is_primary: isPrimary }
+      if (type === 'crypto') {
+        payload.address = address
+        payload.network = network
+      } else {
+        payload.address = phoneNumber
+        payload.full_name = fullName
+        payload.phone_number = phoneNumber
+      }
+      await api.post('/withdrawal-accounts', payload)
       toast.success('Account added successfully!', { id: toastId })
       setShowAddModal(false)
       fetchAccounts()
       setAddress('')
+      setFullName('')
+      setPhoneNumber('')
     } catch (err) {
       console.error(err)
       toast.error('Failed to add account. Please try again.', { id: toastId })
@@ -97,8 +110,15 @@ export default function WithdrawalAccounts() {
             <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-heading)', marginBottom: '20px', textAlign: 'center' }}>Add Withdrawal Account</h3>
             <form onSubmit={handleAddAccount}>
               <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Account Type</label><select value={type} onChange={e => setType(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="crypto">Crypto (USDT)</option><option value="mpesa">M-Pesa</option></select></div>
-              {type === 'crypto' && (<div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Network</label><select value={network} onChange={e => setNetwork(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="ERC20">ERC20</option><option value="TRC20">TRC20</option><option value="BEP20">BEP20</option></select></div>)}
-              <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>{type === 'crypto' ? 'Wallet Address' : 'Phone Number'}</label><input type="text" required placeholder={type === 'crypto' ? '0x...' : '+254...'} value={address} onChange={e => setAddress(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
+              {type === 'crypto' && (<div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Network</label><select value={network} onChange={e => setNetwork(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="ERC20">ERC20</option><option value="BEP20">BEP20</option></select></div>)}
+              {type === 'crypto' ? (
+                <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Wallet Address</label><input type="text" required placeholder="0x..." value={address} onChange={e => setAddress(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Full Name</label><input type="text" required placeholder="As it appears on your ID" value={fullName} onChange={e => setFullName(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
+                  <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Phone Number</label><input type="text" required placeholder="+254..." value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
+                </>
+              )}
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}><input type="checkbox" id="isPrimary" checked={isPrimary} onChange={e => setIsPrimary(e.target.checked)} /><label htmlFor="isPrimary" style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>Set as Primary Account</label></div>
               <div style={{ display: 'flex', gap: '12px' }}><button type="button" onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '16px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-main)', fontWeight: 700, color: 'var(--text-main)', cursor: 'pointer' }}>Cancel</button><button type="submit" disabled={submitting} style={{ flex: 2, padding: '14px', borderRadius: '16px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>{submitting ? 'Saving...' : 'Save Account'}</button></div>
             </form>
