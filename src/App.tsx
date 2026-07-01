@@ -20,6 +20,7 @@ import AdminUsers from './pages/AdminUsers'
 import AdminPayments from './pages/AdminPayments'
 import AdminPlans from './pages/AdminPlans'
 import AdminInvites from './pages/AdminInvites'
+import AdminNotifications from './pages/AdminNotifications'
 import TaskPlayer from './pages/TaskPlayer'
 import InvestmentPlans from './pages/InvestmentPlans'
 import WithdrawFunds from './pages/WithdrawFunds'
@@ -91,6 +92,7 @@ function AppContent() {
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/plans" element={<AdminPlans />} />
             <Route path="/admin/invites" element={<AdminInvites />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
             <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>
