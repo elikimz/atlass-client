@@ -38,9 +38,17 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         localStorage.setItem('user_is_admin', res.data.is_admin ? 'true' : 'false')
       } catch (err: any) {
         console.error('Failed to fetch user data:', err)
-        // Only sign out if it's definitely an auth error and not a network error
+        // Only sign out if it's definitely an auth error (401) AND the token is missing
+        // If token exists but we get 401, it might be a temporary issue, so don't sign out
         if (err.response?.status === 401) {
-          handleSignOut()
+          const token = localStorage.getItem('access_token')
+          if (!token) {
+            handleSignOut()
+          } else {
+            // Token exists but API returned 401 - this could be a temporary issue
+            // Log it but don't sign out the user
+            console.warn('Token exists but received 401 from API - keeping user logged in')
+          }
         }
       }
     }

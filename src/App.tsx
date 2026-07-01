@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
+
 import Login from './pages/Login'
 import OTPVerify from './pages/OTPVerify'
 import Dashboard from './pages/Dashboard'
@@ -39,11 +40,18 @@ function AppContent() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  const checkAuth = () => {
+  const checkAuth = async () => {
     const token = localStorage.getItem('access_token')
     const adminStatus = localStorage.getItem('user_is_admin') === 'true'
-    setIsAuthenticated(!!token)
-    setIsAdmin(adminStatus)
+    
+    if (token) {
+      // Token exists, keep the user logged in
+      setIsAuthenticated(true)
+      setIsAdmin(adminStatus)
+    } else {
+      setIsAuthenticated(false)
+      setIsAdmin(false)
+    }
   }
 
   useEffect(() => {

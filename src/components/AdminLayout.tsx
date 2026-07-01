@@ -22,7 +22,14 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
     window.addEventListener('resize', handleResize)
     api.get('/auth/me').then(res => setAdminName(res.data.first_name || 'Admin')).catch(err => {
       console.error('Failed to fetch admin data:', err)
-      if (err.response?.status === 401) handleSignOut()
+      if (err.response?.status === 401) {
+        const token = localStorage.getItem('access_token')
+        if (!token) {
+          handleSignOut()
+        } else {
+          console.warn('Token exists but received 401 from API - keeping admin logged in')
+        }
+      }
     })
     return () => window.removeEventListener('resize', handleResize)
   }, [])
