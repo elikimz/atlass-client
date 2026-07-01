@@ -11,6 +11,12 @@ interface ReferralSummaryData {
   earnings: number
   users_referred: number
   task_rebate: number
+  tier_a_invite_earnings: number
+  tier_b_invite_earnings: number
+  tier_c_invite_earnings: number
+  tier_a_task_rebate: number
+  tier_b_task_rebate: number
+  tier_c_task_rebate: number
 }
 
 export default function Referrals() {
@@ -64,6 +70,35 @@ export default function Referrals() {
               <p style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>{stat.val}</p>
             </div>
           ))}
+        </div>
+        
+        {/* 3-Tier Breakdown Table */}
+        <div style={{ marginTop: '32px', overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border-main)', textAlign: 'left' }}>
+                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Tier Level</th>
+                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Invite Commission (First Purchase)</th>
+                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Task Rebate (Flat-Rate)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { level: 'Tier A (Direct)', invite: summary?.tier_a_invite_earnings ?? 0, rebate: summary?.tier_a_task_rebate ?? 0, rate: '10% / $0.01' },
+                { level: 'Tier B (Secondary)', invite: summary?.tier_b_invite_earnings ?? 0, rebate: summary?.tier_b_task_rebate ?? 0, rate: '4% / $0.005' },
+                { level: 'Tier C (Tertiary)', invite: summary?.tier_c_invite_earnings ?? 0, rebate: summary?.tier_c_task_rebate ?? 0, rate: '1% / $0.0025' }
+              ].map((row, idx) => (
+                <tr key={idx} style={{ borderBottom: idx === 2 ? 'none' : '1px solid var(--border-main)' }}>
+                  <td style={{ padding: '12px', fontWeight: 600, color: 'var(--text-heading)' }}>
+                    {row.level}
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400 }}>{row.rate}</div>
+                  </td>
+                  <td style={{ padding: '12px', color: '#F97316', fontWeight: 700 }}>${row.invite.toFixed(2)}</td>
+                  <td style={{ padding: '12px', color: '#22C55E', fontWeight: 700 }}>${row.rebate.toFixed(4)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

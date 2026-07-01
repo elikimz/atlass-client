@@ -9,6 +9,11 @@ interface DashboardData {
   approved_roles: string
   certifications_earned: number
   earnings_history: { day: string; value: number }[]
+  total_earnings: number
+  task_earnings: number
+  referral_commission: number
+  task_rebate_commission: number
+  bonus_refunded: number
 }
 
 interface UserData {
@@ -202,10 +207,39 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Total Earnings Breakdown Section */}
+      {data && (
+        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 20px' }}>Total Earnings Breakdown</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: '24px', marginBottom: '24px' }}>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Task Earnings</div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)' }}>${data.task_earnings.toFixed(2)}</div>
+            </div>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Referral Commission</div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#F97316' }}>${data.referral_commission.toFixed(2)}</div>
+            </div>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Task Rebates</div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#22C55E' }}>${data.task_rebate_commission.toFixed(2)}</div>
+            </div>
+            <div style={{ padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Bonus Refunded</div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#0EA5E9' }}>${data.bonus_refunded.toFixed(2)}</div>
+            </div>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border-main)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>Total Accumulated Earnings:</span>
+            <span style={{ fontSize: '24px', fontWeight: 800, color: 'var(--accent-primary)' }}>${data.total_earnings.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+
       {/* Earnings Summary Section */}
       {data && (
         <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 20px' }}>Earnings Summary</h2>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 20px' }}>Periodic Summary</h2>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '24px' }}>
             <div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Today's Earnings</div>
