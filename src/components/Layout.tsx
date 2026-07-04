@@ -20,6 +20,23 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const navigate = useNavigate()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
   const [user, setUser] = useState<UserData | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await api.get('/notifications')
+        const count = (res.data || []).filter((n: any) => !n.is_read).length
+        setUnreadCount(count)
+      } catch (err) {
+        console.error('Failed to fetch unread count:', err)
+      }
+    }
+
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000) // Poll every 30s
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {
@@ -170,7 +187,30 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                   transition: 'all 0.2s',
                 }}
               >
-                <div style={{ color: 'inherit' }}>{item.icon}</div>
+                <div style={{ color: 'inherit', position: 'relative' }}>
+                  {item.icon}
+                  {item.label === 'Dashboard' && unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-5px',
+                      right: '-5px',
+                      backgroundColor: '#EF4444',
+                      color: 'white',
+                      borderRadius: '50%',
+                      minWidth: '16px',
+                      height: '16px',
+                      fontSize: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid var(--bg-card)',
+                      fontWeight: 'bold',
+                      padding: '0 2px'
+                    }}>
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span>{item.label}</span>
               </Link>
             ))}
@@ -281,7 +321,30 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                   minWidth: '60px'
                 }}
               >
-                <div style={{ color: 'inherit', transform: 'scale(0.85)' }}>{item.icon}</div>
+                <div style={{ color: 'inherit', transform: 'scale(0.85)', position: 'relative' }}>
+                  {item.icon}
+                  {item.label === 'Dashboard' && unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-8px',
+                      backgroundColor: '#EF4444',
+                      color: 'white',
+                      borderRadius: '50%',
+                      minWidth: '16px',
+                      height: '16px',
+                      fontSize: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid var(--bg-card)',
+                      fontWeight: 'bold',
+                      padding: '0 2px'
+                    }}>
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
                   {item.label === 'Payments' ? 'Pay' : item.label}
                 </span>

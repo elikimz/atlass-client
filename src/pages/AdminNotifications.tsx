@@ -131,23 +131,53 @@ export default function AdminNotifications() {
 
             {(selectedUserId === -1 || (selectedUserId !== null && selectedUserId !== -1)) && (
               <div style={{ marginTop: '12px' }}>
-                <input
-                  type="text"
-                  placeholder="Search by name or email..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-main)',
-                    backgroundColor: 'var(--bg-main)',
-                    color: 'var(--text-main)',
-                    fontSize: '14px',
-                    marginBottom: '8px',
-                    boxSizing: 'border-box'
-                  }}
-                />
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      type="text"
+                      placeholder="Search by name or email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-main)',
+                        backgroundColor: 'var(--bg-main)',
+                        color: 'var(--text-main)',
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+                  <select
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val) {
+                        setSelectedUserId(parseInt(val));
+                        setSearchTerm('');
+                      }
+                    }}
+                    value={selectedUserId !== null && selectedUserId !== -1 ? selectedUserId : ""}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-main)',
+                      backgroundColor: 'var(--bg-main)',
+                      color: 'var(--text-main)',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      maxWidth: '200px'
+                    }}
+                  >
+                    <option value="" disabled>Or select a user...</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>
+                        {u.first_name} {u.last_name} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 
                 {searchTerm.trim() !== '' && (
                   <div style={{
