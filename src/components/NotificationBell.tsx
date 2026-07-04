@@ -41,6 +41,25 @@ export default function NotificationBell() {
     }
   }
 
+  const handleDeleteNotification = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent triggering mark as read
+    try {
+      await api.delete(`/notifications/${id}`)
+      await fetchNotifications()
+    } catch (error) {
+      console.error('Error deleting notification:', error)
+    }
+  }
+
+  const handleClearAll = async () => {
+    try {
+      await api.delete('/notifications/clear-all')
+      await fetchNotifications()
+    } catch (error) {
+      console.error('Error clearing notifications:', error)
+    }
+  }
+
   const unreadCount = notifications.filter(n => !n.is_read).length
 
   const getTypeColor = (type: string) => {
@@ -134,25 +153,43 @@ export default function NotificationBell() {
             <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)' }}>
               Notifications
             </h3>
-            {unreadCount > 0 && (
-              <button
-                onClick={() => {
-                  const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id)
-                  handleMarkAsRead(unreadIds)
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--accent-primary)',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  textDecoration: 'underline'
-                }}
-              >
-                Mark all read
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {unreadCount > 0 && (
+                <button
+                  onClick={() => {
+                    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id)
+                    handleMarkAsRead(unreadIds)
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--accent-primary)',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Mark all read
+                </button>
+              )}
+              {notifications.some(n => n.user_id !== null) && (
+                <button
+                  onClick={handleClearAll}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#EF4444',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Notifications List */}
@@ -231,17 +268,44 @@ export default function NotificationBell() {
                       </div>
                     </div>
 
-                    {/* Unread Indicator */}
-                    {!notif.is_read && (
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: 'var(--accent-primary)',
-                        flexShrink: 0,
-                        marginTop: '6px'
-                      }} />
-                    )}
+                    {/* Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                      {/* Unread Indicator */}
+                      {!notif.is_read && (
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: 'var(--accent-primary)',
+                          flexShrink: 0
+                        }} />
+                      )}
+                      
+                      {/* Delete Button (only for targeted notifications) */}
+                      {notif.user_id !== null && (
+                        <button
+                          onClick={(e) => handleDeleteNotification(notif.id, e)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            padding: '4px',
+                            color: 'var(--text-muted)',
+                            borderRadius: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = '#EF4444' }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
+                          title="Delete notification"
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
