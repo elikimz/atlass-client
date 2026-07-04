@@ -15,6 +15,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [hasNewNotification, setHasNewNotification] = useState(false)
+  const isAdmin = localStorage.getItem('user_is_admin') === 'true'
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -321,25 +322,26 @@ export default function NotificationBell() {
                         }} />
                       )}
                       
-                      {/* Delete Button (only for targeted notifications) */}
-                      {notif.user_id !== null && (
+                      {/* Delete Button - visible for user's own notifications OR if user is admin */}
+                      {(notif.user_id !== null || isAdmin) && (
                         <button
                           onClick={(e) => handleDeleteNotification(notif.id, e)}
                           style={{
                             background: 'none',
                             border: 'none',
                             cursor: 'pointer',
-                            fontSize: '14px',
-                            padding: '4px',
-                            color: 'var(--text-muted)',
-                            borderRadius: '4px',
+                            fontSize: '16px',
+                            padding: '6px',
+                            color: '#EF4444',
+                            opacity: 0.7,
+                            borderRadius: '6px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             transition: 'all 0.2s'
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = '#EF4444' }}
-                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)' }}
+                          onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.7'; e.currentTarget.style.backgroundColor = 'transparent' }}
                           title="Delete notification"
                         >
                           🗑️
