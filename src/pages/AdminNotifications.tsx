@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 
@@ -10,6 +11,7 @@ interface User {
 }
 
 export default function AdminNotifications() {
+  const location = useLocation()
   const [users, setUsers] = useState<User[]>([])
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
   const [title, setTitle] = useState('')
@@ -25,7 +27,18 @@ export default function AdminNotifications() {
   const fetchUsers = async () => {
     try {
       const response = await api.get('/admin/users')
-      setUsers(response.data || [])
+      const fetchedUsers = response.data || []
+      setUsers(fetchedUsers)
+
+      // Handle pre-selected user from query params
+      const params = new URLSearchParams(location.search)
+      const userIdParam = params.get('userId')
+      if (userIdParam) {
+        const userId = parseInt(userIdParam)
+        if (fetchedUsers.some((u: User) => u.id === userId)) {
+          setSelectedUserId(userId)
+        }
+      }
     } catch (error) {
       console.error('Error fetching users:', error)
       toast.error('Failed to fetch users')
