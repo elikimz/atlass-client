@@ -256,7 +256,7 @@ export default function InvestmentPlans() {
                 </button>
                 {user?.current_plan_id && !isActive && !isLowerTier && plan.name !== 'Intern' && (
                   <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4', fontStyle: 'italic', textAlign: 'center' }}>
-                    Only the net additional cost is deducted from your Deposit Wallet. Your previous plan price is refunded and locked for 3 days (72 hours), then automatically released to your Withdrawal Wallet as cashable earnings. Note: Expired plans are not eligible for a refund.
+                    The full plan amount will be deducted. If upgrading from an active paid tier, your previous package price will be automatically refunded to your balance as bonus and available for withdrawal after 3 days (Note: Expired plans are not eligible for a refund).
                   </div>
                 )}
               </div>
