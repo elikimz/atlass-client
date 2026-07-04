@@ -59,7 +59,7 @@ const infoCardStyle: React.CSSProperties = {
 
 export default function Payments() {
   const navigate = useNavigate()
-  const [overview, setOverview] = useState<PaymentOverview | null>(null)
+  // Removed unused overview state to fix build error
   const [user, setUser] = useState<UserData | null>(null)
   const [referrals, setReferrals] = useState<ReferralSummary | null>(null)
 
@@ -68,13 +68,11 @@ export default function Payments() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/payments/overview'),
       api.get('/auth/me'),
       api.get('/referrals/summary'),
       api.get('/dashboard/summary'),
     ])
-      .then(([overviewRes, userRes, referralsRes, dashboardRes]) => {
-        setOverview(overviewRes.data)
+      .then(([userRes, referralsRes, dashboardRes]) => {
         setUser(userRes.data)
         setReferrals(referralsRes.data)
         setDashboard(dashboardRes.data)
