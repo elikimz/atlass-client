@@ -256,7 +256,7 @@ export default function InvestmentPlans() {
                 </button>
                 {user?.current_plan_id && !isActive && !isLowerTier && plan.name !== 'Intern' && (
                   <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4', fontStyle: 'italic', textAlign: 'center' }}>
-                    The full plan amount will be deducted. If upgrading from an active paid tier, your previous package price will be automatically refunded to your balance as bonus and available for withdrawal after after 3 days (Note: Expired plans are not eligible for a refund).
+                    Only the net additional cost is deducted from your Deposit Wallet. Your previous plan price is refunded and locked for 3 days (72 hours), then automatically released to your Withdrawal Wallet as cashable earnings. Note: Expired plans are not eligible for a refund.
                   </div>
                 )}
               </div>
@@ -290,9 +290,10 @@ export default function InvestmentPlans() {
           </div>
           
           <div>
-            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Upgrade Refund:</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Upgrade Refund (3-Day Lock):</div>
             <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>
-              <li>Upgrade refund to a total performance bonus. When you upgrade, the initial price of your previous plan is refunded back to your balance.</li>
+              <li>When you upgrade, only the net additional cost is charged from your Deposit Wallet. Your previous plan's price is logged as a pending refund and locked for exactly 72 hours. After 3 days, the refund is automatically released to your Withdrawal Wallet as cashable earnings and counted in your Total Earnings.</li>
+              <li>Plan upgrades do NOT generate invite commissions for your upline — only first-time purchases do.</li>
             </ul>
           </div>
         </div>

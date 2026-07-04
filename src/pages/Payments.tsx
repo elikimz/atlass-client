@@ -12,6 +12,11 @@ interface UserData {
   deposit_wallet_balance: number
   withdrawal_wallet_balance: number
   performance_bonus_balance: number
+  /**
+   * pending_refund: Upgrade refund amount still within the 3-day lock.
+   * Not yet cashable — shown as a separate informational card.
+   */
+  pending_refund?: number
 }
 
 interface ReferralSummary {
@@ -26,6 +31,12 @@ interface DashboardSummary {
   today_earnings: number
   this_week_earnings: number
   this_month_earnings: number
+  total_earnings: number
+  task_earnings: number
+  referral_commission: number
+  task_rebate_commission: number
+  bonus_refunded: number
+  pending_refund: number
   recent_activity: {
     id: number
     description: string
@@ -87,7 +98,12 @@ export default function Payments() {
   const todayEarnings = dashboard?.today_earnings || 0
   const weekEarnings = dashboard?.this_week_earnings || 0
   const monthEarnings = dashboard?.this_month_earnings || 0
-  const totalEarnings = (overview?.total_paid || 0) + (user?.withdrawal_wallet_balance || 0)
+
+  // Total Earnings Rule: cumulative profit-generating activities ONLY.
+  // = Task Earnings + Invite Commissions + Task Rebates + Released Upgrade Refunds
+  // Deposit recharges (total_paid) are NEVER included here.
+  const totalEarnings = dashboard?.total_earnings || 0
+  const pendingRefund = dashboard?.pending_refund || 0
 
   const actionButtons = [
     { label: 'Recharge', subtext: 'Add Funds', icon: '⚡', route: '/payments/recharge' },
@@ -96,11 +112,54 @@ export default function Payments() {
   ]
 
   const walletCards = [
-    { id: 'deposit', title: 'Deposit Wallet', amount: user?.deposit_wallet_balance || 0, icon: '💼', color: '#5932EA' },
-    { id: 'withdrawal', title: 'Withdrawal Wallet', amount: user?.withdrawal_wallet_balance || 0, icon: '💳', color: '#00B4D8' },
-    { id: 'earnings', title: 'Total Earnings', amount: totalEarnings, icon: '💰', color: '#22c55e' },
-    { id: 'referral', title: 'Referral Commission', amount: referrals?.earnings || 0, icon: '👥', color: '#f59e0b' },
-    { id: 'rebate', title: 'Task Rebate', amount: referrals?.task_rebate || 0, icon: '🎬', color: '#10b981' },
+    {
+      id: 'deposit',
+      title: 'Deposit Wallet',
+      subtitle: 'Recharged funds only',
+      amount: user?.deposit_wallet_balance || 0,
+      icon: '💼',
+      color: '#5932EA'
+    },
+    {
+      id: 'withdrawal',
+      title: 'Withdrawal Wallet',
+      subtitle: 'Cashable earnings',
+      amount: user?.withdrawal_wallet_balance || 0,
+      icon: '💳',
+      color: '#00B4D8'
+    },
+    {
+      id: 'earnings',
+      title: 'Total Earnings',
+      subtitle: 'Excl. recharges',
+      amount: totalEarnings,
+      icon: '💰',
+      color: '#22c55e'
+    },
+    ...(pendingRefund > 0 ? [{
+      id: 'locked',
+      title: 'Locked Refund',
+      subtitle: '🔒 3-day lock',
+      amount: pendingRefund,
+      icon: '🔒',
+      color: '#f59e0b'
+    }] : []),
+    {
+      id: 'referral',
+      title: 'Invite Commissions',
+      subtitle: 'First-purchase only',
+      amount: referrals?.earnings || 0,
+      icon: '👥',
+      color: '#f59e0b'
+    },
+    {
+      id: 'rebate',
+      title: 'Task Rebates',
+      subtitle: 'Downline activity',
+      amount: referrals?.task_rebate || 0,
+      icon: '🎬',
+      color: '#10b981'
+    },
   ]
 
   const earningPeriods = [
@@ -148,7 +207,10 @@ export default function Payments() {
           <div key={w.id} style={infoCardStyle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: `${w.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>{w.icon}</div>
-              <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{w.title}</h3>
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{w.title}</h3>
+                {'subtitle' in w && <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '2px 0 0' }}>{(w as any).subtitle}</p>}
+              </div>
             </div>
             <div>
               <p style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px' }}>USD {w.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
