@@ -2,11 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
-interface PaymentOverview {
-  total_paid: number
-  previous_unpaid: number
-  current_pending: number
-}
+// Removed unused PaymentOverview interface to fix build error
 
 interface UserData {
   deposit_wallet_balance: number
