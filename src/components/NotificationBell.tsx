@@ -14,6 +14,7 @@ interface Notification {
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
+  const [hasNewNotification, setHasNewNotification] = useState(false)
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -26,7 +27,17 @@ export default function NotificationBell() {
   const fetchNotifications = async () => {
     try {
       const response = await api.get('/notifications')
-      setNotifications(response.data || [])
+      const newNotifications = response.data || []
+      const previousUnreadCount = notifications.filter(n => !n.is_read).length
+      const newUnreadCount = newNotifications.filter(n => !n.is_read).length
+      
+      // Trigger animation if new unread notifications arrived
+      if (newUnreadCount > previousUnreadCount) {
+        setHasNewNotification(true)
+        setTimeout(() => setHasNewNotification(false), 600) // Animation duration
+      }
+      
+      setNotifications(newNotifications)
     } catch (error) {
       console.error('Error fetching notifications:', error)
     }
@@ -88,6 +99,33 @@ export default function NotificationBell() {
 
   return (
     <div style={{ position: 'relative' }}>
+      <style>{`
+        @keyframes bubble {
+          0% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.15);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes pulse-ring {
+          0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+          }
+        }
+      `}</style>
+
       {/* Bell Icon Button */}
       <button
         onClick={() => setShowDropdown(!showDropdown)}
@@ -100,7 +138,8 @@ export default function NotificationBell() {
           padding: '8px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          animation: hasNewNotification ? 'bubble 0.6s ease-in-out' : 'none'
         }}
         title="Notifications"
       >
@@ -119,7 +158,8 @@ export default function NotificationBell() {
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '12px',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            animation: hasNewNotification ? 'pulse-ring 0.6s ease-out' : 'none'
           }}>
             {unreadCount}
           </span>
