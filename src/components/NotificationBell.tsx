@@ -28,8 +28,8 @@ export default function NotificationBell() {
     try {
       const response = await api.get('/notifications')
       const newNotifications = response.data || []
-      const previousUnreadCount = notifications.filter(n => !n.is_read).length
-      const newUnreadCount = newNotifications.filter(n => !n.is_read).length
+      const previousUnreadCount = notifications.filter((n: Notification) => !n.is_read).length
+      const newUnreadCount = newNotifications.filter((n: Notification) => !n.is_read).length
       
       // Trigger animation if new unread notifications arrived
       if (newUnreadCount > previousUnreadCount) {
