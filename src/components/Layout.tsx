@@ -59,14 +59,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         // Only sign out if it's definitely an auth error (401) AND the token is missing
         // If token exists but we get 401, it might be a temporary issue, so don't sign out
         if (err.response?.status === 401) {
-          const token = localStorage.getItem('access_token')
-          if (!token) {
-            handleSignOut()
-          } else {
-            // Token exists but API returned 401 - this could be a temporary issue
-            // Log it but don't sign out the user
-            console.warn('Token exists but received 401 from API - keeping user logged in')
-          }
+          // Force sign out on 401 to prevent broken sessions
+          handleSignOut()
         }
       }
     }
