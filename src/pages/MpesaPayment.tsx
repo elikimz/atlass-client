@@ -97,10 +97,6 @@ export default function MpesaPayment() {
   const [statusData, setStatusData] = useState<StatusResponse | null>(null)
   const [pollCount, setPollCount] = useState(0)
   const [timeoutReached, setTimeoutReached] = useState(false)
-  // Plans list for recharge mode (to find matching plan by price)
-  const [matchedPlan, setMatchedPlan] = useState<Plan | null>(null)
-  const [loadingPlans, setLoadingPlans] = useState(false)
-  const [planLoadError, setPlanLoadError] = useState<string | null>(null)
 
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollCountRef = useRef(0)
@@ -115,32 +111,6 @@ export default function MpesaPayment() {
       navigate('/payments/recharge', { replace: true })
     }
   }, [plan, isRechargeMode, navigate])
-
-  // In recharge mode, load plans to find the one matching the selected amount
-  useEffect(() => {
-    if (isRechargeMode && rechargeAmount) {
-      setLoadingPlans(true)
-      setPlanLoadError(null)
-      api.get('/plans/')
-        .then(res => {
-          const allPlans: Plan[] = res.data || []
-          // Find a plan whose price matches the selected recharge amount
-          const found = allPlans.find(p => p.price === rechargeAmount && p.price > 0)
-          if (found) {
-            setMatchedPlan(found)
-          } else {
-            setPlanLoadError(
-              `No plan found for $${rechargeAmount}. Available plan amounts are: ` +
-              allPlans.filter(p => p.price > 0).map(p => `$${p.price}`).join(', ') + '.'
-            )
-          }
-        })
-        .catch(() => {
-          setPlanLoadError('Failed to load plan details. Please go back and try again.')
-        })
-        .finally(() => setLoadingPlans(false))
-    }
-  }, [isRechargeMode, rechargeAmount])
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -206,9 +176,6 @@ export default function MpesaPayment() {
     setPhoneError(null)
     setError(null)
   }
-
-  // The effective plan to use for payment
-  const effectivePlan = plan || matchedPlan
 
   const handleInitiatePayment = async () => {
     // Validate phone
@@ -311,11 +278,11 @@ export default function MpesaPayment() {
 
   if (!plan && !isRechargeMode) return null
 
-  const displayAmount = effectivePlan
-    ? Math.round(effectivePlan.price * 130)
+  const displayAmount = plan
+    ? Math.round(plan.price * 130)
     : Math.round((rechargeAmount || 0) * 130)
 
-  const displayUSD = effectivePlan ? effectivePlan.price : (rechargeAmount || 0)
+  const displayUSD = plan ? plan.price : (rechargeAmount || 0)
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -356,13 +323,13 @@ export default function MpesaPayment() {
         border: '1px solid var(--border-main)',
         boxShadow: 'var(--card-shadow)'
       }}>
-        {effectivePlan ? (
+        {plan ? (
           /* Plan mode: show plan details */
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Plan</div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-heading)' }}>{effectivePlan.name}</div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-heading)' }}>{plan.name}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Amount</div>
@@ -378,11 +345,11 @@ export default function MpesaPayment() {
             }}>
               <div>
                 <span style={{ color: 'var(--text-muted)' }}>Daily Tasks: </span>
-                <span style={{ fontWeight: 700 }}>{effectivePlan.daily_tasks_limit}</span>
+                <span style={{ fontWeight: 700 }}>{plan.daily_tasks_limit}</span>
               </div>
               <div>
                 <span style={{ color: 'var(--text-muted)' }}>Validity: </span>
-                <span style={{ fontWeight: 700 }}>{effectivePlan.validity_days} days</span>
+                <span style={{ fontWeight: 700 }}>{plan.validity_days} days</span>
               </div>
             </div>
           </>
@@ -502,17 +469,17 @@ export default function MpesaPayment() {
           {/* Pay button */}
           <button
             onClick={handleInitiatePayment}
-            disabled={loading || !phone.trim() || (!effectivePlan && isRechargeMode)}
+            disabled={loading || !phone.trim()}
             style={{
               width: '100%',
               height: '52px',
               borderRadius: '12px',
-              backgroundColor: (loading || !phone.trim() || (!effectivePlan && isRechargeMode)) ? 'var(--text-muted)' : '#00AC4F',
+              backgroundColor: (loading || !phone.trim()) ? 'var(--text-muted)' : '#00AC4F',
               color: 'white',
               fontSize: '16px',
               fontWeight: 700,
               border: 'none',
-              cursor: (loading || !phone.trim() || (!effectivePlan && isRechargeMode)) ? 'not-allowed' : 'pointer',
+              cursor: (loading || !phone.trim()) ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -653,7 +620,7 @@ export default function MpesaPayment() {
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
             {isRechargeMode
               ? `Your account has been recharged with $${displayUSD.toFixed(2)}.`
-              : `Your ${statusData?.plan_name || effectivePlan?.name || 'plan'} has been activated.`
+              : `Your ${statusData?.plan_name || plan?.name || 'plan'} has been activated.`
             }
           </p>
 
