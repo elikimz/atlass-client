@@ -220,8 +220,10 @@ export default function MpesaPayment() {
       setPhoneError('Invalid phone number. Use format 07XXXXXXXX or 2547XXXXXXXX.')
       return
     }
-    if (!effectivePlan) {
-      setError('Plan details not available. Please go back and try again.')
+    
+    // Check if we have a valid target for payment
+    if (!plan && !isRechargeMode) {
+      setError('Payment details missing. Please go back and try again.')
       return
     }
 
@@ -230,10 +232,18 @@ export default function MpesaPayment() {
     setPhoneError(null)
 
     try {
-      const res = await api.post<InitiateResponse>('/pesaflux/initiate', {
-        plan_id: effectivePlan.id,
+      // Prepare payload: send plan_id if available, otherwise send amount for recharge
+      const payload: any = {
         phone: normalizePhone(phone)
-      })
+      }
+      
+      if (plan) {
+        payload.plan_id = plan.id
+      } else if (rechargeAmount) {
+        payload.amount = rechargeAmount
+      }
+
+      const res = await api.post<InitiateResponse>('/pesaflux/initiate', payload)
 
       const data = res.data
       setInitiateData(data)
@@ -299,63 +309,7 @@ export default function MpesaPayment() {
     }
   }
 
-  // Loading state for recharge mode while fetching plans
-  if (isRechargeMode && loadingPlans) {
-    return (
-      <div style={{
-        minHeight: '100vh', backgroundColor: 'var(--bg-main)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'Inter, sans-serif'
-      }}>
-        <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-          <div style={{
-            width: '40px', height: '40px', border: '3px solid var(--border-main)',
-            borderTop: '3px solid #00AC4F', borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite', margin: '0 auto 16px'
-          }} />
-          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-          Loading payment details...
-        </div>
-      </div>
-    )
-  }
-
-  // Error state for recharge mode when no matching plan found
-  if (isRechargeMode && planLoadError) {
-    return (
-      <div style={{
-        minHeight: '100vh', backgroundColor: 'var(--bg-main)',
-        padding: '16px', fontFamily: 'Inter, sans-serif', maxWidth: '480px', margin: '0 auto'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-          <button onClick={handleGoBack} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-heading)', padding: '4px' }}>←</button>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Pay with M-Pesa</h1>
-        </div>
-        <div style={{
-          backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '32px 24px',
-          border: '1px solid #fecaca', textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '40px', marginBottom: '16px' }}>⚠️</div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#991b1b', marginBottom: '12px' }}>Amount Not Available</h2>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
-            {planLoadError}
-          </p>
-          <button
-            onClick={handleGoBack}
-            style={{
-              width: '100%', height: '48px', borderRadius: '12px',
-              backgroundColor: 'var(--accent-primary)', color: 'white',
-              fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer'
-            }}
-          >
-            ← Go Back
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!effectivePlan && !isRechargeMode) return null
+  if (!plan && !isRechargeMode) return null
 
   const displayAmount = effectivePlan
     ? Math.round(effectivePlan.price * 130)
