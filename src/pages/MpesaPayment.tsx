@@ -98,7 +98,6 @@ export default function MpesaPayment() {
   const [pollCount, setPollCount] = useState(0)
   const [timeoutReached, setTimeoutReached] = useState(false)
   // Plans list for recharge mode (to find matching plan by price)
-  const [plans, setPlans] = useState<Plan[]>([])
   const [matchedPlan, setMatchedPlan] = useState<Plan | null>(null)
   const [loadingPlans, setLoadingPlans] = useState(false)
   const [planLoadError, setPlanLoadError] = useState<string | null>(null)
@@ -125,7 +124,6 @@ export default function MpesaPayment() {
       api.get('/plans/')
         .then(res => {
           const allPlans: Plan[] = res.data || []
-          setPlans(allPlans)
           // Find a plan whose price matches the selected recharge amount
           const found = allPlans.find(p => p.price === rechargeAmount && p.price > 0)
           if (found) {
