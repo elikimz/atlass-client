@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 interface Plan {
@@ -33,6 +34,7 @@ const PLAN_FINANCIALS: Record<string, { daily_earnings: number; total_return: nu
 }
 
 export default function InvestmentPlans() {
+  const navigate = useNavigate()
   const [plans, setPlans] = useState<Plan[]>([])
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -258,6 +260,22 @@ export default function InvestmentPlans() {
                   <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4', fontStyle: 'italic', textAlign: 'center' }}>
                     The full plan amount will be deducted. If upgrading from an active paid tier, your previous package price will be automatically refunded to your Withdrawal Wallet immediately and available for cash out (Note: Expired plans are not eligible for a refund).
                   </div>
+                )}
+                {/* NEW: PesaFlux M-Pesa STK Push button (additive — does not affect existing purchase flow) */}
+                {!isActive && !isLowerTier && plan.name !== 'Intern' && (
+                  <button
+                    onClick={() => navigate('/payments/mpesa', { state: { plan } })}
+                    disabled={actionLoading !== null}
+                    style={{
+                      width: '100%', padding: '8px', borderRadius: '4px', border: 'none',
+                      backgroundColor: '#00AC4F',
+                      color: 'white',
+                      fontSize: '11px', fontWeight: 800, cursor: actionLoading !== null ? 'not-allowed' : 'pointer',
+                      textTransform: 'uppercase', marginTop: '6px'
+                    }}
+                  >
+                    📱 PAY WITH M-PESA
+                  </button>
                 )}
               </div>
             </div>

@@ -26,6 +26,7 @@ import InvestmentPlans from './pages/InvestmentPlans'
 import WithdrawFunds from './pages/WithdrawFunds'
 import WithdrawalAccounts from './pages/WithdrawalAccounts'
 import Recharge from './pages/Recharge'
+import MpesaPayment from './pages/MpesaPayment'  // NEW: PesaFlux M-Pesa STK Push (additive)
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
@@ -114,6 +115,7 @@ function AppContent() {
             <Route path="/payments" element={<Payments />} />
             <Route path="/payments/history" element={<PaymentHistory />} />
             <Route path="/payments/recharge" element={<Recharge />} />
+            <Route path="/payments/mpesa" element={<MpesaPayment />} />  {/* NEW: PesaFlux M-Pesa STK Push (additive) */}
             <Route path="/payments/payout" element={<WithdrawFunds />} />
             <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
             <Route path="/payments/withdrawal" element={<Placeholder title="Withdrawal Accounts" />} />

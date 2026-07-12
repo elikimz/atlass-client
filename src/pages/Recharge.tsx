@@ -260,28 +260,34 @@ export default function Recharge() {
                 </div>
               </div>
 
-              {/* M-Pesa coming soon */}
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '16px', borderRadius: '16px', border: '2px solid transparent',
-                backgroundColor: 'var(--bg-main)', cursor: 'not-allowed', opacity: 0.65
-              }}>
+              {/* NEW: PesaFlux M-Pesa STK Push option (additive — replaces Coming Soon placeholder) */}
+              <div
+                onClick={() => navigate('/payments/mpesa', { state: { plan: null } })}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '16px', borderRadius: '16px',
+                  border: '2px solid transparent',
+                  backgroundColor: 'var(--bg-card)', cursor: 'pointer',
+                  boxShadow: 'none',
+                  transition: 'all 0.2s'
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
-                    width: '40px', height: '40px', backgroundColor: 'var(--bg-card)', borderRadius: '8px',
+                    width: '40px', height: '40px', backgroundColor: '#00AC4F', borderRadius: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '14px', fontWeight: 800, color: '#00AC4F'
+                    fontSize: '14px', fontWeight: 800, color: 'white'
                   }}>M</div>
                   <div>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-muted)' }}>M-PESA (Instant KES)</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Mobile money transfer</div>
+                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>M-PESA (Instant KES)</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Pay directly for a plan via M-Pesa STK Push</div>
                   </div>
                 </div>
                 <span style={{
-                  fontSize: '11px', fontWeight: 700, color: '#f59e0b',
-                  backgroundColor: '#fef3c7', padding: '4px 10px', borderRadius: '20px',
-                  border: '1px solid #fde68a'
-                }}>Coming Soon</span>
+                  fontSize: '11px', fontWeight: 700, color: '#166534',
+                  backgroundColor: '#dcfce7', padding: '4px 10px', borderRadius: '20px',
+                  border: '1px solid #bbf7d0'
+                }}>Active →</span>
               </div>
             </div>
           </div>
