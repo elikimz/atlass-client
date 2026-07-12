@@ -14,7 +14,7 @@ export default function Recharge() {
   const [balance, setBalance] = useState(0)
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20)
   const [customAmount, setCustomAmount] = useState('')
-  const [method, setMethod] = useState('crypto')
+  const [method, setMethod] = useState<'crypto' | 'mpesa'>('crypto')
   const [copied, setCopied] = useState(false)
   const [showCryptoDetails, setShowCryptoDetails] = useState(false)
   const [proofFile, setProofFile] = useState<File | null>(null)
@@ -52,6 +52,14 @@ export default function Recharge() {
 
   const handleProceed = () => {
     if (finalAmount < 20) return
+
+    if (method === 'mpesa') {
+      // Navigate to M-Pesa payment page with the selected recharge amount
+      navigate('/payments/mpesa', { state: { rechargeAmount: finalAmount } })
+      return
+    }
+
+    // Crypto flow
     setShowCryptoDetails(true)
   }
 
@@ -172,7 +180,8 @@ export default function Recharge() {
                     setCustomAmount('')
                   }}
                   style={{
-                    height: '52px', borderRadius: '12px', border: (selectedAmount === amt && !customAmount) ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
+                    height: '52px', borderRadius: '12px',
+                    border: (selectedAmount === amt && !customAmount) ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
                     backgroundColor: 'var(--bg-card)',
                     color: 'var(--text-main)',
                     fontSize: '18px', fontWeight: 700, cursor: 'pointer',
@@ -221,11 +230,12 @@ export default function Recharge() {
             </div>
           </div>
 
-          {/* Choose Method Section */}
+          {/* Choose Payment Method Section */}
           <div style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>Choose Payment Method</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Crypto Option */}
               <div
                 onClick={() => setMethod('crypto')}
                 style={{
@@ -260,15 +270,15 @@ export default function Recharge() {
                 </div>
               </div>
 
-              {/* NEW: PesaFlux M-Pesa STK Push option (additive — replaces Coming Soon placeholder) */}
+              {/* M-Pesa Option */}
               <div
-                onClick={() => navigate('/payments/mpesa', { state: { plan: null } })}
+                onClick={() => setMethod('mpesa')}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '16px', borderRadius: '16px',
-                  border: '2px solid transparent',
+                  border: `2px solid ${method === 'mpesa' ? '#00AC4F' : 'transparent'}`,
                   backgroundColor: 'var(--bg-card)', cursor: 'pointer',
-                  boxShadow: 'none',
+                  boxShadow: method === 'mpesa' ? '0 0 0 3px rgba(0,172,79,0.12)' : 'none',
                   transition: 'all 0.2s'
                 }}
               >
@@ -276,18 +286,23 @@ export default function Recharge() {
                   <div style={{
                     width: '40px', height: '40px', backgroundColor: '#00AC4F', borderRadius: '8px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '14px', fontWeight: 800, color: 'white'
+                    fontSize: '18px', fontWeight: 900, color: 'white', flexShrink: 0
                   }}>M</div>
                   <div>
                     <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>M-PESA (Instant KES)</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Pay directly for a plan via M-Pesa STK Push</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Pay via M-Pesa STK Push — instant confirmation</div>
                   </div>
                 </div>
-                <span style={{
-                  fontSize: '11px', fontWeight: 700, color: '#166534',
-                  backgroundColor: '#dcfce7', padding: '4px 10px', borderRadius: '20px',
-                  border: '1px solid #bbf7d0'
-                }}>Active →</span>
+                <div style={{
+                  width: '22px', height: '22px', borderRadius: '50%',
+                  border: `2px solid ${method === 'mpesa' ? '#00AC4F' : 'var(--border-main)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  {method === 'mpesa' && (
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#00AC4F' }} />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -296,11 +311,18 @@ export default function Recharge() {
           <div style={{ marginBottom: '24px', padding: '0 8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
               <span style={{ color: 'var(--text-heading)', fontWeight: 500 }}>Method:</span>
-              <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>Crypto (USDT-ERC20)</span>
+              <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>
+                {method === 'mpesa' ? 'M-PESA (KES)' : 'Crypto (USDT-ERC20)'}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '14px' }}>
               <span style={{ color: 'var(--text-heading)', fontWeight: 500 }}>Total:</span>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent-primary)' }}>${finalAmount.toFixed(2)}</span>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: method === 'mpesa' ? '#00AC4F' : 'var(--accent-primary)' }}>
+                {method === 'mpesa'
+                  ? `KES ${(finalAmount * 130).toLocaleString(undefined, { maximumFractionDigits: 0 })} ≈ $${finalAmount.toFixed(2)}`
+                  : `$${finalAmount.toFixed(2)}`
+                }
+              </span>
             </div>
 
             <button
@@ -308,14 +330,19 @@ export default function Recharge() {
               disabled={finalAmount < 20}
               style={{
                 width: '100%', height: '56px', borderRadius: '16px',
-                backgroundColor: finalAmount < 20 ? 'var(--text-muted)' : 'var(--accent-primary)',
+                backgroundColor: finalAmount < 20
+                  ? 'var(--text-muted)'
+                  : method === 'mpesa' ? '#00AC4F' : 'var(--accent-primary)',
                 color: 'white', fontSize: '16px', fontWeight: 700, border: 'none',
                 cursor: finalAmount < 20 ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 12px rgba(49, 151, 149, 0.2)',
+                boxShadow: finalAmount < 20 ? 'none' : '0 4px 12px rgba(49, 151, 149, 0.2)',
                 transition: 'all 0.2s'
               }}
             >
-              Proceed to Deposit
+              {method === 'mpesa'
+                ? `📱 Pay with M-Pesa`
+                : 'Proceed to Deposit'
+              }
             </button>
           </div>
         </>
@@ -327,7 +354,9 @@ export default function Recharge() {
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '8px' }}>Send exactly</p>
             <h2 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>${finalAmount.toFixed(2)} USDT</h2>
-            <p style={{ fontSize: '12px', color: 'var(--accent-primary)', fontWeight: 700, marginTop: '4px' }}>{USDT_NETWORK} Network</p>
+            <p style={{ fontSize: '12px', color: 'var(--accent-primary)', marginTop: '4px', fontWeight: 600 }}>
+              Network: {USDT_NETWORK}
+            </p>
           </div>
 
           <div style={{
@@ -466,6 +495,7 @@ export default function Recharge() {
           {loadingHistory ? (
             <div style={{ textAlign: 'center', padding: '24px' }}>
               <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+              <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
               <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Loading history...</p>
             </div>
           ) : depositHistory.length > 0 ? (
