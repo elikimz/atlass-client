@@ -70,6 +70,10 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
       setError('Password must be at least 6 characters')
       return
     }
+    if (password.length > 72) {
+      setError('Password must be no longer than 72 characters')
+      return
+    }
     if (username.length < 3) {
       setError('Username must be at least 3 characters')
       return
@@ -166,10 +170,11 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                 <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="6-16 letters or numbers" required style={inputStyle} />
                 
                 <label style={labelStyle}>Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6-16 alphanumeric password" required style={inputStyle} />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value.slice(0, 72))} placeholder="6-72 characters" required style={inputStyle} maxLength={72} />
+                <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '-12px', marginBottom: '12px' }}>{password.length}/72 characters</p>
                 
                 <label style={labelStyle}>Confirm Password</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Please enter the password again" required style={inputStyle} />
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value.slice(0, 72))} placeholder="Please enter the password again" required style={inputStyle} maxLength={72} />
                 
                 {error && <p style={{ color: '#FB7185', fontSize: '14px', marginBottom: '10px' }}>{error}</p>}
                 
