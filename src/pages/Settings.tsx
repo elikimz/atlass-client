@@ -4,9 +4,11 @@ import api from '../services/api'
 import toast from 'react-hot-toast'
 
 interface Profile {
+  username: string
   first_name: string
   last_name: string
   email: string
+  phone_number: string
   has_withdrawal_password: boolean
 }
 
@@ -180,8 +182,8 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
               </div>
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>Email Address</label>
-              <input type="email" value={profile?.email || ''} disabled style={{ width: '100%', padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-muted)', cursor: 'not-allowed' }} />
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>Username</label>
+              <input type="text" value={profile?.username || ''} disabled style={{ width: '100%', padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-muted)', cursor: 'not-allowed' }} />
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
               <button onClick={handleSave} disabled={saving} style={{ padding: '10px 20px', fontSize: '14px', fontWeight: 700, backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>{saving ? 'Saving...' : 'Save Changes'}</button>
@@ -192,7 +194,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div><p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', margin: '0 0 4px', textTransform: 'uppercase' }}>Full Name</p><p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{profile?.first_name} {profile?.last_name}</p></div>
-              <div><p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', margin: '0 0 4px', textTransform: 'uppercase' }}>Email</p><p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{profile?.email}</p></div>
+              <div><p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', margin: '0 0 4px', textTransform: 'uppercase' }}>Username</p><p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{profile?.username}</p></div>
             </div>
             <button onClick={() => setEditing(true)} style={{ padding: '8px 16px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Edit Profile</button>
           </div>

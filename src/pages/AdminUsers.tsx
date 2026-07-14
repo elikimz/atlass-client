@@ -4,9 +4,11 @@ import toast from 'react-hot-toast'
 
 interface User {
   id: number
+  username: string
   first_name: string
   last_name: string
   email: string
+  phone_number: string
   role: string
   is_admin: boolean
   is_suspended: boolean
@@ -74,7 +76,7 @@ export default function AdminUsers() {
   const filteredUsers = (users || []).filter((user) => {
     if (!user) return false
     const search = (searchTerm || '').toLowerCase()
-    return (user.first_name || '').toLowerCase().includes(search) || (user.last_name || '').toLowerCase().includes(search) || (user.email || '').toLowerCase().includes(search)
+    return (user.username || '').toLowerCase().includes(search) || (user.first_name || '').toLowerCase().includes(search) || (user.last_name || '').toLowerCase().includes(search) || (user.email || '').toLowerCase().includes(search)
   })
 
   if (loading) {
@@ -98,8 +100,9 @@ export default function AdminUsers() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-main)' }}>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Username</th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Name</th>
-              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Email</th>
+              <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Phone</th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Role</th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Status</th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Balances</th>
@@ -109,8 +112,9 @@ export default function AdminUsers() {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.id} style={{ borderBottom: '1px solid var(--border-main)', backgroundColor: user.is_suspended ? 'rgba(225, 29, 72, 0.05)' : 'transparent' }}>
-                <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.first_name} {user.last_name} {user.is_suspended && <span style={{ marginLeft: '8px', color: '#E11D48', fontSize: '11px', fontWeight: 700 }}>[SUSPENDED]</span>}</td>
-                <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-muted)' }}>{user.email}</td>
+                <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.username} {user.is_suspended && <span style={{ marginLeft: '8px', color: '#E11D48', fontSize: '11px', fontWeight: 700 }}>[SUSPENDED]</span>}</td>
+                <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.first_name} {user.last_name}</td>
+                <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-muted)' }}>{user.phone_number}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px' }}>{editingId === user.id ? (<select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>) : (<span style={{ padding: '4px 8px', backgroundColor: user.role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: user.role === 'admin' ? '#92400E' : '#1E40AF', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{user.role}</span>)}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px' }}><div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}><span style={{ padding: '2px 6px', backgroundColor: user.is_trained ? 'rgba(34, 197, 94, 0.1)' : 'var(--bg-main)', color: user.is_trained ? '#166534' : 'var(--text-muted)', borderRadius: '4px', fontSize: '11px', fontWeight: 600, width: 'fit-content' }}>{user.is_trained ? 'Trained' : 'Not Trained'}</span><span style={{ padding: '2px 6px', backgroundColor: user.is_suspended ? 'rgba(220, 38, 38, 0.1)' : 'rgba(34, 197, 94, 0.1)', color: user.is_suspended ? '#991B1B' : '#166534', borderRadius: '4px', fontSize: '11px', fontWeight: 600, width: 'fit-content' }}>{user.is_suspended ? 'Suspended' : 'Active'}</span></div></td>
                 <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)' }}><div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div><div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div></td>
