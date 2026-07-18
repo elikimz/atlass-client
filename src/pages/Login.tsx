@@ -702,9 +702,18 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                   </p>
                 )}
 
-                <button type="submit" style={registerBtnStyle} disabled={loading}>
-                  {loading ? 'Registering...' : 'Registration'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setStep(1); setError('') }}
+                    style={{ ...registerBtnStyle, backgroundColor: '#555', flex: 1 }}
+                  >
+                    Back
+                  </button>
+                  <button type="submit" style={{ ...registerBtnStyle, flex: 2 }} disabled={loading}>
+                    {loading ? 'Registering...' : 'Registration'}
+                  </button>
+                </div>
               </form>
             )}
 
