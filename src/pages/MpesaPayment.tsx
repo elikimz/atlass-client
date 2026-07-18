@@ -225,12 +225,13 @@ export default function MpesaPayment() {
 
       let errorMsg = 'Failed to initiate M-Pesa payment. Please try again.'
 
-      if (typeof detail === 'string') {
+      if (status === 503) {
+        // 503 means PesaFlux provider error or timeout. The detail from backend is usually actionable.
+        errorMsg = typeof detail === 'string' ? detail : 'M-Pesa payment is temporarily unavailable. Please try again later or use Crypto (USDT) to recharge.'
+      } else if (typeof detail === 'string') {
         errorMsg = detail
       } else if (Array.isArray(detail)) {
         errorMsg = detail.map((d: any) => d.msg || d.message || String(d)).join(', ')
-      } else if (status === 503) {
-        errorMsg = 'M-Pesa payment is temporarily unavailable. Please try again later or use Crypto (USDT) to recharge.'
       } else if (status === 400) {
         errorMsg = detail || 'Invalid request. Please check your details and try again.'
       } else if (status === 401 || status === 403) {
