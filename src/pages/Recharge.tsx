@@ -31,7 +31,8 @@ export default function Recharge() {
 
   useEffect(() => {
     api.get('/auth/me').then(res => {
-      setBalance(res.data.deposit_wallet_balance)
+      // Safely handle balance, default to 0 if not present
+      setBalance(res.data.deposit_wallet_balance || 0)
     }).catch(console.error)
 
     setLoadingHistory(true)
