@@ -220,25 +220,29 @@ export default function MpesaPayment() {
       // Start polling for payment status
       startPolling(data.reference)
     } catch (err: any) {
-      const status = err?.response?.status
+      const httpStatus = err?.response?.status
       const detail = err?.response?.data?.detail
 
       let errorMsg = 'Failed to initiate M-Pesa payment. Please try again.'
 
-      if (status === 503) {
-        // 503 means PesaFlux provider error or timeout. The detail from backend is usually actionable.
+      if (httpStatus === 503) {
+        // PesaFlux provider error or timeout
         errorMsg = typeof detail === 'string' ? detail : 'M-Pesa payment is temporarily unavailable. Please try again later or use Crypto (USDT) to recharge.'
+      } else if (httpStatus === 403) {
+        // Account not verified or auth issue from PesaFlux
+        errorMsg = typeof detail === 'string' ? detail : 'M-Pesa payment is not available. Please contact support.'
+      } else if (httpStatus === 400) {
+        // User-fixable errors (insufficient balance, cancelled, unreachable)
+        errorMsg = typeof detail === 'string' ? detail : 'Invalid request. Please check your details and try again.'
       } else if (typeof detail === 'string') {
         errorMsg = detail
       } else if (Array.isArray(detail)) {
         errorMsg = detail.map((d: any) => d.msg || d.message || String(d)).join(', ')
-      } else if (status === 400) {
-        errorMsg = detail || 'Invalid request. Please check your details and try again.'
-      } else if (status === 401 || status === 403) {
+      } else if (httpStatus === 401) {
         errorMsg = 'Your session has expired. Please log in again.'
-      } else if (status === 404) {
+      } else if (httpStatus === 404) {
         errorMsg = 'The selected plan is no longer available. Please go back and choose another.'
-      } else if (!status) {
+      } else if (!httpStatus) {
         errorMsg = 'Network error. Please check your internet connection and try again.'
       }
 
