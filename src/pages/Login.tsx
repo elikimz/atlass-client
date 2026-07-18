@@ -100,11 +100,12 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!loginUsername || !loginPassword) return
+    const trimmedUsername = loginUsername.trim()
+    if (!trimmedUsername || !loginPassword) return
     setLoading(true)
     setError('')
     try {
-      const res = await api.post('/auth/login', { username: loginUsername, password: loginPassword })
+      const res = await api.post('/auth/login', { username: trimmedUsername, password: loginPassword })
       localStorage.setItem('access_token', res.data.access_token)
       localStorage.setItem('username', loginUsername)
       setIsAuthenticated(true)
