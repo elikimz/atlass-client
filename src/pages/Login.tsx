@@ -260,8 +260,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   }
 
   const logoBoxStyle: React.CSSProperties = {
-    width: '90px',
-    height: '90px',
+    width: 'min(90px, 20vw)',
+    height: 'min(90px, 20vw)',
     backgroundColor: 'white',
     borderRadius: '16px',
     display: 'flex',
@@ -295,15 +295,16 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   }
 
   const cardStyle: React.CSSProperties = {
-    width: 'calc(100% - 32px)',
-    maxWidth: '480px',
+    width: '90%',
+    maxWidth: '440px',
     backgroundColor: 'rgba(20, 20, 30, 0.92)',
     borderRadius: '20px',
-    padding: '28px 24px 32px',
+    padding: 'min(28px, 6vw) min(24px, 5vw) min(32px, 8vw)',
     boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
     position: 'relative',
     zIndex: 1,
-    margin: '0 16px 32px',
+    margin: '0 auto 32px',
+    boxSizing: 'border-box',
   }
 
   const stepRowStyle: React.CSSProperties = {
@@ -341,9 +342,9 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     alignItems: 'center',
     backgroundColor: '#2a2a3a',
     borderRadius: '10px',
-    marginBottom: '14px',
-    padding: '0 14px',
-    height: '52px',
+    marginBottom: '12px',
+    padding: '0 12px',
+    height: '48px',
     border: '1px solid #3a3a4a',
   }
 
@@ -563,25 +564,25 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
                   {/* Country code selector */}
                   <div style={{ position: 'relative' }} ref={dropdownRef}>
-                    <button
-                      type="button"
-                      onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                      style={{
-                        height: '52px',
-                        backgroundColor: '#2a2a3a',
-                        border: '1px solid #3a3a4a',
-                        borderRadius: '10px',
-                        padding: '0 12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        cursor: 'pointer',
-                        color: '#ccc',
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                      <button
+                        type="button"
+                        onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                        style={{
+                          height: '48px',
+                          backgroundColor: '#2a2a3a',
+                          border: '1px solid #3a3a4a',
+                          borderRadius: '10px',
+                          padding: '0 10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          cursor: 'pointer',
+                          color: '#ccc',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                       <span>{selectedCountry.flag}</span>
                       <span>{selectedCountry.code}</span>
                       <span style={{ fontSize: '10px', color: '#888' }}>▼</span>
@@ -659,8 +660,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                     onClick={() => { setCaptchaValue(generateCaptcha()); setCaptchaInput('') }}
                     title="Click to refresh"
                     style={{
-                      width: '110px',
-                      height: '52px',
+                      width: '100px',
+                      height: '48px',
                       backgroundColor: 'white',
                       borderRadius: '10px',
                       display: 'flex',
@@ -672,7 +673,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                       position: 'relative',
                     }}
                   >
-                    <svg width="110" height="52" style={{ position: 'absolute' }}>
+                    <svg width="100" height="48" style={{ position: 'absolute' }}>
                       {/* Noise lines */}
                       <line x1="0" y1="15" x2="110" y2="38" stroke="#ccc" strokeWidth="1" />
                       <line x1="0" y1="35" x2="110" y2="18" stroke="#ddd" strokeWidth="1" />
