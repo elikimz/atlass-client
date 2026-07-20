@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { endSession, persistUser } from '../services/session'
 import ThemeToggle from './ThemeToggle'
 import NotificationBell from './NotificationBell'
 
@@ -12,7 +13,21 @@ interface UserData {
   first_name: string
   last_name: string
   email: string
+  username: string
+  role: string
   is_admin: boolean
+  is_trained: boolean
+}
+
+interface NotificationSummary {
+  is_read: boolean
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+  return typeof error === 'object'
+    && error !== null
+    && 'response' in error
+    && (error as { response?: { status?: number } }).response?.status === 401
 }
 
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
@@ -22,11 +37,18 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const [user, setUser] = useState<UserData | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
 
+  const handleSignOut = useCallback(async () => {
+    await endSession()
+    setIsAuthenticated(false)
+    navigate('/login')
+  }, [navigate, setIsAuthenticated])
+
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
         const res = await api.get('/notifications')
-        const count = (res.data || []).filter((n: any) => !n.is_read).length
+        const notifications = Array.isArray(res.data) ? res.data as NotificationSummary[] : []
+        const count = notifications.filter((notification) => !notification.is_read).length
         setUnreadCount(count)
       } catch (err) {
         console.error('Failed to fetch unread count:', err)
@@ -49,18 +71,11 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       try {
         const res = await api.get('/auth/me')
         setUser(res.data)
-        // Store in localStorage for other components to use if needed
-        localStorage.setItem('user_first_name', res.data.first_name)
-        localStorage.setItem('user_last_name', res.data.last_name)
-        localStorage.setItem('user_email', res.data.email)
-        localStorage.setItem('user_is_admin', res.data.is_admin ? 'true' : 'false')
-      } catch (err: any) {
-        console.error('Failed to fetch user data:', err)
-        // Only sign out if it's definitely an auth error (401) AND the token is missing
-        // If token exists but we get 401, it might be a temporary issue, so don't sign out
-        if (err.response?.status === 401) {
-          // Force sign out on 401 to prevent broken sessions
-          handleSignOut()
+        persistUser(res.data)
+      } catch (error: unknown) {
+        console.error('Failed to fetch user data:', error)
+        if (isUnauthorizedError(error)) {
+          void handleSignOut()
         }
       }
     }
@@ -68,17 +83,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     fetchUser()
 
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const handleSignOut = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('user_first_name')
-    localStorage.removeItem('user_last_name')
-    localStorage.removeItem('user_email')
-    localStorage.removeItem('user_is_admin')
-    setIsAuthenticated(false)
-    navigate('/login')
-  }
+  }, [handleSignOut])
 
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
   const lastName = user?.last_name || localStorage.getItem('user_last_name') || ''

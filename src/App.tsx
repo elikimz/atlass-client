@@ -1,9 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Toaster } from 'react-hot-toast'
 
 import Login from './pages/Login'
-import OTPVerify from './pages/OTPVerify'
 import Dashboard from './pages/Dashboard'
 import Training from './pages/Training'
 import LearningHub from './pages/LearningHub'
@@ -32,6 +31,8 @@ import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
 import PaymentHistory from './pages/PaymentHistory'
 import { ThemeProvider } from './context/ThemeContext'
+import api from './services/api'
+import { clearSession, hasSession, persistUser } from './services/session'
 
 function TrainingRoute() {
   return <Training />
@@ -42,24 +43,33 @@ function AppContent() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem('access_token')
-    const adminStatus = localStorage.getItem('user_is_admin') === 'true'
-    
-    if (token) {
-      // Token exists, keep the user logged in
+  const checkAuth = useCallback(async () => {
+    if (!hasSession()) {
+      setIsAuthenticated(false)
+      setIsAdmin(false)
+      return
+    }
+
+    try {
+      // The API interceptor refreshes an expired access token once before this
+      // request fails, so a cached token is never treated as proof of identity.
+      const response = await api.get('/auth/me')
+      persistUser(response.data)
       setIsAuthenticated(true)
-      setIsAdmin(adminStatus)
-    } else {
+      setIsAdmin(response.data.role === 'admin' || Boolean(response.data.is_admin))
+    } catch {
+      clearSession()
       setIsAuthenticated(false)
       setIsAdmin(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    checkAuth()
-    setLoading(false)
-  }, [])
+    const bootstrapTimer = window.setTimeout(() => {
+      void checkAuth().finally(() => setLoading(false))
+    }, 0)
+    return () => window.clearTimeout(bootstrapTimer)
+  }, [checkAuth])
 
   if (loading) {
     return (
@@ -83,7 +93,6 @@ function AppContent() {
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
-        <Route path="/verify" element={<OTPVerify setIsAuthenticated={checkAuth} />} />
         {isAuthenticated && isAdmin ? (
           <Route element={<AdminLayout setIsAuthenticated={checkAuth} />}>
             <Route path="/admin" element={<AdminDashboard />} />

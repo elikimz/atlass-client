@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { endSession } from '../services/session'
 import toast from 'react-hot-toast'
 
 interface Profile {
@@ -15,6 +16,21 @@ interface Profile {
 interface AppConfig {
   key: string
   value: string
+}
+
+function apiErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return fallback
+  }
+
+  const data = (error as { response?: { data?: unknown } }).response?.data
+  if (typeof data === 'object' && data !== null && 'detail' in data) {
+    const detail = (data as { detail?: unknown }).detail
+    if (typeof detail === 'string') {
+      return detail
+    }
+  }
+  return fallback
 }
 
 const cardStyle: React.CSSProperties = {
@@ -83,8 +99,8 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
     }
   }
 
-  const handleSignOut = () => {
-    localStorage.clear()
+  const handleSignOut = async () => {
+    await endSession()
     setIsAuthenticated(false)
     navigate('/login')
   }
@@ -118,8 +134,8 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
       // Refresh profile to update has_withdrawal_password state
       const profileRes = await api.get('/settings/profile')
       setProfile(profileRes.data)
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Failed to update withdrawal password')
+    } catch (error: unknown) {
+      toast.error(apiErrorMessage(error, 'Failed to update withdrawal password'))
     } finally {
       setSettingWithdrawalPassword(false)
     }
@@ -143,7 +159,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
         window.URL.revokeObjectURL(url)
       }, 100)
       toast.success('Certificate downloaded successfully!', { id: toastId })
-    } catch (err) {
+    } catch {
       toast.error('Failed to download certificate. Please ensure training is completed.', { id: toastId })
     } finally {
       setDownloading(false)

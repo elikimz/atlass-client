@@ -1,4 +1,5 @@
-import axios from 'axios'
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import { clearSession, getAccessToken, refreshSession } from './session'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -9,36 +10,50 @@ const api = axios.create({
   },
 })
 
-// Add token to requests
+interface RetriableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+}
+
+function isPublicAuthRequest(url?: string): boolean {
+  return Boolean(url && ['/auth/login', '/auth/register/final', '/auth/refresh', '/auth/logout'].some((path) => url.includes(path)))
+}
+
+function redirectToLogin(): void {
+  if (!window.location.pathname.startsWith('/login')) {
+    window.location.assign('/login')
+  }
+}
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
-  if (token) {
+  const token = getAccessToken()
+  if (token && !isPublicAuthRequest(config.url)) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
 
-// Handle response errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Clear all local storage on 401 (Session Expired)
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('user_first_name')
-      localStorage.removeItem('user_last_name')
-      localStorage.removeItem('user_email')
-      localStorage.removeItem('user_is_admin')
-      
-      // Redirect to login if not already there
-      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/verify')) {
-        window.location.href = '/login'
+  async (error: AxiosError) => {
+    const originalRequest = error.config as RetriableRequestConfig | undefined
+    const status = error.response?.status
+
+    if (status === 401 && originalRequest && !originalRequest._retry && !isPublicAuthRequest(originalRequest.url)) {
+      originalRequest._retry = true
+      const tokens = await refreshSession()
+      if (tokens) {
+        originalRequest.headers.Authorization = `Bearer ${tokens.access_token}`
+        return api(originalRequest)
       }
-      
-      console.warn('Unauthorized access - 401. Session cleared.')
     }
+
+    if (status === 401) {
+      clearSession()
+      redirectToLogin()
+    }
+
     return Promise.reject(error)
-  }
+  },
 )
 
 export default api

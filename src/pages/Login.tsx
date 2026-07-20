@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
+import { persistTokens, persistUser } from '../services/session'
 
 // Country codes list
 const COUNTRY_CODES = [
@@ -32,25 +33,42 @@ function generateCaptcha(): string {
   return result
 }
 
-// Generate a random user ID (6-digit number)
-function generateUserId(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString()
+function apiErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return fallback
+  }
+
+  const response = (error as { response?: { data?: unknown } }).response
+  const data = response?.data
+  if (typeof data === 'object' && data !== null && 'detail' in data) {
+    const detail = (data as { detail?: unknown }).detail
+    if (typeof detail === 'string') {
+      return detail
+    }
+  }
+  return fallback
 }
 
-export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: boolean) => void }) {
-  const [isRegistering, setIsRegistering] = useState(false)
+export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () => Promise<void> }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const referralFromUrl = searchParams.get('ref') || ''
+  const registerFromUrl = referralFromUrl.length > 0 || searchParams.get('mode') === 'register'
+
+  const [isRegistering, setIsRegistering] = useState(registerFromUrl)
   const [step, setStep] = useState(1)
 
   // Step 1 fields
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [inviteCode, setInviteCode] = useState('')
+  const [username, setUsername] = useState('')
+  const [inviteCode, setInviteCode] = useState(referralFromUrl)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
 
   // Step 2 fields
-  const [userId] = useState(generateUserId)
   const [countryCode, setCountryCode] = useState('+254')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [captchaInput, setCaptchaInput] = useState('')
@@ -65,27 +83,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const navigate = useNavigate()
-  const location = useLocation()
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      const isAdmin = localStorage.getItem('user_is_admin') === 'true'
-      navigate(isAdmin ? '/admin' : '/dashboard')
-      return
-    }
-
-    const params = new URLSearchParams(location.search)
-    const ref = params.get('ref')
-    const mode = params.get('mode')
-
-    if (ref || mode === 'register') {
-      if (ref) setInviteCode(ref)
-      setIsRegistering(true)
-    }
-  }, [location, navigate])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -106,24 +104,17 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     setError('')
     try {
       const res = await api.post('/auth/login', { username: trimmedUsername, password: loginPassword })
-      localStorage.setItem('access_token', res.data.access_token)
-      localStorage.setItem('username', loginUsername)
-      setIsAuthenticated(true)
-      // Fetch user info to check admin
-      try {
-        const meRes = await api.get('/auth/me')
-        if (meRes.data.role === 'admin' || meRes.data.is_admin) {
-          localStorage.setItem('user_is_admin', 'true')
-          navigate('/admin')
-        } else {
-          localStorage.setItem('user_is_admin', 'false')
-          navigate('/dashboard')
-        }
-      } catch {
-        navigate('/dashboard')
+      persistTokens(res.data)
+      const meRes = await api.get('/auth/me')
+      persistUser(meRes.data)
+      await setIsAuthenticated()
+      if (meRes.data.role === 'admin' || meRes.data.is_admin) {
+        navigate('/admin')
+      } else {
+        navigate(meRes.data.is_trained ? '/dashboard' : '/training')
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your credentials.')
+    } catch (error: unknown) {
+      setError(apiErrorMessage(error, 'Login failed. Please check your credentials.'))
     } finally {
       setLoading(false)
     }
@@ -138,7 +129,10 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Please enter a valid email address'); return
     }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
+    if (!/^[A-Za-z0-9_-]{3,64}$/.test(username)) {
+      setError('Username must be 3–64 characters and use only letters, numbers, hyphens, or underscores'); return
+    }
+    if (password.length < 8) { setError('Password must be at least 8 characters'); return }
     if (password.length > 72) { setError('Password must be no longer than 72 characters'); return }
     if (password !== confirmPassword) { setError('Passwords do not match'); return }
     setStep(2)
@@ -157,8 +151,6 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     }
     setLoading(true)
     try {
-      // username is auto-generated from userId
-      const username = `user${userId}`
       await api.post('/auth/register/final', {
         username,
         password,
@@ -168,9 +160,14 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
         last_name: lastName.trim(),
         email: email.trim(),
       })
-      setStep(3) // Success screen
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.')
+      const loginResponse = await api.post('/auth/login', { username, password })
+      persistTokens(loginResponse.data)
+      const userResponse = await api.get('/auth/me')
+      persistUser(userResponse.data)
+      await setIsAuthenticated()
+      navigate(userResponse.data.role === 'admin' || userResponse.data.is_admin ? '/admin' : '/training')
+    } catch (error: unknown) {
+      setError(apiErrorMessage(error, 'Registration failed. Please try again.'))
       setCaptchaValue(generateCaptcha())
       setCaptchaInput('')
     } finally {
@@ -183,6 +180,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
     setFirstName('')
     setLastName('')
     setEmail('')
+    setUsername('')
     setInviteCode('')
     setPassword('')
     setConfirmPassword('')
@@ -479,6 +477,22 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                   />
                 </div>
 
+                {/* Username */}
+                <div style={inputWrapStyle}>
+                  <span style={iconStyle}>@</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    placeholder="Username"
+                    style={inputStyle}
+                    minLength={3}
+                    maxLength={64}
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+
                 {/* Invite Code */}
                 <div style={inputWrapStyle}>
                   <span style={iconStyle}>🎟️</span>
@@ -498,7 +512,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
                     type="password"
                     value={password}
                     onChange={e => setPassword(e.target.value.slice(0, 72))}
-                    placeholder="Please enter a 6-16 alphanumeric password"
+                    placeholder="Create a password (8–72 characters)"
                     style={inputStyle}
                     required
                     maxLength={72}
@@ -550,13 +564,14 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: (v: 
             {/* ── STEP 2 ── */}
             {step === 2 && (
               <form onSubmit={handleRegisterFinal}>
-                {/* User ID (read-only) */}
+                {/* Chosen username (read-only confirmation) */}
                 <div style={{ ...inputWrapStyle, backgroundColor: '#222230' }}>
-                  <span style={iconStyle}>👤</span>
+                  <span style={iconStyle}>@</span>
                   <input
                     type="text"
-                    value={userId}
+                    value={username}
                     readOnly
+                    aria-label="Chosen username"
                     style={{ ...inputStyle, color: '#aaa', cursor: 'not-allowed' }}
                   />
                 </div>

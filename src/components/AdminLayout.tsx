@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { endSession, persistUser } from '../services/session'
 import ThemeToggle from './ThemeToggle'
 
 interface AdminLayoutProps {
   setIsAuthenticated: (value: boolean) => void
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+  return typeof error === 'object'
+    && error !== null
+    && 'response' in error
+    && (error as { response?: { status?: number } }).response?.status === 401
 }
 
 export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
@@ -14,33 +22,34 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
   const [adminName, setAdminName] = useState('Admin')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  const handleSignOut = useCallback(async () => {
+    await endSession()
+    setIsAuthenticated(false)
+    navigate('/login')
+  }, [navigate, setIsAuthenticated])
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024)
       if (window.innerWidth >= 1024) setIsMenuOpen(false)
     }
-    window.addEventListener('resize', handleResize)
-    api.get('/auth/me').then(res => setAdminName(res.data.first_name || 'Admin')).catch(err => {
-      console.error('Failed to fetch admin data:', err)
-      if (err.response?.status === 401) {
-        const token = localStorage.getItem('access_token')
-        if (!token) {
-          handleSignOut()
-        } else {
-          console.warn('Token exists but received 401 from API - keeping admin logged in')
+    const fetchAdmin = async () => {
+      try {
+        const response = await api.get('/auth/me')
+        persistUser(response.data)
+        setAdminName(response.data.first_name || 'Admin')
+      } catch (error: unknown) {
+        console.error('Failed to fetch admin data:', error)
+        if (isUnauthorizedError(error)) {
+          void handleSignOut()
         }
       }
-    })
+    }
+
+    window.addEventListener('resize', handleResize)
+    void fetchAdmin()
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  useEffect(() => { setIsMenuOpen(false) }, [location.pathname])
-
-  const handleSignOut = () => {
-    localStorage.clear()
-    setIsAuthenticated(false)
-    navigate('/login')
-  }
+  }, [handleSignOut])
 
   const adminNavItems = [
     { label: 'Dashboard', path: '/admin', icon: '📊' },
@@ -67,7 +76,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
         </div>
         <nav style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
           {adminNavItems.map((item) => (
-            <Link key={item.label} to={item.path} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '10px', marginBottom: '8px', textDecoration: 'none', color: isActive(item.path) ? 'white' : 'var(--text-muted-sidebar)', backgroundColor: isActive(item.path) ? 'var(--accent-primary)' : 'transparent', transition: 'all 0.2s', fontSize: '14px', fontWeight: 500 }}><span style={{ fontSize: '18px' }}>{item.icon}</span><span>{item.label}</span></Link>
+            <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '10px', marginBottom: '8px', textDecoration: 'none', color: isActive(item.path) ? 'white' : 'var(--text-muted-sidebar)', backgroundColor: isActive(item.path) ? 'var(--accent-primary)' : 'transparent', transition: 'all 0.2s', fontSize: '14px', fontWeight: 500 }}><span style={{ fontSize: '18px' }}>{item.icon}</span><span>{item.label}</span></Link>
           ))}
         </nav>
         <div style={{ padding: '16px', borderTop: '1px solid var(--border-sidebar)' }}>
