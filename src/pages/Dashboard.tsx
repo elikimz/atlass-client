@@ -57,9 +57,7 @@ export default function Dashboard() {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
 
-    // Trigger release of any due upgrade refunds, then fetch dashboard data
-    api.post('/plans/release-refunds').catch(() => {/* silent — non-critical */})
-
+    // Fetch dashboard data
     Promise.all([
       api.get('/dashboard/summary'),
       api.get('/auth/me')
@@ -98,8 +96,10 @@ export default function Dashboard() {
   // released upgrade refunds). Never includes recharge amounts.
   const withdrawalBalance = user?.withdrawal_wallet_balance ?? 0
 
-  // Pending Refund: upgrade refund amount still within the 3-day lock.
-  // Not yet cashable — shown as informational "Locked" card.
+  // Pending Refund: upgrade refund amount still pending (legacy lock records).
+  // In the current flow, upgrade refunds are released immediately, so this
+  // should be 0 for new upgrades. It is still displayed for backward
+  // compatibility with legacy pending records.
   const pendingRefund = data?.pending_refund ?? 0
 
   // Total Earnings (main display): cumulative profit-generating activities only.
@@ -176,7 +176,7 @@ export default function Dashboard() {
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>Upgrade Refund</div>
             <div style={{ fontSize: '18px', fontWeight: 700, color: pendingRefund > 0 ? '#F59E0B' : 'var(--text-heading)' }}>${pendingRefund.toFixed(2)}</div>
             <div style={{ fontSize: '9px', color: pendingRefund > 0 ? '#F59E0B' : 'var(--text-muted)', marginTop: '2px', fontWeight: pendingRefund > 0 ? 600 : 400 }}>
-              {pendingRefund > 0 ? '🔒 Locked (3-day)' : 'No pending refund'}
+              {pendingRefund > 0 ? '🔒 Pending release' : 'No pending refund'}
             </div>
           </div>
         </div>
@@ -254,7 +254,7 @@ export default function Dashboard() {
               ...(pendingRefund > 0 ? [{
                 label: 'Locked Refund',
                 value: `$${pendingRefund.toFixed(2)}`,
-                subtext: '🔒 Releases in 3 days',
+                subtext: '🔒 Pending release',
                 color: '#F59E0B',
                 icon: <><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>
               }] : []),
@@ -319,7 +319,7 @@ export default function Dashboard() {
             <div style={{ padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Upgrade Refunds</div>
               <div style={{ fontSize: '20px', fontWeight: 700, color: '#0EA5E9' }}>${data.bonus_refunded.toFixed(2)}</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Released after 3-day lock</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>Upgrade refunds (immediate release)</div>
             </div>
           </div>
 
@@ -331,10 +331,10 @@ export default function Dashboard() {
               </svg>
               <div>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#F59E0B' }}>
-                  ${data.pending_refund.toFixed(2)} upgrade refund is locked
+                  ${data.pending_refund.toFixed(2)} upgrade refund is pending
                 </span>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '6px' }}>
-                  — will be released to your Withdrawal Wallet after the 3-day lock period.
+                  — will be released to your Withdrawal Wallet automatically.
                 </span>
               </div>
             </div>

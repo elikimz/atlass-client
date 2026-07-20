@@ -9,8 +9,8 @@ interface UserData {
   withdrawal_wallet_balance: number
   performance_bonus_balance: number
   /**
-   * pending_refund: Upgrade refund amount still within the 3-day lock.
-   * Not yet cashable — shown as a separate informational card.
+   * pending_refund: Upgrade refund amount still pending (legacy lock records).
+   * In the current flow, upgrade refunds are released immediately.
    */
   pending_refund?: number
 }
@@ -132,8 +132,8 @@ export default function Payments() {
     },
     ...(pendingRefund > 0 ? [{
       id: 'locked',
-      title: 'Locked Refund',
-      subtitle: '🔒 3-day lock',
+      title: 'Pending Refund',
+      subtitle: '🔒 Pending release',
       amount: pendingRefund,
       icon: '🔒',
       color: '#f59e0b'

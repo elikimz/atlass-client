@@ -53,10 +53,16 @@ export default function AdminNotifications() {
       return
     }
 
+    // If "Specific User" mode was selected but no actual user was chosen, block submission
+    if (selectedUserId === -1) {
+      toast.error('Please select a specific user from the list')
+      return
+    }
+
     try {
       setLoading(true)
       await api.post('/admin/notifications/send', {
-        user_id: selectedUserId || null, // null means global notification
+        user_id: selectedUserId === -1 ? null : selectedUserId, // null means global notification
         title,
         message,
         type

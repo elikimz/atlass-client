@@ -76,7 +76,11 @@ export default function InvestmentPlans() {
     
     try {
       const endpoint = isUpgrade ? `/plans/upgrade/${plan.id}` : `/plans/purchase/${plan.id}`;
-      await api.post(endpoint)
+      const res = await api.post(endpoint)
+      // If purchase response includes updated user data, refresh from it
+      if (res.data?.user) {
+        setUser({ ...user, ...res.data.user } as any)
+      }
       setMessage({ 
         type: 'success', 
         text: plan.name === 'Intern'
@@ -122,7 +126,8 @@ export default function InvestmentPlans() {
     return PLAN_FINANCIALS[key]
   }
 
-  const isExpired = user?.plan_expiry_date && new Date(user.plan_expiry_date) < new Date()
+  // Handle both timezone-aware and timezone-naive datetime strings from backend
+  const isExpired = user?.plan_expiry_date && new Date(user.plan_expiry_date.replace(' ', 'T') + 'Z') < new Date()
 
   return (
     <div style={{ 
@@ -177,8 +182,8 @@ export default function InvestmentPlans() {
           const financials = getFinancials(plan.name);
           const isActive = user?.current_plan_id === plan.id;
           const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
-          const currentPlanPrice = user?.current_plan?.price || 0;
-          const requiredBalance = user?.current_plan_id ? Math.max(plan.price - currentPlanPrice, 0) : plan.price;
+          // Backend requires the FULL plan price in deposit wallet for upgrades (not just the difference)
+          const requiredBalance = plan.price;
           const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= requiredBalance;
           const canPurchase = !isActive && hasEnoughBalance && (!user?.current_plan_id || isExpired || !isLowerTier);
           
@@ -257,7 +262,7 @@ export default function InvestmentPlans() {
                 </button>
                 {user?.current_plan_id && !isActive && !isLowerTier && plan.name !== 'Intern' && (
                   <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4', fontStyle: 'italic', textAlign: 'center' }}>
-                    The full plan amount will be deducted. If upgrading from an active paid tier, your previous package price will be automatically refunded to your Withdrawal Wallet immediately and available for cash out (Note: Expired plans are not eligible for a refund).
+                    Full plan amount will be deducted from Deposit Wallet. Previous plan price is refunded immediately to Withdrawal Wallet.
                   </div>
                 )}
 
@@ -292,9 +297,9 @@ export default function InvestmentPlans() {
           </div>
           
           <div>
-            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Upgrade Refund (3-Day Lock):</div>
+            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Upgrade Refund:</div>
             <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>
-              <li>When you upgrade, only the net additional cost is charged from your Deposit Wallet. Your previous plan's price is logged as a pending refund and locked for exactly 72 hours. After 3 days, the refund is automatically released to your Withdrawal Wallet as cashable earnings and counted in your Total Earnings.</li>
+              <li>When you upgrade, the full price of the new plan is deducted from your Deposit Wallet. Your previous plan's price is refunded immediately to your Withdrawal Wallet and is available for cash out.</li>
               <li>Plan upgrades do NOT generate invite commissions for your upline — only first-time purchases do.</li>
             </ul>
           </div>

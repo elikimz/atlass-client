@@ -112,8 +112,8 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
       toast.error('Please enter your current withdrawal password')
       return
     }
-    if (!newWithdrawalPassword || newWithdrawalPassword.length < 4) {
-      toast.error('New password must be at least 4 characters')
+    if (!newWithdrawalPassword || newWithdrawalPassword.length < 8) {
+      toast.error('New password must be at least 8 characters')
       return
     }
     if (newWithdrawalPassword !== confirmWithdrawalPassword) {

@@ -50,9 +50,9 @@ interface StatusResponse {
   status: 'pending' | 'completed' | 'failed'
   plan_name: string | null
   amount_usd: number
-  amount_kes: number
-  mpesa_receipt: string | null
-  message: string
+  amount_kes?: number
+  mpesa_receipt?: string | null
+  message?: string
 }
 
 type PaymentStep = 'input' | 'pending' | 'success' | 'failed'
@@ -154,7 +154,7 @@ export default function MpesaPayment() {
       } else if (data.status === 'failed') {
         stopPolling()
         setStep('failed')
-        setError(data.message || 'Payment was not completed. Please try again.')
+        setError('Payment was not completed. Please try again.')
       }
       // If still pending, continue polling
     } catch (err: any) {
@@ -639,6 +639,18 @@ export default function MpesaPayment() {
               </div>
             </div>
           )}
+
+          <div style={{
+            backgroundColor: '#f0fdf4', borderRadius: '10px', padding: '12px 16px',
+            marginBottom: '20px', border: '1px solid #bbf7d0'
+          }}>
+            <div style={{ fontSize: '12px', color: '#166534' }}>
+              Reference: <strong style={{ fontFamily: 'monospace' }}>{statusData?.reference}</strong>
+            </div>
+            <div style={{ fontSize: '12px', color: '#166534', marginTop: '4px' }}>
+              Amount: <strong>${statusData?.amount_usd?.toFixed(2) || '0.00'}</strong>
+            </div>
+          </div>
 
           <button
             onClick={handleGoToSuccess}

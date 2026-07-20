@@ -8,9 +8,10 @@ interface WithdrawalAccount {
   type: string
   label: string
   address: string
-  network: string
+  network: string | null
   is_verified: boolean
   is_primary: boolean
+  full_name?: string
 }
 
 export default function WithdrawalAccounts() {
@@ -49,8 +50,9 @@ export default function WithdrawalAccounts() {
         payload.network = network
       } else {
         payload.address = phoneNumber
+        payload.network = 'M-Pesa'
+        // Include full_name for M-Pesa validation on backend
         payload.full_name = fullName
-        payload.phone_number = phoneNumber
       }
       await api.post('/withdrawal-accounts', payload)
       toast.success('Account added successfully!', { id: toastId })
@@ -92,9 +94,9 @@ export default function WithdrawalAccounts() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ width: '52px', height: '52px', backgroundColor: acc.type === 'crypto' ? 'var(--accent-primary)' : '#00AC4F', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', color: 'white' }}>{acc.type === 'crypto' ? '₮' : 'M'}</div>
                 <div>
-                  <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-heading)' }}>{acc.type.toUpperCase()} - {acc.network}</div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-heading)' }}>{acc.type.toUpperCase()} - {acc.network || 'M-Pesa'}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 500 }}>{acc.address.substring(0, 10)}...{acc.address.substring(acc.address.length - 4)}</span>
+                    <span style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: 500 }}>{acc.full_name || acc.address.substring(0, 10)}...{acc.address.substring(acc.address.length - 4)}</span>
                     {acc.is_primary && <span style={{ fontSize: '11px', fontWeight: 700, color: '#059669', backgroundColor: 'rgba(34, 197, 94, 0.1)', padding: '3px 10px', borderRadius: '20px' }}>Primary</span>}
                   </div>
                 </div>
