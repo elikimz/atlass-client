@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface WithdrawalAccount {
   id: number
@@ -13,33 +15,41 @@ interface WithdrawalAccount {
 
 export default function WithdrawFunds() {
   const navigate = useNavigate()
-  const [balance, setBalance] = useState(0)
+  const queryClient = useQueryClient()
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<{ withdrawal_wallet_balance?: number }>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const accountsQuery = useQuery({
+    queryKey: ['withdrawal-accounts'] as const,
+    queryFn: async () => (await api.get<WithdrawalAccount[]>('/withdrawal-accounts')).data ?? [],
+    staleTime: 5 * 60 * 1000,
+  })
+  const paymentHistoryQuery = useQuery({
+    queryKey: queryKeys.payments.history(1, 50),
+    queryFn: async () => (await api.get<any[]>('/payments/history', { params: { page: 1, limit: 50 } })).data ?? [],
+    staleTime: 2 * 60 * 1000,
+  })
+  const balance = userQuery.data?.withdrawal_wallet_balance ?? 0
+  const accounts = accountsQuery.data ?? []
+  const withdrawalHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'payout')
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
-  const [accounts, setAccounts] = useState<WithdrawalAccount[]>([])
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [withdrawalPassword, setWithdrawalPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([])
 
   const amounts = [2.50, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
   const networkFee = 0.50
 
   useEffect(() => {
-    api.get('/auth/me').then(res => setBalance(res.data.withdrawal_wallet_balance)).catch(console.error)
-    api.get('/withdrawal-accounts').then(res => {
-      setAccounts(res.data)
-      const primary = res.data.find((a: WithdrawalAccount) => a.is_primary)
-      if (primary) setSelectedAccountId(primary.id)
-      else if (res.data.length > 0) setSelectedAccountId(res.data[0].id)
-    }).catch(console.error)
-    api.get('/payments/history').then(res => {
-      const withdrawals = res.data.filter((p: any) => p.type === 'payout')
-      setWithdrawalHistory(withdrawals)
-    }).catch(console.error)
-  }, [])
+    if (selectedAccountId || accounts.length === 0) return
+    const primary = accounts.find((account) => account.is_primary)
+    setSelectedAccountId(primary?.id ?? accounts[0].id)
+  }, [accounts, selectedAccountId])
 
   const handleConfirmWithdrawal = () => {
     if (!selectedAmount || !selectedAccountId) return
@@ -52,6 +62,12 @@ export default function WithdrawFunds() {
     setSubmitting(true); setError(null)
     try {
       await api.post('/payments/withdraw', { amount: selectedAmount, account_id: selectedAccountId, password: withdrawalPassword })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.historyBase }),
+      ])
       setSuccess(true); setShowPasswordModal(false); setTimeout(() => navigate('/payments'), 3000)
     } catch (err: any) { setError(err.response?.data?.detail || 'Withdrawal failed. Please check your password.') } finally { setSubmitting(false) }
   }

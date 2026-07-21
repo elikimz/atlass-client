@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface DashboardData {
   footage_labeled_min: number
@@ -48,29 +50,27 @@ interface UserData {
 }
 
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(null)
-  const [user, setUser] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const dashboardQuery = useQuery({
+    queryKey: queryKeys.dashboard.summary,
+    queryFn: async () => (await api.get<DashboardData>('/dashboard/summary')).data,
+    staleTime: 30 * 1000,
+  })
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<UserData>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const data = dashboardQuery.data ?? null
+  const user = userQuery.data ?? null
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
-
-    // Fetch dashboard data
-    Promise.all([
-      api.get('/dashboard/summary'),
-      api.get('/auth/me')
-    ]).then(([summaryRes, userRes]) => {
-      setData(summaryRes.data)
-      setUser(userRes.data)
-    }).catch(console.error)
-      .finally(() => setLoading(false))
-
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  if (loading) {
+  if (dashboardQuery.isLoading || userQuery.isLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
         <div style={{ textAlign: 'center' }}>

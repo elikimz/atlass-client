@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 // Removed unused PaymentOverview interface to fix build error
 
@@ -55,27 +56,25 @@ const infoCardStyle: React.CSSProperties = {
 
 export default function Payments() {
   const navigate = useNavigate()
-  // Removed unused overview state to fix build error
-  const [user, setUser] = useState<UserData | null>(null)
-  const [referrals, setReferrals] = useState<ReferralSummary | null>(null)
-
-  const [dashboard, setDashboard] = useState<DashboardSummary | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    Promise.all([
-      api.get('/auth/me'),
-      api.get('/referrals/summary'),
-      api.get('/dashboard/summary'),
-    ])
-      .then(([userRes, referralsRes, dashboardRes]) => {
-        setUser(userRes.data)
-        setReferrals(referralsRes.data)
-        setDashboard(dashboardRes.data)
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<UserData>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const referralsQuery = useQuery({
+    queryKey: queryKeys.referrals.summary,
+    queryFn: async () => (await api.get<ReferralSummary>('/referrals/summary')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+  const dashboardQuery = useQuery({
+    queryKey: queryKeys.dashboard.summary,
+    queryFn: async () => (await api.get<DashboardSummary>('/dashboard/summary')).data,
+    staleTime: 30 * 1000,
+  })
+  const user = userQuery.data ?? null
+  const referrals = referralsQuery.data ?? null
+  const dashboard = dashboardQuery.data ?? null
+  const loading = userQuery.isLoading || referralsQuery.isLoading || dashboardQuery.isLoading
 
   if (loading) {
     return (

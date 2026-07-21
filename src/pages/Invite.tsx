@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface InvitedUser {
   name: string
@@ -25,31 +27,26 @@ interface ReferralSummary {
 }
 
 export default function Invite() {
-  const [activeInvites, setActiveInvites] = useState<InvitedUser[]>([])
-  const [referralCodes, setReferralCodes] = useState<ReferralCodeData[]>([])
-  const [summary, setSummary] = useState<ReferralSummary | null>(null)
-  const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [activeRes, codesRes, summaryRes] = await Promise.all([
-          api.get('/referrals/active'),
-          api.get('/referrals/codes'),
-          api.get('/referrals/summary')
-        ])
-        setActiveInvites(activeRes.data)
-        setReferralCodes(codesRes.data)
-        setSummary(summaryRes.data)
-      } catch (err) {
-        console.error('Failed to fetch referral data', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
+  const activeInvitesQuery = useQuery({
+    queryKey: queryKeys.referrals.active,
+    queryFn: async () => (await api.get<InvitedUser[]>('/referrals/active')).data ?? [],
+    staleTime: 2 * 60 * 1000,
+  })
+  const referralCodesQuery = useQuery({
+    queryKey: queryKeys.referrals.codes,
+    queryFn: async () => (await api.get<ReferralCodeData[]>('/referrals/codes')).data ?? [],
+    staleTime: 10 * 60 * 1000,
+  })
+  const summaryQuery = useQuery({
+    queryKey: queryKeys.referrals.summary,
+    queryFn: async () => (await api.get<ReferralSummary>('/referrals/summary')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+  const activeInvites = activeInvitesQuery.data ?? []
+  const referralCodes = referralCodesQuery.data ?? []
+  const summary = summaryQuery.data ?? null
+  const loading = activeInvitesQuery.isLoading || referralCodesQuery.isLoading || summaryQuery.isLoading
 
   const handleCopy = (text: string, type: 'link' | 'code') => {
     navigator.clipboard.writeText(text)

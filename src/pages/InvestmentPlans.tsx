@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface Plan {
   id: number
@@ -34,71 +36,79 @@ const PLAN_FINANCIALS: Record<string, { daily_earnings: number; total_return: nu
 }
 
 export default function InvestmentPlans() {
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [user, setUser] = useState<UserData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState<number | null>(null)
+  const queryClient = useQueryClient()
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const plansQuery = useQuery({
+    queryKey: queryKeys.plans.all,
+    queryFn: async () => (await api.get<Plan[]>('/plans')).data ?? [],
+    staleTime: 10 * 60 * 1000,
+  })
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<UserData>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const plans = (plansQuery.data ?? []).slice().sort((first, second) => first.price - second.price)
+  const user = userQuery.data ?? null
 
-  const fetchData = async () => {
-    try {
-      const [plansRes, userRes] = await Promise.all([
-        api.get('/plans'),
-        api.get('/auth/me')
+  const purchaseMutation = useMutation({
+    mutationFn: async (plan: Plan) => {
+      const isUpgrade = user?.current_plan_id !== null && user?.current_plan_id !== undefined
+      const endpoint = isUpgrade ? `/plans/upgrade/${plan.id}` : `/plans/purchase/${plan.id}`
+      const response = await api.post(endpoint)
+      return { response, plan, isUpgrade }
+    },
+    onMutate: () => setMessage(null),
+    onSuccess: ({ response, plan, isUpgrade }) => {
+      if (response.data?.user) {
+        queryClient.setQueryData(queryKeys.auth.currentUser, (current: UserData | undefined) => ({
+          ...current,
+          ...response.data.user,
+        }))
+      }
+      setMessage({
+        type: 'success',
+        text: plan.name === 'Intern'
+          ? 'Free Intern trial activated successfully!'
+          : isUpgrade
+            ? `Successfully upgraded to ${plan.name}!`
+            : `Successfully purchased ${plan.name}!`,
+      })
+    },
+    onError: (error: any) => {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.detail || 'Transaction failed. Please check your balance.',
+      })
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.available }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.referrals.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.referrals.active }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.historyBase }),
       ])
-      // Sort plans by price to ensure correct order
-      const sortedPlans = (plansRes.data || []).sort((a: Plan, b: Plan) => a.price - b.price)
-      setPlans(sortedPlans)
-      setUser(userRes.data)
-    } catch (err) {
-      console.error('Failed to fetch data', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+  })
 
   useEffect(() => {
-    fetchData()
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const handleAction = async (plan: Plan) => {
-    const hasExistingPlan = user?.current_plan_id !== null && user?.current_plan_id !== undefined;
-    const isUpgrade = hasExistingPlan;
-    
-    if (user?.current_plan_id === plan.id) return;
-
-    setActionLoading(plan.id)
-    setMessage(null)
-    
-    try {
-      const endpoint = isUpgrade ? `/plans/upgrade/${plan.id}` : `/plans/purchase/${plan.id}`;
-      const res = await api.post(endpoint)
-      // If purchase response includes updated user data, refresh from it
-      if (res.data?.user) {
-        setUser({ ...user, ...res.data.user } as any)
-      }
-      setMessage({ 
-        type: 'success', 
-        text: plan.name === 'Intern'
-          ? 'Free Intern trial activated successfully!'
-          : isUpgrade
-            ? `Successfully upgraded to ${plan.name}!`
-            : `Successfully purchased ${plan.name}!` 
-      })
-      await fetchData() // Refresh user state
-    } catch (err: any) {
-      setMessage({ 
-        type: 'error', 
-        text: err.response?.data?.detail || 'Transaction failed. Please check your balance.' 
-      })
-    } finally {
-      setActionLoading(null)
-    }
+  const handleAction = (plan: Plan) => {
+    if (user?.current_plan_id === plan.id) return
+    purchaseMutation.mutate(plan)
   }
+
+  const loading = plansQuery.isLoading || userQuery.isLoading
+  const actionLoading = purchaseMutation.isPending ? purchaseMutation.variables?.id ?? null : null
 
   if (loading) {
     return (

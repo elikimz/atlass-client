@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface UserData {
   first_name: string
@@ -31,34 +33,33 @@ interface RecentActivity {
 
 export default function Tasks() {
   const navigate = useNavigate()
-  const [user, setUser] = useState<UserData | null>(null)
-  const [summary, setSummary] = useState<DashboardSummary | null>(null)
-  const [availableTasks, setAvailableTasks] = useState<AvailableTask[]>([])
-  const [loading, setLoading] = useState(true)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<UserData>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const summaryQuery = useQuery({
+    queryKey: queryKeys.dashboard.summary,
+    queryFn: async () => (await api.get<DashboardSummary>('/dashboard/summary')).data,
+    staleTime: 30 * 1000,
+  })
+  const availableTasksQuery = useQuery({
+    queryKey: queryKeys.tasks.available,
+    queryFn: async () => (await api.get<AvailableTask[]>('/tasks/available')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+  const user = userQuery.data ?? null
+  const summary = summaryQuery.data ?? null
+  const availableTasks = availableTasksQuery.data ?? []
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
-
-    Promise.all([
-      api.get('/auth/me'),
-      api.get('/tasks/available'),
-      api.get('/dashboard/summary')
-    ]).then(([userRes, tasksRes, summaryRes]) => {
-      setUser(userRes.data)
-      setAvailableTasks(tasksRes.data || [])
-      setSummary(summaryRes.data)
-    }).catch(err => {
-      console.error('Failed to fetch data:', err)
-      setAvailableTasks([])
-    })
-      .finally(() => setLoading(false))
-
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  if (loading) {
+  if (userQuery.isLoading || summaryQuery.isLoading || availableTasksQuery.isLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
         <div style={{ textAlign: 'center' }}>

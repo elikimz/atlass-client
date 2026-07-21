@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface Notification {
   id: number
@@ -12,67 +14,85 @@ interface Notification {
 }
 
 export default function NotificationBell() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
+  const queryClient = useQueryClient()
   const [showDropdown, setShowDropdown] = useState(false)
   const [hasNewNotification, setHasNewNotification] = useState(false)
+  const previousUnreadCount = useRef(0)
   const isAdmin = localStorage.getItem('user_is_admin') === 'true'
+  const notificationsQuery = useQuery({
+    queryKey: queryKeys.notifications.list(),
+    queryFn: async () => (await api.get<Notification[]>('/notifications')).data ?? [],
+    staleTime: 30 * 1000,
+    // Keep the request rate low while the menu is closed; opening it resumes
+    // periodic refreshes and focus/reconnect refreshes remain enabled globally.
+    refetchInterval: showDropdown ? 30 * 1000 : false,
+  })
+  const notifications = notificationsQuery.data ?? []
+  const unreadCount = notifications.filter((notification) => !notification.is_read).length
 
-  // Fetch notifications on component mount
   useEffect(() => {
-    fetchNotifications()
-    // Poll for new notifications every 10 seconds
-    const interval = setInterval(fetchNotifications, 10000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await api.get('/notifications')
-      const newNotifications = response.data || []
-      const previousUnreadCount = notifications.filter((n: Notification) => !n.is_read).length
-      const newUnreadCount = newNotifications.filter((n: Notification) => !n.is_read).length
-      
-      // Trigger animation if new unread notifications arrived
-      if (newUnreadCount > previousUnreadCount) {
-        setHasNewNotification(true)
-        setTimeout(() => setHasNewNotification(false), 600) // Animation duration
-      }
-      
-      setNotifications(newNotifications)
-    } catch (error) {
-      console.error('Error fetching notifications:', error)
+    if (unreadCount > previousUnreadCount.current) {
+      setHasNewNotification(true)
+      window.setTimeout(() => setHasNewNotification(false), 600)
     }
+    previousUnreadCount.current = unreadCount
+  }, [unreadCount])
+
+  const markAsReadMutation = useMutation({
+    mutationFn: async (notificationIds: number[]) => api.post('/notifications/mark-read', { notification_ids: notificationIds }),
+    onMutate: async (notificationIds) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() })
+      const previous = queryClient.getQueryData<Notification[]>(queryKeys.notifications.list())
+      const ids = new Set(notificationIds)
+      queryClient.setQueryData<Notification[]>(queryKeys.notifications.list(), (old) =>
+        old?.map((notification) => ids.has(notification.id) ? { ...notification, is_read: true } : notification),
+      )
+      return { previous }
+    },
+    onError: (_error, _ids, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.notifications.list(), context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() }),
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (notificationId: number) => api.delete(`/notifications/${notificationId}`),
+    onMutate: async (notificationId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() })
+      const previous = queryClient.getQueryData<Notification[]>(queryKeys.notifications.list())
+      queryClient.setQueryData<Notification[]>(queryKeys.notifications.list(), (old) =>
+        old?.filter((notification) => notification.id !== notificationId),
+      )
+      return { previous }
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.notifications.list(), context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() }),
+  })
+
+  const clearAllMutation = useMutation({
+    mutationFn: async () => api.delete('/notifications/clear-all'),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.notifications.list() })
+      const previous = queryClient.getQueryData<Notification[]>(queryKeys.notifications.list())
+      queryClient.setQueryData<Notification[]>(queryKeys.notifications.list(), [])
+      return { previous }
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.notifications.list(), context.previous)
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() }),
+  })
+
+  const handleMarkAsRead = (notificationIds: number[]) => markAsReadMutation.mutate(notificationIds)
+
+  const handleDeleteNotification = (id: number, event: React.MouseEvent) => {
+    event.stopPropagation()
+    deleteMutation.mutate(id)
   }
 
-  const handleMarkAsRead = async (notificationIds: number[]) => {
-    try {
-      await api.post('/notifications/mark-read', { notification_ids: notificationIds })
-      await fetchNotifications()
-    } catch (error) {
-      console.error('Error marking notifications as read:', error)
-    }
-  }
-
-  const handleDeleteNotification = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent triggering mark as read
-    try {
-      await api.delete(`/notifications/${id}`)
-      await fetchNotifications()
-    } catch (error) {
-      console.error('Error deleting notification:', error)
-    }
-  }
-
-  const handleClearAll = async () => {
-    try {
-      await api.delete('/notifications/clear-all')
-      await fetchNotifications()
-    } catch (error) {
-      console.error('Error clearing notifications:', error)
-    }
-  }
-
-  const unreadCount = notifications.filter(n => !n.is_read).length
+  const handleClearAll = () => clearAllMutation.mutate()
 
   const getTypeColor = (type: string) => {
     switch (type) {

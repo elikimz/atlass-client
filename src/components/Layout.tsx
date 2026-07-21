@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import { endSession, persistUser } from '../services/session'
+import { endSession } from '../services/session'
+import { queryKeys } from '../services/queryClient'
 import ThemeToggle from './ThemeToggle'
 import NotificationBell from './NotificationBell'
 
@@ -23,19 +25,22 @@ interface NotificationSummary {
   is_read: boolean
 }
 
-function isUnauthorizedError(error: unknown): boolean {
-  return typeof error === 'object'
-    && error !== null
-    && 'response' in error
-    && (error as { response?: { status?: number } }).response?.status === 401
-}
-
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
-  const [user, setUser] = useState<UserData | null>(null)
-  const [unreadCount, setUnreadCount] = useState(0)
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<UserData>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const notificationsQuery = useQuery({
+    queryKey: queryKeys.notifications.list(),
+    queryFn: async () => (await api.get<NotificationSummary[]>('/notifications')).data ?? [],
+    staleTime: 30 * 1000,
+  })
+  const user = userQuery.data ?? null
+  const unreadCount = (notificationsQuery.data ?? []).filter((notification) => !notification.is_read).length
 
   const handleSignOut = useCallback(async () => {
     await endSession()
@@ -44,46 +49,12 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   }, [navigate, setIsAuthenticated])
 
   useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const res = await api.get('/notifications')
-        const notifications = Array.isArray(res.data) ? res.data as NotificationSummary[] : []
-        const count = notifications.filter((notification) => !notification.is_read).length
-        setUnreadCount(count)
-      } catch (err) {
-        console.error('Failed to fetch unread count:', err)
-      }
-    }
-
-    fetchUnreadCount()
-    const interval = setInterval(fetchUnreadCount, 30000) // Poll every 30s
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024)
     }
     window.addEventListener('resize', handleResize)
-
-    // Fetch real user data from backend
-    const fetchUser = async () => {
-      try {
-        const res = await api.get('/auth/me')
-        setUser(res.data)
-        persistUser(res.data)
-      } catch (error: unknown) {
-        console.error('Failed to fetch user data:', error)
-        if (isUnauthorizedError(error)) {
-          void handleSignOut()
-        }
-      }
-    }
-    
-    fetchUser()
-
     return () => window.removeEventListener('resize', handleResize)
-  }, [handleSignOut])
+  }, [])
 
   const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
   const lastName = user?.last_name || localStorage.getItem('user_last_name') || ''

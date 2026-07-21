@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface Payment {
   id: number
@@ -33,23 +35,16 @@ const typeColors: { [key: string]: { bg: string; text: string; icon: string } } 
 
 export default function PaymentHistory() {
   const navigate = useNavigate()
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [filterType, setFilterType] = useState('all')
-
-  useEffect(() => { fetchPaymentHistory() }, [])
-  const fetchPaymentHistory = async () => {
-    try {
-      const response = await api.get('/payments/history')
-      setPayments(response.data)
-    } catch (err) {
-      console.error('Failed to fetch payment history:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const paymentHistoryQuery = useQuery({
+    queryKey: queryKeys.payments.history(1, 50),
+    queryFn: async () => (await api.get<Payment[]>('/payments/history', { params: { page: 1, limit: 50 } })).data ?? [],
+    staleTime: 2 * 60 * 1000,
+  })
+  const payments = paymentHistoryQuery.data ?? []
+  const loading = paymentHistoryQuery.isLoading
 
   const filteredPayments = filterType === 'all' ? payments : payments.filter(p => p.type === filterType)
 

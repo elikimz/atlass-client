@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 interface TaskData {
   id: number
@@ -8,38 +10,83 @@ interface TaskData {
   description?: string
   video_url: string
   reward_amount: number
+  status?: string
+}
+
+interface DashboardSummary {
+  active_tasks: number
+  completed_tasks: number
+  pending_videos: number
 }
 
 export default function TaskPlayer() {
   const { taskId } = useParams<{ taskId: string }>()
   const navigate = useNavigate()
-  const [task, setTask] = useState<TaskData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [completing, setCompleting] = useState(false)
+  const queryClient = useQueryClient()
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState('')
   const [videoWatched, setVideoWatched] = useState(false)
-  const [isYouTube, setIsYouTube] = useState(false)
+  const taskIdNumber = Number(taskId || 0)
+  const tasksQuery = useQuery({
+    queryKey: queryKeys.tasks.all,
+    queryFn: async () => (await api.get<TaskData[]>('/tasks/all')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+  const task = tasksQuery.data?.find((candidate) => candidate.id === taskIdNumber) ?? null
+  const isYouTube = Boolean(task?.video_url.includes('youtube.com') || task?.video_url.includes('youtu.be'))
 
-  useEffect(() => {
-    api.get('/tasks/all')
-      .then(res => {
-        const tasks = res.data
-        const foundTask = tasks.find((t: TaskData) => t.id === parseInt(taskId || '0'))
-        if (foundTask) {
-          setTask(foundTask)
-          const isYT = foundTask.video_url.includes('youtube.com') || foundTask.video_url.includes('youtu.be')
-          setIsYouTube(isYT)
-        } else {
-          setError('Task not found')
-        }
-      })
-      .catch(err => {
-        console.error('Failed to fetch task:', err)
-        setError('Failed to load task')
-      })
-      .finally(() => setLoading(false))
-  }, [taskId])
+  const completionMutation = useMutation({
+    mutationFn: async (videoTaskId: number) => api.post('/tasks/complete', { video_task_id: videoTaskId }),
+    onMutate: async (videoTaskId) => {
+      setError('')
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: queryKeys.tasks.available }),
+        queryClient.cancelQueries({ queryKey: queryKeys.dashboard.summary }),
+      ])
+      const previousAvailable = queryClient.getQueryData<TaskData[]>(queryKeys.tasks.available)
+      const previousDashboard = queryClient.getQueryData<DashboardSummary>(queryKeys.dashboard.summary)
+
+      queryClient.setQueryData<TaskData[]>(queryKeys.tasks.available, (old) =>
+        old?.filter((candidate) => candidate.id !== videoTaskId),
+      )
+      queryClient.setQueryData<DashboardSummary>(queryKeys.dashboard.summary, (old) =>
+        old
+          ? {
+              ...old,
+              active_tasks: Math.max(0, old.active_tasks - 1),
+              completed_tasks: old.completed_tasks + 1,
+              pending_videos: Math.max(0, old.pending_videos - 1),
+            }
+          : old,
+      )
+      return { previousAvailable, previousDashboard }
+    },
+    onError: (requestError, _videoTaskId, context) => {
+      if (context?.previousAvailable) {
+        queryClient.setQueryData(queryKeys.tasks.available, context.previousAvailable)
+      }
+      if (context?.previousDashboard) {
+        queryClient.setQueryData(queryKeys.dashboard.summary, context.previousDashboard)
+      }
+      const message = (requestError as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+      setError(message || 'Failed to complete task')
+    },
+    onSuccess: () => {
+      setCompleted(true)
+      window.setTimeout(() => navigate('/tasks'), 2000)
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.available }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.referrals.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.referrals.codes }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
+      ])
+    },
+  })
 
   const handleVideoEnded = () => {
     setVideoWatched(true)
@@ -52,32 +99,17 @@ export default function TaskPlayer() {
     }
   }
 
-  const handleCompleteTask = async () => {
+  const handleCompleteTask = () => {
     if (!task || !videoWatched) {
       setError('Please watch the entire video first')
       return
     }
-
-    setCompleting(true)
-    setError('')
-
-    try {
-      await api.post('/tasks/complete', {
-        video_task_id: task.id,
-      })
-
-      setCompleted(true)
-      
-      setTimeout(() => {
-        navigate('/tasks')
-      }, 2000)
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to complete task')
-      console.error(err)
-    } finally {
-      setCompleting(false)
-    }
+    completionMutation.mutate(task.id)
   }
+
+  const loading = tasksQuery.isLoading
+  const completing = completionMutation.isPending
+  const loadError = tasksQuery.isError ? 'Failed to load task' : (!loading && !task ? 'Task not found' : '')
 
   if (loading) {
     return (
@@ -90,11 +122,11 @@ export default function TaskPlayer() {
     )
   }
 
-  if (error && !task) {
+  if ((error || loadError) && !task) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '16px', color: '#DC2626', marginBottom: '16px' }}>{error}</p>
+          <p style={{ fontSize: '16px', color: '#DC2626', marginBottom: '16px' }}>{error || loadError}</p>
           <button 
             onClick={() => navigate('/tasks')}
             style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}

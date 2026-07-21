@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 const USDT_ADDRESS = '0xcfed1cdcce064dc27f60bbf2292fc5c15082fc86'
 const USDT_NETWORK = 'ERC20 (Ethereum)'
@@ -11,7 +13,18 @@ const CLOUDINARY_CLOUD_NAME = "doste1wr0"
 
 export default function Recharge() {
   const navigate = useNavigate()
-  const [balance, setBalance] = useState(0)
+  const queryClient = useQueryClient()
+  const userQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: async () => (await api.get<{ deposit_wallet_balance?: number }>('/auth/me')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+  const paymentHistoryQuery = useQuery({
+    queryKey: queryKeys.payments.history(1, 50),
+    queryFn: async () => (await api.get<any[]>('/payments/history', { params: { page: 1, limit: 50 } })).data ?? [],
+    staleTime: 2 * 60 * 1000,
+  })
+  const balance = userQuery.data?.deposit_wallet_balance ?? 0
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20)
   const [customAmount, setCustomAmount] = useState('')
   const [method, setMethod] = useState<'crypto' | 'mpesa'>('crypto')
@@ -24,23 +37,9 @@ export default function Recharge() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [depositHistory, setDepositHistory] = useState<any[]>([])
-  const [loadingHistory, setLoadingHistory] = useState(false)
-
   const amounts = [20, 50, 100, 150, 200]
-
-  useEffect(() => {
-    api.get('/auth/me').then(res => {
-      // Safely handle balance, default to 0 if not present
-      setBalance(res.data.deposit_wallet_balance || 0)
-    }).catch(console.error)
-
-    setLoadingHistory(true)
-    api.get('/payments/history').then(res => {
-      const deposits = res.data.filter((p: any) => p.type === 'deposit')
-      setDepositHistory(deposits)
-    }).catch(console.error).finally(() => setLoadingHistory(false))
-  }, [])
+  const depositHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'deposit')
+  const loadingHistory = paymentHistoryQuery.isLoading
 
   const finalAmount = customAmount ? parseFloat(customAmount) : (selectedAmount || 0)
 
@@ -128,6 +127,12 @@ export default function Recharge() {
         network: 'ERC20',
         proof_url: uploadedProofUrl
       })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.payments.historyBase }),
+      ])
 
       // Show success state
       setSubmitSuccess(true)

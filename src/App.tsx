@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 
 import Login from './pages/Login'
@@ -25,53 +26,73 @@ import InvestmentPlans from './pages/InvestmentPlans'
 import WithdrawFunds from './pages/WithdrawFunds'
 import WithdrawalAccounts from './pages/WithdrawalAccounts'
 import Recharge from './pages/Recharge'
-import MpesaPayment from './pages/MpesaPayment'  // NEW: PesaFlux M-Pesa STK Push (additive)
+import MpesaPayment from './pages/MpesaPayment'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
 import PaymentHistory from './pages/PaymentHistory'
-import { ThemeProvider } from './context/ThemeContext'
 import api from './services/api'
 import { clearSession, hasSession, persistUser } from './services/session'
+import { queryKeys } from './services/queryClient'
 
 function TrainingRoute() {
   return <Training />
 }
 
+async function fetchCurrentUser() {
+  // The API interceptor refreshes an expired access token once before this
+  // request fails, so a cached token is never treated as proof of identity.
+  const response = await api.get('/auth/me')
+  persistUser(response.data)
+  return response.data
+}
+
 function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const sessionPresent = hasSession()
+  const currentUserQuery = useQuery({
+    queryKey: queryKeys.auth.currentUser,
+    queryFn: fetchCurrentUser,
+    enabled: sessionPresent,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  })
+
+  const currentUser = currentUserQuery.data
+  const isAuthenticated = sessionPresent && Boolean(currentUser) && !currentUserQuery.isError
+  const isAdmin = currentUser?.role === 'admin' || Boolean(currentUser?.is_admin)
+
+  useEffect(() => {
+    if (currentUserQuery.isError) {
+      clearSession()
+      queryClient.removeQueries({ queryKey: queryKeys.auth.currentUser })
+    }
+  }, [currentUserQuery.isError, queryClient])
 
   const checkAuth = useCallback(async () => {
     if (!hasSession()) {
-      setIsAuthenticated(false)
-      setIsAdmin(false)
+      clearSession()
+      queryClient.removeQueries({ queryKey: queryKeys.auth.currentUser })
       return
     }
 
-    try {
-      // The API interceptor refreshes an expired access token once before this
-      // request fails, so a cached token is never treated as proof of identity.
-      const response = await api.get('/auth/me')
-      persistUser(response.data)
-      setIsAuthenticated(true)
-      setIsAdmin(response.data.role === 'admin' || Boolean(response.data.is_admin))
-    } catch {
+    const result = await currentUserQuery.refetch()
+    if (result.isError) {
       clearSession()
-      setIsAuthenticated(false)
-      setIsAdmin(false)
+      queryClient.removeQueries({ queryKey: queryKeys.auth.currentUser })
     }
-  }, [])
+  }, [currentUserQuery, queryClient])
 
-  useEffect(() => {
-    const bootstrapTimer = window.setTimeout(() => {
-      void checkAuth().finally(() => setLoading(false))
-    }, 0)
-    return () => window.clearTimeout(bootstrapTimer)
-  }, [checkAuth])
+  const setAuthenticationState = useCallback((authenticated: boolean) => {
+    if (authenticated) {
+      void checkAuth()
+      return
+    }
+    clearSession()
+    queryClient.removeQueries({ queryKey: queryKeys.auth.currentUser })
+  }, [checkAuth, queryClient])
 
-  if (loading) {
+  if (sessionPresent && currentUserQuery.isLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div className="loading-container">
@@ -124,7 +145,7 @@ function AppContent() {
             <Route path="/payments" element={<Payments />} />
             <Route path="/payments/history" element={<PaymentHistory />} />
             <Route path="/payments/recharge" element={<Recharge />} />
-            <Route path="/payments/mpesa" element={<MpesaPayment />} />  {/* NEW: PesaFlux M-Pesa STK Push (additive) */}
+            <Route path="/payments/mpesa" element={<MpesaPayment />} />
             <Route path="/payments/payout" element={<WithdrawFunds />} />
             <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
             <Route path="/payments/withdrawal" element={<Placeholder title="Withdrawal Accounts" />} />
@@ -134,7 +155,7 @@ function AppContent() {
             <Route path="/payments/rebate" element={<Placeholder title="Task Rebate" />} />
             <Route path="/payments/periods" element={<Placeholder title="Earning Periods" />} />
             <Route path="/feedback" element={<Feedback />} />
-            <Route path="/settings" element={<Settings setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Route>
@@ -147,9 +168,5 @@ function AppContent() {
 }
 
 export default function App() {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  )
+  return <AppContent />
 }
