@@ -233,7 +233,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
           <a
             href={
               configs.whatsapp_number
-                ? `https://wa.me/${String(configs.whatsapp_number).replace(/[^0-9]/g, '')}`
+                ? `https://wa.me/${String(configs.whatsapp_number).replace(/[^0-9]/g, '')}?text=Hello!%20I%20need%20support%20regarding%20AdPulseAI.`
                 : '#'
             }
             target="_blank"
