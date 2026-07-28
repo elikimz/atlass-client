@@ -96,16 +96,15 @@ export default function TaskPlayer() {
     setVideoWatched(true)
   }
 
+  /* 
+  // Disabled start button functionality as requested
   const handleWatchOnYouTube = () => {
-    // Disabled start button functionality as requested
-    return;
-    /*
     if (task) {
       window.open(task.video_url, '_blank')
       setVideoWatched(true)
     }
-    */
   }
+  */
 
   const handleCompleteTask = () => {
     if (!task || !videoWatched) {
