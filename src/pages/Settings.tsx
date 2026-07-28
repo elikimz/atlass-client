@@ -230,19 +230,29 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
             Join Telegram
           </a>
-          <a
-            href={
-              configs.whatsapp_number
-                ? `https://wa.me/${String(configs.whatsapp_number).replace(/[^0-9]/g, '')}?text=Hello!%20I%20need%20support%20regarding%20AdPulseAI.`
-                : '#'
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '12px', backgroundColor: '#25D366', color: 'white', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}
+          <button
+            onClick={() => {
+              const number = String(configs.whatsapp_number).replace(/[^0-9]/g, '')
+              // Try native deep link first (opens WhatsApp app directly on mobile)
+              const waApp = `whatsapp://send?phone=${number}&text=Hello!%20I%20need%20support%20regarding%20AdPulseAI.`
+              // Fallback for desktop (opens WhatsApp Web in browser)
+              const waWeb = `https://wa.me/${number}?text=Hello!%20I%20need%20support%20regarding%20AdPulseAI.`
+              const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+              if (isMobile) {
+                window.location.href = waApp
+                // If deep link fails, redirect to wa.me after a short delay
+                window.setTimeout(() => {
+                  window.location.href = waWeb
+                }, 500)
+              } else {
+                window.open(waWeb, '_blank')
+              }
+            }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '12px', backgroundColor: '#25D366', color: 'white', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', border: 'none', cursor: 'pointer', width: '100%' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zM6.07 17.05l-.2-.34c-.76-1.27-1.16-2.73-1.16-4.23 0-4.43 3.61-8.04 8.04-8.04 2.15 0 4.16.84 5.67 2.35 1.51 1.51 2.35 3.52 2.35 5.67 0 4.43-3.61 8.04-8.04 8.04-1.5 0-2.96-.4-4.23-1.16l-.34-.2-3.14.82.83-3.06z"/></svg>
             WhatsApp Support
-          </a>
+          </button>
         </div>
       </div>
 
