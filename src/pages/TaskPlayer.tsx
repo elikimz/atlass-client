@@ -169,8 +169,13 @@ export default function TaskPlayer() {
             </svg>
             <h3 style={{ color: 'white', marginBottom: '20px' }}>This video is on YouTube</h3>
             <button 
-              disabled={true}
-              style={{ backgroundColor: '#cccccc', color: '#666666', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'not-allowed', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto' }}
+              onClick={() => {
+                window.open(task.video_url, '_blank')
+                setVideoWatched(true)
+              }}
+              style={{ backgroundColor: '#FF0000', color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto', transition: 'background-color 0.2s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#CC0000')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FF0000')}
             >
               Watch on YouTube
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
