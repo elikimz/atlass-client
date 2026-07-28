@@ -69,7 +69,11 @@ export default function TaskPlayer() {
         queryClient.setQueryData(queryKeys.dashboard.summary, context.previousDashboard)
       }
       const message = (requestError as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-      setError(message || 'Failed to complete task')
+      if (message && message.includes('Daily task limit reached')) {
+        setError('Daily task limit reached for your Intern plan (2 tasks).')
+      } else {
+        setError(message || 'Failed to complete task')
+      }
     },
     onSuccess: () => {
       setCompleted(true)
@@ -93,10 +97,14 @@ export default function TaskPlayer() {
   }
 
   const handleWatchOnYouTube = () => {
+    // Disabled start button functionality as requested
+    return;
+    /*
     if (task) {
       window.open(task.video_url, '_blank')
       setVideoWatched(true)
     }
+    */
   }
 
   const handleCompleteTask = () => {
@@ -164,8 +172,8 @@ export default function TaskPlayer() {
             </svg>
             <h3 style={{ color: 'white', marginBottom: '20px' }}>This video is on YouTube</h3>
             <button 
-              onClick={handleWatchOnYouTube}
-              style={{ backgroundColor: '#FF0000', color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto' }}
+              disabled={true}
+              style={{ backgroundColor: '#cccccc', color: '#666666', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'not-allowed', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto' }}
             >
               Watch on YouTube
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>

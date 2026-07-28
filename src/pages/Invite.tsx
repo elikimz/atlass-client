@@ -105,7 +105,7 @@ export default function Invite() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 4px', fontWeight: 500 }}>Total Commission</p>
-            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>${summary?.earnings?.toFixed(2) || '0.00'}</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>${(summary?.earnings + summary?.task_rebate)?.toFixed(2) || '0.00'}</p>
           </div>
           <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-main)', boxShadow: 'var(--card-shadow)' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>

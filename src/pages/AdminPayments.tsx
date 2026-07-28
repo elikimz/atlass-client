@@ -11,6 +11,7 @@ interface Payment {
   network: string
   proof_url: string
   admin_notes: string
+  destination_number?: string
   created_at: string
   user: { first_name: string; last_name: string; email: string }
 }
@@ -99,6 +100,23 @@ export default function AdminPayments() {
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Method</div><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{reviewingPayment.payment_method}</div></div>
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Network</div><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{reviewingPayment.network || 'N/A'}</div></div>
               </div>
+              {(reviewingPayment.type === 'payout' || reviewingPayment.type === 'withdrawal') && reviewingPayment.destination_number && (
+                <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-main)' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Withdrawal Number / Address</div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--accent-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>{reviewingPayment.destination_number}</div>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(reviewingPayment.destination_number || '');
+                        showNotify('Number copied to clipboard');
+                      }}
+                      style={{ padding: '6px 12px', borderRadius: '6px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', fontSize: '11px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+                    >
+                      COPY
+                    </button>
+                  </div>
+                </div>
+              )}
               {reviewingPayment.proof_url && (
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>Payment Proof</div><a href={reviewingPayment.proof_url} target="_blank" rel="noreferrer"><img src={reviewingPayment.proof_url} alt="Proof" style={{ width: '100%', borderRadius: '8px', border: '1px solid var(--border-main)' }} /></a></div>
               )}
