@@ -69,11 +69,9 @@ export default function TaskPlayer() {
         queryClient.setQueryData(queryKeys.dashboard.summary, context.previousDashboard)
       }
       const message = (requestError as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-      if (message && message.includes('Daily task limit reached')) {
-        setError('Daily task limit reached for your Intern plan (2 tasks).')
-      } else {
-        setError(message || 'Failed to complete task')
-      }
+      // Use the exact backend error message so the correct plan name and limit are shown.
+      // Previously this was hardcoded to "Intern plan (2 tasks)" which was wrong after an upgrade.
+      setError(message || 'Failed to complete task')
     },
     onSuccess: () => {
       setCompleted(true)
@@ -205,6 +203,16 @@ export default function TaskPlayer() {
         {error && (
           <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', color: '#DC2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
             {error}
+            {error.includes('Daily task limit reached') && (
+              <div style={{ marginTop: '10px' }}>
+                <button
+                  onClick={() => navigate('/plans')}
+                  style={{ backgroundColor: '#DC2626', color: 'white', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
+                >
+                  Upgrade Plan to Unlock More Tasks →
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -23,7 +23,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
+import { queryKeys } from '../services/queryClient'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,6 +80,7 @@ function isValidKenyanPhone(phone: string): boolean {
 export default function MpesaPayment() {
   const navigate = useNavigate()
   const location = useLocation()
+  const queryClient = useQueryClient()
 
   // Plan passed via navigation state from InvestmentPlans
   const plan: Plan | null = (location.state as any)?.plan || null
@@ -151,6 +154,17 @@ export default function MpesaPayment() {
       if (data.status === 'completed') {
         stopPolling()
         setStep('success')
+        // Invalidate all relevant queries so the UI reflects the new plan,
+        // updated task list, and wallet balances immediately after M-Pesa payment.
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.tasks.available }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.plans.all }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.payments.historyBase }),
+        ])
       } else if (data.status === 'failed') {
         stopPolling()
         setStep('failed')
