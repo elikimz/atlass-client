@@ -135,12 +135,20 @@ export default function AdminDashboard() {
               { label: 'Training', icon: '📚', color: '#F59E0B', path: '/admin/training' },
               { label: 'User Base', icon: '👥', color: '#22C55E', path: '/admin/users' },
               { label: 'Payments', icon: '💳', color: '#8B5CF6', path: '/admin/payments' },
-              { label: 'Plans', icon: '💎', color: '#EF4444', path: '/admin/plans' }
+              { label: 'Plans', icon: '💎', color: '#EF4444', path: '/admin/plans' },
+              { label: 'WhatsApp Group', icon: '📱', color: '#25D366', path: configs.find(c => c.key === 'whatsapp_link')?.value || '#', external: true }
             ].map((action, i) => (
+              action.external ? (
+                <a key={i} href={action.path} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-heading)', border: '1px solid var(--border-main)', transition: 'all 0.2s' }}>
+                  <span style={{ fontSize: '20px' }}>{action.icon}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 700 }}>{action.label}</span>
+                </a>
+              ) : (
               <a key={i} href={action.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-heading)', border: '1px solid var(--border-main)', transition: 'all 0.2s' }}>
                 <span style={{ fontSize: '20px' }}>{action.icon}</span>
                 <span style={{ fontSize: '13px', fontWeight: 700 }}>{action.label}</span>
               </a>
+              )
             ))}
           </div>
         </div>

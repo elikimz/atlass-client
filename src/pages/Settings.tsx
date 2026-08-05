@@ -232,26 +232,17 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
           </a>
           <button
             onClick={() => {
-              const number = String(configs.whatsapp_number).replace(/[^0-9]/g, '')
-              // Try native deep link first (opens WhatsApp app directly on mobile)
-              const waApp = `whatsapp://send?phone=${number}&text=Hello!%20I%20need%20support%20regarding%20AdPulseAI.`
-              // Fallback for desktop (opens WhatsApp Web in browser)
-              const waWeb = `https://wa.me/${number}?text=Hello!%20I%20need%20support%20regarding%20AdPulseAI.`
-              const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-              if (isMobile) {
-                window.location.href = waApp
-                // If deep link fails, redirect to wa.me after a short delay
-                window.setTimeout(() => {
-                  window.location.href = waWeb
-                }, 500)
+              const link = configs.whatsapp_link || '#'
+              if (link !== '#') {
+                window.open(link, '_blank')
               } else {
-                window.open(waWeb, '_blank')
+                toast.error('WhatsApp group link not configured')
               }
             }}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '12px', backgroundColor: '#25D366', color: 'white', borderRadius: '10px', textDecoration: 'none', fontWeight: 700, fontSize: '14px', border: 'none', cursor: 'pointer', width: '100%' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zM6.07 17.05l-.2-.34c-.76-1.27-1.16-2.73-1.16-4.23 0-4.43 3.61-8.04 8.04-8.04 2.15 0 4.16.84 5.67 2.35 1.51 1.51 2.35 3.52 2.35 5.67 0 4.43-3.61 8.04-8.04 8.04-1.5 0-2.96-.4-4.23-1.16l-.34-.2-3.14.82.83-3.06z"/></svg>
-            WhatsApp Support
+            Join WhatsApp Group
           </button>
         </div>
       </div>
