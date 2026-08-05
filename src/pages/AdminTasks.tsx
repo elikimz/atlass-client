@@ -27,7 +27,6 @@ export default function AdminTasks() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({ title: '', description: '', video_url: '', reward_amount: 0, plan_id: '' as string | number })
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [uploading, setUploading] = useState(false)
 
   const CLOUDINARY_UPLOAD_PRESET = "task_images"
@@ -67,7 +66,7 @@ export default function AdminTasks() {
 
       const data = await response.json()
       setFormData(prev => ({ ...prev, video_url: data.secure_url }))
-      setSuccess('Video uploaded successfully')
+      toast.success('Video uploaded successfully')
     } catch (err: any) {
       setError('Failed to upload video: ' + err.message)
     } finally {

@@ -25,7 +25,6 @@ export default function AdminTraining() {
   const [notification, setNotification] = useState<Notification | null>(null)
   const [showConfirm, setShowConfirm] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
 
   const CLOUDINARY_UPLOAD_PRESET = "task_images"
   const CLOUDINARY_CLOUD_NAME = "doste1wr0"
@@ -47,7 +46,6 @@ export default function AdminTraining() {
     }
 
     setUploading(true)
-    setUploadProgress(0)
 
     try {
       const uploadData = new FormData()
@@ -71,7 +69,6 @@ export default function AdminTraining() {
       showNotify('Failed to upload video: ' + err.message, 'error')
     } finally {
       setUploading(false)
-      setUploadProgress(0)
     }
   }
 
