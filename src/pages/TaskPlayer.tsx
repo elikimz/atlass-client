@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -26,7 +26,15 @@ export default function TaskPlayer() {
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState('')
   const [videoWatched, setVideoWatched] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(60)
   const taskIdNumber = Number(taskId || 0)
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [timeLeft])
   const tasksQuery = useQuery({
     queryKey: queryKeys.tasks.all,
     queryFn: async () => (await api.get<TaskData[]>('/tasks/all')).data,
@@ -105,8 +113,13 @@ export default function TaskPlayer() {
   */
 
   const handleCompleteTask = () => {
-    if (!task || !videoWatched) {
-      setError('Please watch the entire video first')
+    if (!task) return
+    if (timeLeft > 0) {
+      setError(`Please wait ${timeLeft} more seconds before submitting`)
+      return
+    }
+    if (!videoWatched) {
+      setError('Please watch the video first')
       return
     }
     completionMutation.mutate(task.id)
@@ -199,8 +212,10 @@ export default function TaskPlayer() {
             <p style={{ fontSize: '24px', fontWeight: 700, color: '#00AC4F', margin: 0 }}>${task.reward_amount.toFixed(2)}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: '12px', color: videoWatched ? '#00AC4F' : '#F59E0B', margin: '0 0 4px' }}>
-              {videoWatched ? '✓ Video Watched' : '⏱ Watch the video to continue'}
+            <p style={{ fontSize: '12px', color: (videoWatched && timeLeft === 0) ? '#00AC4F' : '#F59E0B', margin: '0 0 4px' }}>
+              {timeLeft > 0 
+                ? `⏱ Wait ${timeLeft}s to finish` 
+                : (videoWatched ? '✓ Ready to submit' : '⏱ Finish watching video')}
             </p>
           </div>
         </div>
@@ -229,21 +244,27 @@ export default function TaskPlayer() {
 
         <button
           onClick={handleCompleteTask}
-          disabled={!videoWatched || completing || completed}
+          disabled={timeLeft > 0 || !videoWatched || completing || completed}
           style={{
             width: '100%',
-            backgroundColor: videoWatched && !completed ? 'var(--accent-primary)' : 'var(--border-main)',
-            color: videoWatched && !completed ? 'white' : 'var(--text-muted)',
+            backgroundColor: (videoWatched && timeLeft === 0 && !completed) ? 'var(--accent-primary)' : 'var(--border-main)',
+            color: (videoWatched && timeLeft === 0 && !completed) ? 'white' : 'var(--text-muted)',
             padding: '14px 24px',
             borderRadius: '8px',
             border: 'none',
-            cursor: videoWatched && !completed ? 'pointer' : 'not-allowed',
+            cursor: (videoWatched && timeLeft === 0 && !completed) ? 'pointer' : 'not-allowed',
             fontSize: '16px',
             fontWeight: 600,
             transition: 'background-color 0.2s',
           }}
         >
-          {completing ? 'Completing...' : completed ? 'Task Completed ✓' : 'Complete Task & Earn Reward'}
+          {completing 
+            ? 'Completing...' 
+            : completed 
+              ? 'Task Completed ✓' 
+              : timeLeft > 0 
+                ? `Wait ${timeLeft}s to Finish` 
+                : 'Complete Task & Earn Reward'}
         </button>
       </div>
 
