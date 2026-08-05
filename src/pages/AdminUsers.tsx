@@ -26,7 +26,7 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editData, setEditData] = useState<Partial<User>>({})
+  const [editData, setEditData] = useState<Partial<User & { password?: string }>>({})
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -115,9 +115,36 @@ export default function AdminUsers() {
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.username} {user.is_suspended && <span style={{ marginLeft: '8px', color: '#E11D48', fontSize: '11px', fontWeight: 700 }}>[SUSPENDED]</span>}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.first_name} {user.last_name}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-muted)' }}>{user.phone_number}</td>
-                <td style={{ padding: '12px 16px', fontSize: '14px' }}>{editingId === user.id ? (<select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>) : (<span style={{ padding: '4px 8px', backgroundColor: user.role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: user.role === 'admin' ? '#92400E' : '#1E40AF', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{user.role}</span>)}</td>
+                <td style={{ padding: '12px 16px', fontSize: '14px' }}>
+                  {editingId === user.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>
+                      <input type="password" placeholder="New Password" value={editData.password || ''} onChange={(e) => setEditData({ ...editData, password: e.target.value })} style={{ padding: '6px 8px', fontSize: '12px', border: '1px solid var(--border-main)', borderRadius: '6px', width: '120px' }} />
+                    </div>
+                  ) : (
+                    <span style={{ padding: '4px 8px', backgroundColor: user.role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: user.role === 'admin' ? '#92400E' : '#1E40AF', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{user.role}</span>
+                  )}
+                </td>
                 <td style={{ padding: '12px 16px', fontSize: '14px' }}><div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}><span style={{ padding: '2px 6px', backgroundColor: user.is_trained ? 'rgba(34, 197, 94, 0.1)' : 'var(--bg-main)', color: user.is_trained ? '#166534' : 'var(--text-muted)', borderRadius: '4px', fontSize: '11px', fontWeight: 600, width: 'fit-content' }}>{user.is_trained ? 'Trained' : 'Not Trained'}</span><span style={{ padding: '2px 6px', backgroundColor: user.is_suspended ? 'rgba(220, 38, 38, 0.1)' : 'rgba(34, 197, 94, 0.1)', color: user.is_suspended ? '#991B1B' : '#166534', borderRadius: '4px', fontSize: '11px', fontWeight: 600, width: 'fit-content' }}>{user.is_suspended ? 'Suspended' : 'Active'}</span></div></td>
-                <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)' }}><div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div><div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div></td>
+                <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  {editingId === user.id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>Dep:</span>
+                        <input type="number" value={editData.deposit_wallet_balance || 0} onChange={(e) => setEditData({ ...editData, deposit_wallet_balance: parseFloat(e.target.value) })} style={{ padding: '4px', fontSize: '11px', border: '1px solid var(--border-main)', borderRadius: '4px', width: '60px' }} />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>Wth:</span>
+                        <input type="number" value={editData.withdrawal_wallet_balance || 0} onChange={(e) => setEditData({ ...editData, withdrawal_wallet_balance: parseFloat(e.target.value) })} style={{ padding: '4px', fontSize: '11px', border: '1px solid var(--border-main)', borderRadius: '4px', width: '60px' }} />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div>
+                      <div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div>
+                    </>
+                  )}
+                </td>
                 <td style={{ padding: '12px 16px', textAlign: 'center' }}>{editingId === user.id ? (<div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}><button onClick={handleSave} style={{ padding: '6px 12px', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Save</button><button onClick={handleCancel} style={{ padding: '6px 12px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', border: '1px solid var(--border-main)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Cancel</button></div>) : (<div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}><button onClick={() => toggleSuspension(user)} style={{ padding: '6px 12px', backgroundColor: user.is_suspended ? 'rgba(34, 197, 94, 0.1)' : 'rgba(225, 29, 72, 0.1)', color: user.is_suspended ? '#166534' : '#E11D48', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>{user.is_suspended ? 'Unsuspend' : 'Suspend'}</button><button onClick={() => handleEdit(user)} style={{ padding: '6px 12px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Edit</button><button onClick={() => navigate(`/admin/notifications?userId=${user.id}`)} style={{ padding: '6px 12px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#1E40AF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Notify</button><button onClick={() => handleDelete(user.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></div>)}</td>
               </tr>
             ))}
