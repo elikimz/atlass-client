@@ -24,6 +24,56 @@ export default function AdminTraining() {
   const [formData, setFormData] = useState({ name: '', description: '', estimated_time: '', video_url: '', steps_count: 0, is_active: true })
   const [notification, setNotification] = useState<Notification | null>(null)
   const [showConfirm, setShowConfirm] = useState<number | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+
+  const CLOUDINARY_UPLOAD_PRESET = "task_images"
+  const CLOUDINARY_CLOUD_NAME = "doste1wr0"
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      showNotify('Please select a valid video file', 'error')
+      return
+    }
+
+    // Validate file size (e.g., 100MB limit)
+    if (file.size > 100 * 1024 * 1024) {
+      showNotify('Video file is too large (max 100MB)', 'error')
+      return
+    }
+
+    setUploading(true)
+    setUploadProgress(0)
+
+    try {
+      const uploadData = new FormData()
+      uploadData.append('file', file)
+      uploadData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+        {
+          method: 'POST',
+          body: uploadData,
+        }
+      )
+
+      if (!response.ok) throw new Error('Upload failed')
+
+      const data = await response.json()
+      setFormData(prev => ({ ...prev, video_url: data.secure_url }))
+      showNotify('Video uploaded successfully')
+    } catch (err: any) {
+      showNotify('Failed to upload video: ' + err.message, 'error')
+    } finally {
+      setUploading(false)
+      setUploadProgress(0)
+    }
+  }
 
   useEffect(() => { fetchCertifications() }, [])
   useEffect(() => { if (notification) { const timer = setTimeout(() => setNotification(null), 5000); return () => clearTimeout(timer) } }, [notification])
@@ -136,7 +186,68 @@ export default function AdminTraining() {
               <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Estimated Time</label><input type="text" value={formData.estimated_time} onChange={(e) => setFormData({ ...formData, estimated_time: e.target.value })} placeholder="e.g., 15 mins" style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
               <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Steps Count</label><input type="number" value={formData.steps_count} onChange={(e) => setFormData({ ...formData, steps_count: parseInt(e.target.value) })} min="0" style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
             </div>
-            <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Video URL</label><input type="url" value={formData.video_url} onChange={(e) => setFormData({ ...formData, video_url: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Video Source</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input 
+                  type="url" 
+                  placeholder="Paste video URL here..." 
+                  value={formData.video_url} 
+                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })} 
+                  style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} 
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-main)' }}></div>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>OR</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-main)' }}></div>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoUpload}
+                    disabled={uploading}
+                    id="video-upload-input"
+                    style={{ display: 'none' }}
+                  />
+                  <label 
+                    htmlFor="video-upload-input"
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '8px', 
+                      padding: '10px 12px', 
+                      fontSize: '14px', 
+                      border: '2px dashed var(--border-main)', 
+                      borderRadius: '8px', 
+                      cursor: uploading ? 'not-allowed' : 'pointer', 
+                      backgroundColor: 'var(--bg-main)', 
+                      color: 'var(--text-main)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {uploading ? (
+                      <>
+                        <div style={{ width: '16px', height: '16px', border: '2px solid var(--text-muted)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                        <span>Uploading Video...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📁</span>
+                        <span>{formData.video_url ? 'Change Uploaded Video' : 'Upload Video from Device'}</span>
+                      </>
+                    )}
+                  </label>
+                  {formData.video_url && !uploading && (
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>✅</span>
+                      <span style={{ wordBreak: 'break-all' }}>Current video: {formData.video_url}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><input type="checkbox" id="is_active" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} style={{ cursor: 'pointer' }} /><label htmlFor="is_active" style={{ fontSize: '14px', color: 'var(--text-main)', fontWeight: 500, cursor: 'pointer' }}>Active</label></div>
             <div style={{ display: 'flex', gap: '12px' }}><button type="submit" style={{ padding: '10px 20px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>{editingId ? 'Update Certification' : 'Create Certification'}</button><button type="button" onClick={handleCancel} style={{ padding: '10px 20px', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-main)', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>Cancel</button></div>
           </form>

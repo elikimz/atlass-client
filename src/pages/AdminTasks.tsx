@@ -27,6 +27,53 @@ export default function AdminTasks() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({ title: '', description: '', video_url: '', reward_amount: 0, plan_id: '' as string | number })
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [uploading, setUploading] = useState(false)
+
+  const CLOUDINARY_UPLOAD_PRESET = "task_images"
+  const CLOUDINARY_CLOUD_NAME = "doste1wr0"
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('video/')) {
+      setError('Please select a valid video file')
+      return
+    }
+
+    if (file.size > 100 * 1024 * 1024) {
+      setError('Video file is too large (max 100MB)')
+      return
+    }
+
+    setUploading(true)
+    setError('')
+
+    try {
+      const uploadData = new FormData()
+      uploadData.append('file', file)
+      uploadData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+        {
+          method: 'POST',
+          body: uploadData,
+        }
+      )
+
+      if (!response.ok) throw new Error('Upload failed')
+
+      const data = await response.json()
+      setFormData(prev => ({ ...prev, video_url: data.secure_url }))
+      setSuccess('Video uploaded successfully')
+    } catch (err: any) {
+      setError('Failed to upload video: ' + err.message)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   useEffect(() => { 
     fetchTasks()
@@ -136,7 +183,69 @@ export default function AdminTasks() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Title</label><input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
             <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Description</label><textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontFamily: 'inherit' }} /></div>
-            <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Video URL</label><input type="url" value={formData.video_url} onChange={(e) => setFormData({ ...formData, video_url: e.target.value })} required style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Video Source</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <input 
+                  type="url" 
+                  placeholder="Paste video URL here..." 
+                  value={formData.video_url} 
+                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })} 
+                  required 
+                  style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} 
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-main)' }}></div>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>OR</span>
+                  <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-main)' }}></div>
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoUpload}
+                    disabled={uploading}
+                    id="task-video-upload-input"
+                    style={{ display: 'none' }}
+                  />
+                  <label 
+                    htmlFor="task-video-upload-input"
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '8px', 
+                      padding: '10px 12px', 
+                      fontSize: '14px', 
+                      border: '2px dashed var(--border-main)', 
+                      borderRadius: '8px', 
+                      cursor: uploading ? 'not-allowed' : 'pointer', 
+                      backgroundColor: 'var(--bg-card)', 
+                      color: 'var(--text-main)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {uploading ? (
+                      <>
+                        <div style={{ width: '16px', height: '16px', border: '2px solid var(--text-muted)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                        <span>Uploading Video...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>📁</span>
+                        <span>{formData.video_url ? 'Change Uploaded Video' : 'Upload Video from Device'}</span>
+                      </>
+                    )}
+                  </label>
+                  {formData.video_url && !uploading && (
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span>✅</span>
+                      <span style={{ wordBreak: 'break-all' }}>Current video: {formData.video_url}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Assign to Plan</label><select value={formData.plan_id} onChange={(e) => setFormData({ ...formData, plan_id: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="">All Levels (General)</option>{plans.filter(p => p.name !== 'Intern').map(plan => (<option key={plan.id} value={plan.id}>{plan.name}</option>))}
 <option value="1">Intern Only</option></select></div>
             <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '6px' }}>Reward Amount</label><input type="number" value={formData.reward_amount} onChange={(e) => setFormData({ ...formData, reward_amount: parseFloat(e.target.value) })} step="0.01" required style={{ width: '100%', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', boxSizing: 'border-box', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
