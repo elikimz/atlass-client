@@ -27,6 +27,7 @@ import WithdrawFunds from './pages/WithdrawFunds'
 import WithdrawalAccounts from './pages/WithdrawalAccounts'
 import Recharge from './pages/Recharge'
 import MpesaPayment from './pages/MpesaPayment'
+import PaymentMethodMaintenance from './pages/PaymentMethodMaintenance'
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
@@ -146,6 +147,7 @@ function AppContent() {
             <Route path="/payments/history" element={<PaymentHistory />} />
             <Route path="/payments/recharge" element={<Recharge />} />
             <Route path="/payments/mpesa" element={<MpesaPayment />} />
+            <Route path="/payments/maintenance/:method" element={<PaymentMethodMaintenance />} />
             <Route path="/payments/payout" element={<WithdrawFunds />} />
             <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
             <Route path="/payments/withdrawal" element={<Placeholder title="Withdrawal Accounts" />} />
