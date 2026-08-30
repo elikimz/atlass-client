@@ -30,6 +30,8 @@ export default function AdminUsers() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   useEffect(() => { fetchUsers() }, [])
 
@@ -65,6 +67,28 @@ export default function AdminUsers() {
     }
   }
 
+  const handleBulkDelete = async (deleteAll = false) => {
+    const ids = Array.from(selectedIds)
+    if (!deleteAll && ids.length === 0) return
+    const confirmation = deleteAll
+      ? 'Delete every non-admin user account? This permanently removes their data and cannot be undone.'
+      : `Delete ${ids.length} selected user${ids.length === 1 ? '' : 's'}? This permanently removes their data and cannot be undone.`
+    if (!window.confirm(confirmation)) return
+
+    const toastId = toast.loading(deleteAll ? 'Deleting all users...' : `Deleting ${ids.length} users...`)
+    setBulkDeleting(true)
+    try {
+      const response = await api.post('/admin/users/bulk-delete', { user_ids: ids, delete_all: deleteAll })
+      toast.success(response.data?.message || 'Users deleted successfully', { id: toastId })
+      setSelectedIds(new Set())
+      await fetchUsers()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Failed to delete users', { id: toastId })
+    } finally {
+      setBulkDeleting(false)
+    }
+  }
+
   const toggleSuspension = async (user: User) => {
     try {
       await api.put(`/admin/users/${user.id}`, { is_suspended: !user.is_suspended })
@@ -77,6 +101,19 @@ export default function AdminUsers() {
     if (!user) return false
     const search = (searchTerm || '').toLowerCase()
     return (user.username || '').toLowerCase().includes(search) || (user.first_name || '').toLowerCase().includes(search) || (user.last_name || '').toLowerCase().includes(search) || (user.email || '').toLowerCase().includes(search)
+  })
+  const selectableUsers = filteredUsers.filter((user) => !user.is_admin && user.role !== 'admin')
+  const allVisibleSelected = selectableUsers.length > 0 && selectableUsers.every((user) => selectedIds.has(user.id))
+  const toggleSelected = (id: number) => setSelectedIds((previous) => {
+    const next = new Set(previous)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+  const toggleSelectVisible = () => setSelectedIds((previous) => {
+    const next = new Set(previous)
+    if (allVisibleSelected) selectableUsers.forEach((user) => next.delete(user.id))
+    else selectableUsers.forEach((user) => next.add(user.id))
+    return next
   })
 
   if (loading) {
@@ -95,11 +132,16 @@ export default function AdminUsers() {
       <div><h1 style={{ fontSize: '26px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px' }}>Manage Users</h1><p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>View and manage user accounts, roles, and status</p></div>
       {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', color: '#DC2626', fontSize: '14px' }}>{error}</div>}
       {success && <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '12px 16px', color: '#166534', fontSize: '14px' }}>{success}</div>}
-      <div><input type="text" placeholder="Search by name or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', maxWidth: '400px', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)' }} /></div>
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <input type="text" placeholder="Search by name or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', maxWidth: '400px', padding: '10px 12px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', outline: 'none', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)' }} />
+        <button onClick={() => handleBulkDelete(false)} disabled={bulkDeleting || selectedIds.size === 0} style={{ padding: '10px 14px', border: 'none', borderRadius: '8px', backgroundColor: selectedIds.size ? '#DC2626' : 'var(--text-muted)', color: 'white', fontSize: '13px', fontWeight: 700, cursor: selectedIds.size && !bulkDeleting ? 'pointer' : 'not-allowed' }}>Delete selected ({selectedIds.size})</button>
+        <button onClick={() => handleBulkDelete(true)} disabled={bulkDeleting || users.filter((user) => !user.is_admin && user.role !== 'admin').length === 0} style={{ padding: '10px 14px', border: '1px solid #DC2626', borderRadius: '8px', backgroundColor: 'transparent', color: '#DC2626', fontSize: '13px', fontWeight: 700, cursor: bulkDeleting ? 'not-allowed' : 'pointer' }}>Delete all non-admin users</button>
+      </div>
       <div style={{ overflowX: 'auto', backgroundColor: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-main)', boxShadow: 'var(--card-shadow)' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-main)' }}>
+              <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', width: '44px' }}><input type="checkbox" aria-label="Select visible users" checked={allVisibleSelected} onChange={toggleSelectVisible} /></th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Username</th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Name</th>
               <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>Phone</th>
@@ -112,6 +154,7 @@ export default function AdminUsers() {
           <tbody>
             {filteredUsers.map((user) => (
               <tr key={user.id} style={{ borderBottom: '1px solid var(--border-main)', backgroundColor: user.is_suspended ? 'rgba(225, 29, 72, 0.05)' : 'transparent' }}>
+                <td style={{ padding: '12px 16px', textAlign: 'center' }}>{!user.is_admin && user.role !== 'admin' && <input type="checkbox" aria-label={`Select ${user.username}`} checked={selectedIds.has(user.id)} onChange={() => toggleSelected(user.id)} />}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.username} {user.is_suspended && <span style={{ marginLeft: '8px', color: '#E11D48', fontSize: '11px', fontWeight: 700 }}>[SUSPENDED]</span>}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}>{user.first_name} {user.last_name}</td>
                 <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-muted)' }}>{user.phone_number}</td>
