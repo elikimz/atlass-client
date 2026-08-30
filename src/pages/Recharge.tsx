@@ -333,9 +333,8 @@ export default function Recharge() {
                   <div key={soonMethod} onClick={() => { setMethod(soonMethod); setError(maintenanceMessage) }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', border: `2px solid ${method === soonMethod ? logoColor : 'transparent'}`, backgroundColor: 'var(--bg-card)', cursor: 'pointer', boxShadow: method === soonMethod ? `0 0 0 3px ${logoColor}20` : 'none', transition: 'all 0.2s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'white', display: 'grid', placeItems: 'center', flexShrink: 0, border: '1px solid var(--border-main)' }}><img src={logoUrl} alt={`${brand} logo`} style={{ width: '27px', height: '27px' }} /></div>
-                      <div><div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>{brand}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Temporarily unavailable</div></div>
+                      <div><div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>{brand}</div></div>
                     </div>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: logoColor, border: `1px solid ${logoColor}55`, borderRadius: '999px', padding: '5px 8px' }}>UNAVAILABLE</span>
                   </div>
                 )
               })}
@@ -377,7 +376,7 @@ export default function Recharge() {
             >
               {method === 'mpesa'
                 ? `📱 Pay with M-Pesa`
-                : isComingSoon ? 'Temporarily unavailable' : 'Proceed to Deposit'
+                : 'Proceed to Deposit'
               }
             </button>
           </div>
