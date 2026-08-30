@@ -13,6 +13,8 @@ const CLOUDINARY_CLOUD_NAME = "doste1wr0"
 
 type RechargeMethod = 'crypto' | 'mpesa' | 'paypal' | 'wise' | 'payoneer'
 
+const maintenanceMessage = 'The payment method is currently under maintenance and is temporarily unavailable. Our technical team is working on the necessary updates to restore the service.'
+
 const comingSoonLabels: Record<'paypal' | 'wise' | 'payoneer', string> = {
   paypal: 'PayPal',
   wise: 'Wise',
@@ -62,7 +64,7 @@ export default function Recharge() {
   const handleProceed = () => {
     if (finalAmount < 20) return
     if (isComingSoon) {
-      setError(`${comingSoonLabels[method]} payments are coming soon. Please choose M-Pesa or USDT for now.`)
+      setError(maintenanceMessage)
       return
     }
 
@@ -328,17 +330,17 @@ export default function Recharge() {
                 const logoColor = soonMethod === 'paypal' ? '#003087' : soonMethod === 'wise' ? '#163300' : '#ff4800'
                 const logoUrl = soonMethod === 'paypal' ? 'https://cdn.simpleicons.org/paypal/003087' : soonMethod === 'wise' ? 'https://cdn.simpleicons.org/wise/163300' : 'https://cdn.simpleicons.org/payoneer/ff4800'
                 return (
-                  <div key={soonMethod} onClick={() => { setMethod(soonMethod); setError(`${brand} payments are coming soon.`) }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', border: `2px solid ${method === soonMethod ? logoColor : 'transparent'}`, backgroundColor: 'var(--bg-card)', cursor: 'pointer', boxShadow: method === soonMethod ? `0 0 0 3px ${logoColor}20` : 'none', transition: 'all 0.2s' }}>
+                  <div key={soonMethod} onClick={() => { setMethod(soonMethod); setError(maintenanceMessage) }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', border: `2px solid ${method === soonMethod ? logoColor : 'transparent'}`, backgroundColor: 'var(--bg-card)', cursor: 'pointer', boxShadow: method === soonMethod ? `0 0 0 3px ${logoColor}20` : 'none', transition: 'all 0.2s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'white', display: 'grid', placeItems: 'center', flexShrink: 0, border: '1px solid var(--border-main)' }}><img src={logoUrl} alt={`${brand} logo`} style={{ width: '27px', height: '27px' }} /></div>
-                      <div><div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>{brand}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Coming soon</div></div>
+                      <div><div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>{brand}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Temporarily unavailable</div></div>
                     </div>
-                    <span style={{ fontSize: '11px', fontWeight: 800, color: logoColor, border: `1px solid ${logoColor}55`, borderRadius: '999px', padding: '5px 8px' }}>SOON</span>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: logoColor, border: `1px solid ${logoColor}55`, borderRadius: '999px', padding: '5px 8px' }}>UNAVAILABLE</span>
                   </div>
                 )
               })}
             </div>
-            {isComingSoon && <div style={{ marginTop: '12px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#9a3412', fontSize: '13px', fontWeight: 700 }}>☻ {comingSoonLabels[method]} checkout is coming soon. Select M-Pesa or USDT to continue.</div>}
+            {isComingSoon && <div style={{ marginTop: '12px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#9a3412', fontSize: '13px', lineHeight: 1.5, fontWeight: 700 }}>{maintenanceMessage}</div>}
           </div>
 
           {/* Summary and Proceed */}
@@ -375,7 +377,7 @@ export default function Recharge() {
             >
               {method === 'mpesa'
                 ? `📱 Pay with M-Pesa`
-                : isComingSoon ? `${comingSoonLabels[method]} Coming Soon` : 'Proceed to Deposit'
+                : isComingSoon ? 'Temporarily unavailable' : 'Proceed to Deposit'
               }
             </button>
           </div>
