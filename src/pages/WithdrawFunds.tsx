@@ -18,7 +18,7 @@ export default function WithdrawFunds() {
   const queryClient = useQueryClient()
   const userQuery = useQuery({
     queryKey: queryKeys.auth.currentUser,
-    queryFn: async () => (await api.get<{ withdrawal_wallet_balance?: number }>('/auth/me')).data,
+    queryFn: async () => (await api.get<{ withdrawal_wallet_balance?: number; current_plan_id?: number | null; has_purchased_first_package?: boolean }>('/auth/me')).data,
     staleTime: 5 * 60 * 1000,
   })
   const accountsQuery = useQuery({
@@ -32,6 +32,7 @@ export default function WithdrawFunds() {
     staleTime: 2 * 60 * 1000,
   })
   const balance = userQuery.data?.withdrawal_wallet_balance ?? 0
+  const isEligible = Boolean(userQuery.data?.has_purchased_first_package && userQuery.data?.current_plan_id)
   const accounts = accountsQuery.data ?? []
   const withdrawalHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'payout')
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
@@ -52,6 +53,7 @@ export default function WithdrawFunds() {
   }, [accounts, selectedAccountId])
 
   const handleConfirmWithdrawal = () => {
+    if (!isEligible) { setError('Recharge your account and purchase a plan before requesting a withdrawal.'); return }
     if (!selectedAmount || !selectedAccountId) return
     if (selectedAmount > balance) { setError('Insufficient balance'); return }
     setError(null); setShowPasswordModal(true)
@@ -94,11 +96,13 @@ export default function WithdrawFunds() {
         <button onClick={() => navigate('/payments/history')} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-heading)' }}>🕒</button>
       </div>
 
-      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '24px', textAlign: 'center', boxShadow: 'var(--card-shadow)', marginBottom: '24px', border: '1px solid var(--border-main)' }}>
+      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '24px', textAlign: 'center', boxShadow: 'var(--card-shadow)', marginBottom: '14px', border: '1px solid var(--border-main)' }}>
         <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>Available Balance</div>
         <div style={{ fontSize: '38px', fontWeight: 800, color: 'var(--text-heading)' }}>${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 600 }}>USD</div>
       </div>
+
+      {!isEligible && <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal unavailable</strong><br />Recharge your account and purchase an active plan before you can withdraw earnings.</div>}
 
       <div style={{ marginBottom: '24px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>1. Select Amount</h3>
@@ -133,7 +137,7 @@ export default function WithdrawFunds() {
 
       {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid #fecaca', padding: '12px', borderRadius: '12px', marginBottom: '16px' }}><p style={{ fontSize: '13px', color: '#991b1b', margin: 0, fontWeight: 600 }}>❌ {error}</p></div>}
 
-      <button onClick={handleConfirmWithdrawal} disabled={!selectedAmount || !selectedAccountId} style={{ width: '100%', padding: '18px', borderRadius: '30px', backgroundColor: (!selectedAmount || !selectedAccountId) ? 'var(--text-muted)' : 'var(--accent-primary)', color: 'white', fontSize: '17px', fontWeight: 700, border: 'none', cursor: (!selectedAmount || !selectedAccountId) ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(49, 151, 149, 0.3)', marginBottom: '12px' }}>Confirm Withdrawal</button>
+      <button onClick={handleConfirmWithdrawal} disabled={!isEligible || !selectedAmount || !selectedAccountId} style={{ width: '100%', padding: '18px', borderRadius: '30px', backgroundColor: (!isEligible || !selectedAmount || !selectedAccountId) ? 'var(--text-muted)' : 'var(--accent-primary)', color: 'white', fontSize: '17px', fontWeight: 700, border: 'none', cursor: (!isEligible || !selectedAmount || !selectedAccountId) ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(49, 151, 149, 0.3)', marginBottom: '12px' }}>Confirm Withdrawal</button>
 
       {withdrawalHistory.length > 0 && (
         <div style={{ marginTop: '40px', paddingTop: '32px', borderTop: '2px solid var(--border-main)' }}>

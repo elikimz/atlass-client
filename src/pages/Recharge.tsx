@@ -11,12 +11,20 @@ const USDT_NETWORK = 'ERC20 (Ethereum)'
 const CLOUDINARY_UPLOAD_PRESET = "task_images"
 const CLOUDINARY_CLOUD_NAME = "doste1wr0"
 
+type RechargeMethod = 'crypto' | 'mpesa' | 'paypal' | 'wise' | 'payoneer'
+
+const comingSoonLabels: Record<'paypal' | 'wise' | 'payoneer', string> = {
+  paypal: 'PayPal',
+  wise: 'Wise',
+  payoneer: 'Payoneer',
+}
+
 export default function Recharge() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const userQuery = useQuery({
     queryKey: queryKeys.auth.currentUser,
-    queryFn: async () => (await api.get<{ deposit_wallet_balance?: number }>('/auth/me')).data,
+    queryFn: async () => (await api.get<{ deposit_wallet_balance?: number; current_plan_id?: number | null; has_purchased_first_package?: boolean }>('/auth/me')).data,
     staleTime: 5 * 60 * 1000,
   })
   const paymentHistoryQuery = useQuery({
@@ -27,7 +35,7 @@ export default function Recharge() {
   const balance = userQuery.data?.deposit_wallet_balance ?? 0
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20)
   const [customAmount, setCustomAmount] = useState('')
-  const [method, setMethod] = useState<'crypto' | 'mpesa'>('crypto')
+  const [method, setMethod] = useState<RechargeMethod>('crypto')
   const [copied, setCopied] = useState(false)
   const [showCryptoDetails, setShowCryptoDetails] = useState(false)
   const [proofFile, setProofFile] = useState<File | null>(null)
@@ -42,6 +50,7 @@ export default function Recharge() {
   const loadingHistory = paymentHistoryQuery.isLoading
 
   const finalAmount = customAmount ? parseFloat(customAmount) : (selectedAmount || 0)
+  const isComingSoon = method === 'paypal' || method === 'wise' || method === 'payoneer'
 
   const handleCopy = () => {
     navigator.clipboard.writeText(USDT_ADDRESS).then(() => {
@@ -52,6 +61,10 @@ export default function Recharge() {
 
   const handleProceed = () => {
     if (finalAmount < 20) return
+    if (isComingSoon) {
+      setError(`${comingSoonLabels[method]} payments are coming soon. Please choose M-Pesa or USDT for now.`)
+      return
+    }
 
     if (method === 'mpesa') {
       // Navigate to M-Pesa payment page with the selected recharge amount
@@ -310,7 +323,22 @@ export default function Recharge() {
                   )}
                 </div>
               </div>
+              {(['paypal', 'wise', 'payoneer'] as const).map((soonMethod) => {
+                const brand = comingSoonLabels[soonMethod]
+                const logoColor = soonMethod === 'paypal' ? '#003087' : soonMethod === 'wise' ? '#163300' : '#ff4800'
+                const logoUrl = soonMethod === 'paypal' ? 'https://cdn.simpleicons.org/paypal/003087' : soonMethod === 'wise' ? 'https://cdn.simpleicons.org/wise/163300' : 'https://cdn.simpleicons.org/payoneer/ff4800'
+                return (
+                  <div key={soonMethod} onClick={() => { setMethod(soonMethod); setError(`${brand} payments are coming soon.`) }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', border: `2px solid ${method === soonMethod ? logoColor : 'transparent'}`, backgroundColor: 'var(--bg-card)', cursor: 'pointer', boxShadow: method === soonMethod ? `0 0 0 3px ${logoColor}20` : 'none', transition: 'all 0.2s' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'white', display: 'grid', placeItems: 'center', flexShrink: 0, border: '1px solid var(--border-main)' }}><img src={logoUrl} alt={`${brand} logo`} style={{ width: '27px', height: '27px' }} /></div>
+                      <div><div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>{brand}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Coming soon</div></div>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: logoColor, border: `1px solid ${logoColor}55`, borderRadius: '999px', padding: '5px 8px' }}>SOON</span>
+                  </div>
+                )
+              })}
             </div>
+            {isComingSoon && <div style={{ marginTop: '12px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#9a3412', fontSize: '13px', fontWeight: 700 }}>☻ {comingSoonLabels[method]} checkout is coming soon. Select M-Pesa or USDT to continue.</div>}
           </div>
 
           {/* Summary and Proceed */}
@@ -318,7 +346,7 @@ export default function Recharge() {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
               <span style={{ color: 'var(--text-heading)', fontWeight: 500 }}>Method:</span>
               <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>
-                {method === 'mpesa' ? 'M-PESA (KES)' : 'Crypto (USDT-ERC20)'}
+                {method === 'mpesa' ? 'M-PESA (KES)' : method === 'crypto' ? 'Crypto (USDT-ERC20)' : comingSoonLabels[method]}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '14px' }}>
@@ -336,18 +364,18 @@ export default function Recharge() {
               disabled={finalAmount < 20}
               style={{
                 width: '100%', height: '56px', borderRadius: '16px',
-                backgroundColor: finalAmount < 20
+                  backgroundColor: finalAmount < 20 || isComingSoon
                   ? 'var(--text-muted)'
                   : method === 'mpesa' ? '#00AC4F' : 'var(--accent-primary)',
                 color: 'white', fontSize: '16px', fontWeight: 700, border: 'none',
-                cursor: finalAmount < 20 ? 'not-allowed' : 'pointer',
+                cursor: finalAmount < 20 || isComingSoon ? 'not-allowed' : 'pointer',
                 boxShadow: finalAmount < 20 ? 'none' : '0 4px 12px rgba(49, 151, 149, 0.2)',
                 transition: 'all 0.2s'
               }}
             >
               {method === 'mpesa'
                 ? `📱 Pay with M-Pesa`
-                : 'Proceed to Deposit'
+                : isComingSoon ? `${comingSoonLabels[method]} Coming Soon` : 'Proceed to Deposit'
               }
             </button>
           </div>
