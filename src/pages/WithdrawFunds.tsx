@@ -46,7 +46,7 @@ export default function WithdrawFunds() {
   const [success, setSuccess] = useState(false)
 
   const amounts = [2.50, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
-  const networkFee = 0.50
+  const networkFee = 0.00
 
   useEffect(() => {
     if (selectedAccountId || accounts.length === 0) return
@@ -134,7 +134,7 @@ export default function WithdrawFunds() {
       <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '20px', padding: '20px', marginBottom: '24px', border: '1px solid var(--border-main)' }}>
         <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '16px', textTransform: 'uppercase' }}>Withdrawal Summary</h3>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '14px', color: 'var(--text-main)', fontWeight: 500 }}>Withdrawal Amount:</span><span style={{ fontSize: '14px', color: 'var(--text-heading)', fontWeight: 700 }}>${selectedAmount?.toFixed(2) || '0.00'} USD</span></div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '14px', color: 'var(--text-main)', fontWeight: 500 }}>Network Fee:</span><span style={{ fontSize: '14px', color: '#ef4444', fontWeight: 700 }}>-${networkFee.toFixed(2)} USDT</span></div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}><span style={{ fontSize: '14px', color: 'var(--text-main)', fontWeight: 500 }}>Network Fee:</span><span style={{ fontSize: '14px', color: 'var(--accent-primary)', fontWeight: 700 }}>${networkFee.toFixed(2)} USDT</span></div>
         <div style={{ height: '1px', backgroundColor: 'var(--border-main)', margin: '12px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontSize: '15px', color: 'var(--text-heading)', fontWeight: 700 }}>Net Received:</span><span style={{ fontSize: '16px', color: 'var(--accent-primary)', fontWeight: 800 }}>${netReceived.toFixed(2)} USDT</span></div>
       </div>
