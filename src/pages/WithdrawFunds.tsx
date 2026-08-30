@@ -106,7 +106,7 @@ export default function WithdrawFunds() {
       </div>
 
       {hasPendingWithdrawal && <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal already in progress</strong><br />You cannot request another withdrawal until this one is processed or canceled.</div>}
-      {!hasPendingWithdrawal && !isEligible && <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal unavailable</strong><br />Recharge your account and purchase an active plan before you can withdraw earnings.</div>}
+      {!hasPendingWithdrawal && !isEligible && <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal unavailable</strong><br />Please recharge your account and purchase an active plan to enable the withdrawal of your available earnings. Withdrawals can only be processed once an active plan is in place.</div>}
 
       <div style={{ marginBottom: '24px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>1. Select Amount</h3>
