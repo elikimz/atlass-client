@@ -35,6 +35,8 @@ export default function WithdrawFunds() {
   const isEligible = Boolean(userQuery.data?.has_purchased_first_package && userQuery.data?.current_plan_id)
   const accounts = accountsQuery.data ?? []
   const withdrawalHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'payout')
+  const pendingWithdrawal = withdrawalHistory.find((payment: any) => ['pending', 'processing', 'in_progress'].includes(payment.status))
+  const hasPendingWithdrawal = Boolean(pendingWithdrawal)
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
@@ -53,6 +55,7 @@ export default function WithdrawFunds() {
   }, [accounts, selectedAccountId])
 
   const handleConfirmWithdrawal = () => {
+    if (hasPendingWithdrawal) { setError('You already have a withdrawal being processed. Wait until it is processed or canceled before requesting another withdrawal.'); return }
     if (!isEligible) { setError('Recharge your account and purchase a plan before requesting a withdrawal.'); return }
     if (!selectedAmount || !selectedAccountId) return
     if (selectedAmount > balance) { setError('Insufficient balance'); return }
@@ -102,7 +105,8 @@ export default function WithdrawFunds() {
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 600 }}>USD</div>
       </div>
 
-      {!isEligible && <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal unavailable</strong><br />Recharge your account and purchase an active plan before you can withdraw earnings.</div>}
+      {hasPendingWithdrawal && <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e40af', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal already in progress</strong><br />You cannot request another withdrawal until this one is processed or canceled.</div>}
+      {!hasPendingWithdrawal && !isEligible && <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: '16px', padding: '14px 16px', marginBottom: '24px', fontSize: '13px', lineHeight: 1.5 }}><strong>Withdrawal unavailable</strong><br />Recharge your account and purchase an active plan before you can withdraw earnings.</div>}
 
       <div style={{ marginBottom: '24px' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>1. Select Amount</h3>
@@ -137,7 +141,7 @@ export default function WithdrawFunds() {
 
       {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid #fecaca', padding: '12px', borderRadius: '12px', marginBottom: '16px' }}><p style={{ fontSize: '13px', color: '#991b1b', margin: 0, fontWeight: 600 }}>❌ {error}</p></div>}
 
-      <button onClick={handleConfirmWithdrawal} disabled={!isEligible || !selectedAmount || !selectedAccountId} style={{ width: '100%', padding: '18px', borderRadius: '30px', backgroundColor: (!isEligible || !selectedAmount || !selectedAccountId) ? 'var(--text-muted)' : 'var(--accent-primary)', color: 'white', fontSize: '17px', fontWeight: 700, border: 'none', cursor: (!isEligible || !selectedAmount || !selectedAccountId) ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(49, 151, 149, 0.3)', marginBottom: '12px' }}>Confirm Withdrawal</button>
+      <button onClick={handleConfirmWithdrawal} disabled={hasPendingWithdrawal || !isEligible || !selectedAmount || !selectedAccountId} style={{ width: '100%', padding: '18px', borderRadius: '30px', backgroundColor: (hasPendingWithdrawal || !isEligible || !selectedAmount || !selectedAccountId) ? 'var(--text-muted)' : 'var(--accent-primary)', color: 'white', fontSize: '17px', fontWeight: 700, border: 'none', cursor: (hasPendingWithdrawal || !isEligible || !selectedAmount || !selectedAccountId) ? 'not-allowed' : 'pointer', boxShadow: '0 4px 15px rgba(49, 151, 149, 0.3)', marginBottom: '12px' }}>Confirm Withdrawal</button>
 
       {withdrawalHistory.length > 0 && (
         <div style={{ marginTop: '40px', paddingTop: '32px', borderTop: '2px solid var(--border-main)' }}>
