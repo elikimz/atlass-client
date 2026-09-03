@@ -67,6 +67,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const [inviteCode, setInviteCode] = useState(referralFromUrl)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // Step 2 fields
   const [countryCode, setCountryCode] = useState('+254')
@@ -78,6 +80,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   // Login fields
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [showLoginPassword, setShowLoginPassword] = useState(false)
   // const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   const [loading, setLoading] = useState(false)
@@ -509,28 +512,32 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                 <div style={inputWrapStyle}>
                   <span style={iconStyle}>🔒</span>
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value.slice(0, 72))}
                     placeholder="Create a password (8–72 characters)"
                     style={inputStyle}
+                    autoComplete="new-password"
                     required
                     maxLength={72}
                   />
+                  <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showPassword ? '🙈' : '👁️'}</button>
                 </div>
 
                 {/* Confirm Password */}
                 <div style={inputWrapStyle}>
                   <span style={iconStyle}>🔒</span>
                   <input
-                    type="password"
+                    type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value.slice(0, 72))}
                     placeholder="Please enter the password again"
                     style={inputStyle}
+                    autoComplete="new-password"
                     required
                     maxLength={72}
                   />
+                  <button type="button" onClick={() => setShowConfirmPassword(value => !value)} aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showConfirmPassword ? '🙈' : '👁️'}</button>
                 </div>
 
                 {error && (
@@ -805,13 +812,15 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
               <div style={inputWrapStyle}>
                 <span style={iconStyle}>🔒</span>
                 <input
-                  type="password"
+                  type={showLoginPassword ? 'text' : 'password'}
                   value={loginPassword}
                   onChange={e => setLoginPassword(e.target.value)}
                   placeholder="Please enter your password"
                   style={inputStyle}
+                  autoComplete="current-password"
                   required
                 />
+                <button type="button" onClick={() => setShowLoginPassword(value => !value)} aria-label={showLoginPassword ? 'Hide password' : 'Show password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showLoginPassword ? '🙈' : '👁️'}</button>
               </div>
 
               {error && (
