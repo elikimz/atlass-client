@@ -8,6 +8,9 @@ interface Plan {
   id: number
   name: string
   price: number
+  daily_earnings: number
+  total_return: number
+  profit: number
   daily_tasks_limit: number
   validity_days: number
   description: string
@@ -24,15 +27,6 @@ interface UserData {
   plan_start_date?: string
   plan_expiry_date?: string
   current_plan?: Plan
-}
-
-// Plan financial data
-const PLAN_FINANCIALS: Record<string, { daily_earnings: number; total_return: number; profit: number; icon: string }> = {
-  'Intern': { daily_earnings: 0.7, total_return: 2.1, profit: 2.1, icon: '💻' },
-  'LV1': { daily_earnings: 0.7, total_return: 42, profit: 22, icon: '💎' },
-  'LV2': { daily_earnings: 1.7, total_return: 102, profit: 52, icon: '💎' },
-  'LV3': { daily_earnings: 3.5, total_return: 210, profit: 110, icon: '👑' },
-  'LV4': { daily_earnings: 5.0, total_return: 300, profit: 150, icon: '👑' },
 }
 
 export default function InvestmentPlans() {
@@ -130,11 +124,12 @@ export default function InvestmentPlans() {
     return { bg: '#64748B', header: '#475569', btn: '#475569' };
   }
 
-  const getFinancials = (planName: string) => {
-    // Strip "(Dummy)" or other suffixes for lookup
-    const key = Object.keys(PLAN_FINANCIALS).find(k => planName.includes(k)) || 'Intern'
-    return PLAN_FINANCIALS[key]
-  }
+  const getFinancials = (plan: Plan) => ({
+    daily_earnings: plan.daily_earnings || 0,
+    total_return: plan.total_return || 0,
+    profit: plan.profit || 0,
+    icon: plan.name.includes('Intern') ? '💻' : plan.name.includes('LV1') || plan.name.includes('LV2') ? '💎' : '👑',
+  })
 
   // Handle both timezone-aware and timezone-naive datetime strings from backend
   const isExpired = user?.plan_expiry_date && new Date(user.plan_expiry_date.replace(' ', 'T') + 'Z') < new Date()
@@ -189,7 +184,7 @@ export default function InvestmentPlans() {
       }}>
         {plans.map((plan) => {
           const colors = getPlanColors(plan.name);
-          const financials = getFinancials(plan.name);
+          const financials = getFinancials(plan);
           const isActive = user?.current_plan_id === plan.id;
           const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
           // Backend requires the FULL plan price in deposit wallet for upgrades (not just the difference)
