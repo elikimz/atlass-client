@@ -125,6 +125,23 @@ function AppContent() {
             <Route path="/admin/plans" element={<AdminPlans />} />
             <Route path="/admin/invites" element={<AdminInvites />} />
             <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route element={<Layout setIsAuthenticated={checkAuth} />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/training" element={<TrainingRoute />} />
+              <Route path="/training/hub" element={<LearningHub />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/tasks/:taskId" element={<TaskPlayer />} />
+              <Route path="/plans" element={<InvestmentPlans />} />
+              <Route path="/referrals" element={<Invite />} />
+              <Route path="/payments" element={<Payments />} />
+              <Route path="/payments/history" element={<PaymentHistory />} />
+              <Route path="/payments/recharge" element={<Recharge />} />
+              <Route path="/payments/mpesa" element={<MpesaPayment />} />
+              <Route path="/payments/maintenance/:method" element={<PaymentMethodMaintenance />} />
+              <Route path="/payments/payout" element={<WithdrawFunds />} />
+              <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
+              <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
+            </Route>
             <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>

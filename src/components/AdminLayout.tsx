@@ -97,6 +97,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{adminNavItems.find(i => isActive(i.path))?.label || 'Admin Portal'}</h2>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <button onClick={() => window.open('/dashboard', '_blank', 'noopener,noreferrer')} style={{ padding: '9px 14px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>View User Site</button>
             <ThemeToggle />
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               {!isMobile && <div style={{ textAlign: 'right' }}><div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>{adminName}</div><div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Admin Account</div></div>}
