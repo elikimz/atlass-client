@@ -116,15 +116,7 @@ function AppContent() {
       <Routes>
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
         {isAuthenticated && isAdmin ? (
-          <Route element={<AdminLayout setIsAuthenticated={checkAuth} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/tasks" element={<AdminTasks />} />
-            <Route path="/admin/training" element={<AdminTraining />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/payments" element={<AdminPayments />} />
-            <Route path="/admin/plans" element={<AdminPlans />} />
-            <Route path="/admin/invites" element={<AdminInvites />} />
-            <Route path="/admin/notifications" element={<AdminNotifications />} />
+          <>
             <Route element={<Layout setIsAuthenticated={checkAuth} />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/training" element={<TrainingRoute />} />
@@ -142,9 +134,19 @@ function AppContent() {
               <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
               <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
             </Route>
+          <Route element={<AdminLayout setIsAuthenticated={checkAuth} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/tasks" element={<AdminTasks />} />
+            <Route path="/admin/training" element={<AdminTraining />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
+            <Route path="/admin/plans" element={<AdminPlans />} />
+            <Route path="/admin/invites" element={<AdminInvites />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
             <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>
+          </>
         ) : isAuthenticated ? (
           <Route element={<Layout setIsAuthenticated={checkAuth} />}>
             <Route path="/dashboard" element={<Dashboard />} />
