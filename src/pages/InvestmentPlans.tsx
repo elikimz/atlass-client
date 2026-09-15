@@ -231,20 +231,6 @@ export default function InvestmentPlans() {
                     <span style={{ fontWeight: 700 }}>{financials.profit.toFixed(1) || '0.0'} USD</span>
                   </div>
                   
-                  {/* Mockup specific fields for higher tiers */}
-                  {plan.price >= 100 && (
-                    <>
-                      <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px' }}>Unlimrowte refund:</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Total Return:</span>
-                        <span style={{ fontWeight: 700 }}>{financials.total_return.toFixed(0)} USD</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>Profit:</span>
-                        <span style={{ fontWeight: 700 }}>{financials.profit.toFixed(0)} USD</span>
-                      </div>
-                    </>
-                  )}
                 </div>
 
                 <button
