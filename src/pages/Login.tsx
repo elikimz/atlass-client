@@ -200,7 +200,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
   const pageStyle: React.CSSProperties = {
     minHeight: '100vh',
-    background: 'var(--color-canvas)',
+    backgroundColor: 'var(--color-primary-soft)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
