@@ -200,12 +200,12 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
   const pageStyle: React.CSSProperties = {
     minHeight: '100vh',
-    background: 'linear-gradient(180deg, #1a6fa8 0%, #2a9fd6 30%, #1a6fa8 60%, #0d3a5c 100%)',
+    background: 'var(--color-canvas)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    fontFamily: 'Inter, -apple-system, sans-serif',
+    fontFamily: 'inherit',
     padding: '0',
     position: 'relative',
     overflow: 'hidden',
@@ -214,25 +214,14 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const starsStyle: React.CSSProperties = {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundImage: `
-      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.8) 0%, transparent 100%),
-      radial-gradient(1px 1px at 30% 10%, rgba(255,255,255,0.6) 0%, transparent 100%),
-      radial-gradient(1px 1px at 50% 25%, rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(1px 1px at 70% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
-      radial-gradient(1px 1px at 90% 30%, rgba(255,255,255,0.8) 0%, transparent 100%),
-      radial-gradient(1px 1px at 20% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 60% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
-      radial-gradient(2px 2px at 80% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 15% 55%, rgba(255,255,255,0.7) 0%, transparent 100%),
-      radial-gradient(1px 1px at 45% 50%, rgba(255,255,255,0.5) 0%, transparent 100%)
-    `,
+    backgroundImage: 'none',
     pointerEvents: 'none',
     zIndex: 0,
   }
 
   const headerStyle: React.CSSProperties = {
     width: '100%',
-    padding: '16px 20px',
+    padding: '16px 24px',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
@@ -241,16 +230,17 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   }
 
   const backBtnStyle: React.CSSProperties = {
-    background: 'none',
-    border: 'none',
-    color: 'white',
+    background: 'transparent',
+    border: '1px solid var(--color-border)',
+    color: 'var(--color-primary)',
     fontSize: '18px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
     fontWeight: 600,
-    padding: '4px 0',
+    padding: '8px 12px',
+    borderRadius: '4px',
   }
 
   const logoContainerStyle: React.CSSProperties = {
@@ -264,12 +254,13 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const logoBoxStyle: React.CSSProperties = {
     width: 'min(90px, 20vw)',
     height: 'min(90px, 20vw)',
-    backgroundColor: 'white',
-    borderRadius: '16px',
+    backgroundColor: 'var(--color-surface)',
+    borderRadius: '4px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+    boxShadow: 'var(--card-shadow)',
+    border: '1px solid var(--color-border-subtle)',
     overflow: 'hidden',
   }
 
@@ -283,9 +274,9 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   }
 
   const langBtnStyle: React.CSSProperties = {
-    background: 'white',
-    border: 'none',
-    borderRadius: '8px',
+    background: 'var(--color-surface)',
+    border: '1px solid var(--color-border)',
+    borderRadius: '4px',
     padding: '8px 14px',
     display: 'flex',
     alignItems: 'center',
@@ -293,16 +284,17 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     fontSize: '14px',
     fontWeight: 600,
     cursor: 'pointer',
-    color: '#1a1a1a',
+    color: 'var(--color-text-secondary)',
   }
 
   const cardStyle: React.CSSProperties = {
-    width: '90%',
-    maxWidth: '440px',
-    backgroundColor: 'rgba(20, 20, 30, 0.92)',
-    borderRadius: '20px',
-    padding: 'min(28px, 6vw) min(24px, 5vw) min(32px, 8vw)',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+    width: 'min(90%, 480px)',
+    maxWidth: '480px',
+    backgroundColor: 'var(--color-surface)',
+    borderRadius: '4px',
+    padding: '32px',
+    boxShadow: 'var(--card-shadow)',
+    border: '1px solid var(--color-border-subtle)',
     position: 'relative',
     zIndex: 1,
     margin: '0 auto 32px',
@@ -321,8 +313,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     width: '36px',
     height: '36px',
     borderRadius: '50%',
-    backgroundColor: active || completed ? '#F5A623' : '#555',
-    color: active || completed ? 'white' : '#aaa',
+    backgroundColor: active || completed ? 'var(--color-primary)' : 'var(--color-border)',
+    color: active || completed ? 'white' : 'var(--color-text-muted)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -335,19 +327,19 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const stepLine = (active: boolean) => ({
     flex: 1,
     height: '2px',
-    backgroundColor: active ? '#F5A623' : '#555',
+    backgroundColor: active ? 'var(--color-primary)' : 'var(--color-border)',
     margin: '0 4px',
   } as React.CSSProperties)
 
   const inputWrapStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    backgroundColor: '#2a2a3a',
-    borderRadius: '10px',
+    backgroundColor: 'var(--color-surface)',
+    borderRadius: '4px',
     marginBottom: '12px',
     padding: '0 12px',
     height: '48px',
-    border: '1px solid #3a3a4a',
+    border: '1px solid var(--color-border)',
   }
 
   const inputStyle: React.CSSProperties = {
@@ -355,40 +347,40 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     background: 'none',
     border: 'none',
     outline: 'none',
-    color: '#ccc',
+    color: 'var(--color-text-secondary)',
     fontSize: '14px',
     padding: '0 8px',
     height: '100%',
   }
 
   const iconStyle: React.CSSProperties = {
-    color: '#888',
+    color: 'var(--color-text-muted)',
     fontSize: '18px',
     flexShrink: 0,
   }
 
   const registerBtnStyle: React.CSSProperties = {
     width: '100%',
-    padding: '16px',
-    fontSize: '16px',
-    fontWeight: 700,
-    backgroundColor: '#F5A623',
+    padding: '11px 16px',
+    fontSize: '14px',
+    fontWeight: 600,
+    backgroundColor: 'var(--color-primary)',
     color: 'white',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '4px',
     cursor: 'pointer',
     marginTop: '8px',
-    letterSpacing: '0.5px',
+    letterSpacing: '0',
   }
 
   const loginBtnStyle: React.CSSProperties = {
     ...registerBtnStyle,
-    backgroundColor: '#F5A623',
+    backgroundColor: 'var(--color-primary)',
   }
 
   return (
     <div style={pageStyle}>
-      {/* Starfield overlay */}
+      {/* Neutral background layer */}
       <div style={starsStyle} />
 
       {/* Header */}
@@ -419,7 +411,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
         <button style={langBtnStyle}>
           <span>🇺🇸</span>
           <span>US</span>
-          <span style={{ fontSize: '10px', color: '#666' }}>▼</span>
+          <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>▼</span>
         </button>
       </div>
 
@@ -541,7 +533,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                 </div>
 
                 {error && (
-                  <p style={{ color: '#ff6b6b', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
+                  <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
                     {error}
                   </p>
                 )}
@@ -550,19 +542,19 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   Next
                 </button>
 
-                <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#888' }}>
+                <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
                   Already have an account?{' '}
                   <span
                     onClick={() => { setIsRegistering(false); resetRegistration() }}
-                    style={{ color: '#F5A623', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }}
                   >
                     Sign In
                   </span>
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
                   <input type="checkbox" id="terms" required />
-                  <label htmlFor="terms" style={{ fontSize: '12px', color: '#888' }}>
-                    I agree to the <span style={{ color: '#F5A623' }}>Terms and Conditions</span>
+                  <label htmlFor="terms" style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                    I agree to the <span style={{ color: 'var(--color-primary)' }}>Terms and Conditions</span>
                   </label>
                 </div>
               </form>
@@ -572,14 +564,14 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
             {step === 2 && (
               <form onSubmit={handleRegisterFinal}>
                 {/* Chosen username (read-only confirmation) */}
-                <div style={{ ...inputWrapStyle, backgroundColor: '#222230' }}>
+                <div style={{ ...inputWrapStyle, backgroundColor: 'var(--color-surface-inset)' }}>
                   <span style={iconStyle}>@</span>
                   <input
                     type="text"
                     value={username}
                     readOnly
                     aria-label="Chosen username"
-                    style={{ ...inputStyle, color: '#aaa', cursor: 'not-allowed' }}
+                    style={{ ...inputStyle, color: 'var(--color-text-muted)', cursor: 'not-allowed' }}
                   />
                 </div>
 
@@ -592,15 +584,15 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                         onClick={() => setShowCountryDropdown(!showCountryDropdown)}
                         style={{
                           height: '48px',
-                          backgroundColor: '#2a2a3a',
-                          border: '1px solid #3a3a4a',
+                          backgroundColor: 'var(--color-surface)',
+                          border: '1px solid var(--color-border)',
                           borderRadius: '10px',
                           padding: '0 10px',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '4px',
                           cursor: 'pointer',
-                          color: '#ccc',
+                          color: 'var(--color-text-secondary)',
                           fontSize: '13px',
                           fontWeight: 600,
                           whiteSpace: 'nowrap',
@@ -608,15 +600,15 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                       >
                       <span>{selectedCountry.flag}</span>
                       <span>{selectedCountry.code}</span>
-                      <span style={{ fontSize: '10px', color: '#888' }}>▼</span>
+                      <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>▼</span>
                     </button>
                     {showCountryDropdown && (
                       <div style={{
                         position: 'absolute',
                         top: '56px',
                         left: 0,
-                        backgroundColor: '#1e1e2e',
-                        border: '1px solid #3a3a4a',
+                        backgroundColor: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
                         borderRadius: '10px',
                         zIndex: 100,
                         maxHeight: '200px',
@@ -635,15 +627,15 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                               alignItems: 'center',
                               gap: '10px',
                               fontSize: '14px',
-                              color: '#ccc',
-                              backgroundColor: countryCode === c.code ? '#2a2a3a' : 'transparent',
+                              color: 'var(--color-text-secondary)',
+                              backgroundColor: countryCode === c.code ? 'var(--color-primary-soft)' : 'transparent',
                             }}
-                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#2a2a3a')}
-                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = countryCode === c.code ? '#2a2a3a' : 'transparent')}
+                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-primary-soft)')}
+                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = countryCode === c.code ? 'var(--color-surface)' : 'transparent')}
                           >
                             <span>{c.flag}</span>
                             <span>{c.name}</span>
-                            <span style={{ marginLeft: 'auto', color: '#888' }}>{c.code}</span>
+                            <span style={{ marginLeft: 'auto', color: 'var(--color-text-muted)' }}>{c.code}</span>
                           </div>
                         ))}
                       </div>
@@ -698,9 +690,9 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   >
                     <svg width="100" height="48" style={{ position: 'absolute' }}>
                       {/* Noise lines */}
-                      <line x1="0" y1="15" x2="110" y2="38" stroke="#ccc" strokeWidth="1" />
-                      <line x1="0" y1="35" x2="110" y2="18" stroke="#ddd" strokeWidth="1" />
-                      <line x1="20" y1="0" x2="90" y2="52" stroke="#eee" strokeWidth="1" />
+                      <line x1="0" y1="15" x2="110" y2="38" stroke="var(--color-text-secondary)" strokeWidth="1" />
+                      <line x1="0" y1="35" x2="110" y2="18" stroke="var(--color-border-subtle)" strokeWidth="1" />
+                      <line x1="20" y1="0" x2="90" y2="52" stroke="var(--color-border-subtle)" strokeWidth="1" />
                     </svg>
                     <span style={{
                       fontSize: '22px',
@@ -708,11 +700,11 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                       fontFamily: 'Georgia, serif',
                       fontStyle: 'italic',
                       letterSpacing: '4px',
-                      color: '#1a1a8a',
+                      color: 'var(--color-primary)',
                       position: 'relative',
                       zIndex: 1,
                       userSelect: 'none',
-                      textShadow: '1px 1px 0 #8888ff',
+                      textShadow: 'none',
                     }}>
                       {captchaValue}
                     </span>
@@ -720,7 +712,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                 </div>
 
                 {error && (
-                  <p style={{ color: '#ff6b6b', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
+                  <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
                     {error}
                   </p>
                 )}
@@ -756,7 +748,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   <div style={{
                     width: '70px', height: '70px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #F5A623, #f7c56a)',
+                    background: 'var(--color-primary)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '0 auto 20px',
                     boxShadow: '0 4px 20px rgba(245,166,35,0.4)',
@@ -768,7 +760,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   <h2 style={{ color: 'white', fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
                     Congratulations!
                   </h2>
-                  <p style={{ color: '#aaa', fontSize: '14px', lineHeight: 1.7, padding: '0 8px' }}>
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.7, padding: '0 8px' }}>
                     Congratulations and welcome to AdpulseAI! Your registration is complete. Now you're ready to explore opportunities, complete tasks, and start growing with us.
                   </p>
                 </div>
@@ -824,7 +816,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
               </div>
 
               {error && (
-                <p style={{ color: '#ff6b6b', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
                   {error}
                 </p>
               )}
@@ -834,11 +826,11 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
               </button>
             </form>
 
-            <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#888' }}>
+            <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
               Don't have an account?{' '}
               <span
                 onClick={() => { setIsRegistering(true); setError('') }}
-                style={{ color: '#F5A623', cursor: 'pointer', fontWeight: 600 }}
+                style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }}
               >
                 Register Now
               </span>

@@ -118,21 +118,22 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       fontFamily: 'Poppins, Inter, system-ui, sans-serif',
       overflow: 'hidden',
     }}>
+      <a className="skip-link" href="#main-content">Skip to content</a>
       {/* Sidebar (Desktop Only) */}
       {!isMobile && (
         <div style={{
-          width: '280px',
-          minWidth: '280px',
+          width: '248px',
+          minWidth: '248px',
           backgroundColor: 'var(--bg-card)',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '2px 0px 10px rgba(0, 0, 0, 0.02)',
+          boxShadow: 'var(--sidebar-shadow)',
           zIndex: 20,
         }}>
-          <div style={{ padding: '30px 24px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
+          <div style={{ padding: '20px 20px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
-              <span style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-heading)' }}>AdPulseAI</span>
+              <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>AdPulseAI</span>
             </div>
             <ThemeToggle />
           </div>
@@ -146,8 +147,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
+                  padding: '10px 12px',
+                  borderRadius: '4px',
                   marginBottom: '4px',
                   textDecoration: 'none',
                   fontSize: '14px',
@@ -212,9 +213,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: isMobile ? '16px 20px' : '20px 40px',
+            padding: isMobile ? '12px 16px' : '12px 24px',
           backgroundColor: 'var(--bg-card)',
-          boxShadow: 'var(--card-shadow)',
+            boxShadow: '0 1px 0 var(--border-main)',
           zIndex: 10,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -251,7 +252,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '80px' : '0' }}>
+        <div id="main-content" role="main" style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '80px' : '0' }}>
           <div style={{ padding: isMobile ? '20px' : '40px' }}>
             <Outlet />
           </div>

@@ -65,23 +65,24 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <div className="admin-shell" style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-main)', fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
-      <div style={{ position: isMobile ? 'fixed' : 'relative', top: 0, left: 0, bottom: 0, width: '260px', backgroundColor: 'var(--bg-sidebar)', color: 'var(--text-sidebar)', display: (isMobile && !isMenuOpen) ? 'none' : 'flex', flexDirection: 'column', boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, transition: 'transform 0.3s ease-in-out', transform: (isMobile && !isMenuOpen) ? 'translateX(-100%)' : 'translateX(0)' }}>
-        <div style={{ padding: '24px', borderBottom: '1px solid var(--border-sidebar)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="admin-shell" style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-main)', fontFamily: 'inherit', overflow: 'hidden' }}>
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <div style={{ position: isMobile ? 'fixed' : 'relative', top: 0, left: 0, bottom: 0, width: '248px', backgroundColor: '#1d2327', color: '#f0f0f1', display: (isMobile && !isMenuOpen) ? 'none' : 'flex', flexDirection: 'column', boxShadow: 'var(--sidebar-shadow)', zIndex: 1000, transition: 'transform 0.3s ease-in-out', transform: (isMobile && !isMenuOpen) ? 'translateX(-100%)' : 'translateX(0)' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid #50575e', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img src="/assets/logo.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-            <div><div style={{ fontSize: '15px', fontWeight: 700 }}>AdPulseAI</div><div style={{ fontSize: '10px', color: 'var(--text-muted-sidebar)' }}>Admin Portal</div></div>
+            <div><div style={{ fontSize: '16px', fontWeight: 600 }}>AdPulseAI</div><div style={{ fontSize: '12px', color: '#a7aaad' }}>Admin Portal</div></div>
           </div>
           {isMobile && <button onClick={() => setIsMenuOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted-sidebar)', fontSize: '20px', cursor: 'pointer' }}>✕</button>}
         </div>
-        <nav style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
+        <nav aria-label="Admin navigation" style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
           {adminNavItems.map((item) => (
-            <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', borderRadius: '10px', marginBottom: '8px', textDecoration: 'none', color: isActive(item.path) ? 'white' : 'var(--text-muted-sidebar)', backgroundColor: isActive(item.path) ? 'var(--accent-primary)' : 'transparent', transition: 'all 0.2s', fontSize: '14px', fontWeight: 500 }}><span style={{ fontSize: '18px' }}>{item.icon}</span><span>{item.label}</span></Link>
+            <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} aria-current={isActive(item.path) ? 'page' : undefined} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '4px', marginBottom: '4px', textDecoration: 'none', color: isActive(item.path) ? 'white' : '#c3c4c7', backgroundColor: isActive(item.path) ? '#32373c' : 'transparent', transition: 'all 0.2s', fontSize: '14px', fontWeight: 500 }}><span style={{ fontSize: '16px' }}>{item.icon}</span><span>{item.label}</span></Link>
           ))}
         </nav>
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border-sidebar)' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid #50575e' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '0 8px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: 'white' }}>{adminName.charAt(0).toUpperCase()}</div>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#2271b1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600, color: 'white' }}>{adminName.charAt(0).toUpperCase()}</div>
             <div style={{ overflow: 'hidden' }}><div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adminName}</div><div style={{ fontSize: '11px', color: 'var(--text-muted-sidebar)' }}>Administrator</div></div>
           </div>
           <button onClick={handleSignOut} style={{ width: '100%', padding: '10px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Sign Out</button>
@@ -91,7 +92,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
       {isMobile && isMenuOpen && <div onClick={() => setIsMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999 }} />}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <header style={{ height: '64px', backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', zIndex: 10 }}>
+        <header style={{ height: '56px', backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', zIndex: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {isMobile && <button onClick={() => setIsMenuOpen(true)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-heading)', padding: '4px' }}>☰</button>}
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{adminNavItems.find(i => isActive(i.path))?.label || 'Admin Portal'}</h2>
@@ -105,7 +106,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px' : '32px' }}><Outlet /></main>
+        <main id="main-content" style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px' : '32px' }}><Outlet /></main>
       </div>
     </div>
   )
