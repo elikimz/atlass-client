@@ -14,6 +14,14 @@ interface AppConfig {
   value: string
 }
 
+const withdrawalScheduleKeys = new Set([
+  'withdrawal_schedule_enabled',
+  'withdrawal_allowed_days',
+  'withdrawal_start_time',
+  'withdrawal_end_time',
+  'withdrawal_timezone',
+])
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({ total_users: 0, pending_payments: 0, total_payouts: 0, total_deposits: 0 })
   const [configs, setConfigs] = useState<AppConfig[]>([])
@@ -54,6 +62,8 @@ export default function AdminDashboard() {
   const handleConfigChange = (key: string, newValue: string) => {
     setConfigs(prev => prev.map(c => c.key === key ? { ...c, value: newValue } : c))
   }
+
+  const configValue = (key: string) => configs.find((config) => config.key === key)?.value ?? ''
 
   if (loading) {
     return (
@@ -98,7 +108,7 @@ export default function AdminDashboard() {
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>App Configuration</h2>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {configs.map((config) => (
+            {configs.filter((config) => !withdrawalScheduleKeys.has(config.key)).map((config) => (
               <div key={config.key}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>
                   {config.key.replace(/_/g, ' ')}
@@ -120,6 +130,36 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+            <div style={{ marginTop: '8px', paddingTop: '20px', borderTop: '1px solid var(--border-main)' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 6px' }}>Withdrawal schedule</h3>
+              <p style={{ fontSize: '12px', lineHeight: 1.5, color: 'var(--text-muted)', margin: '0 0 16px' }}>
+                Control when users may submit withdrawal requests. The default is enabled every day from 00:00 to 23:59 UTC, which preserves current behavior.
+              </p>
+              {[
+                { key: 'withdrawal_schedule_enabled', label: 'Schedule enabled', type: 'select' },
+                { key: 'withdrawal_allowed_days', label: 'Allowed days', type: 'text', placeholder: 'mon,tue,wed,thu,fri,sat,sun' },
+                { key: 'withdrawal_start_time', label: 'Opening time', type: 'time' },
+                { key: 'withdrawal_end_time', label: 'Closing time', type: 'time' },
+                { key: 'withdrawal_timezone', label: 'Timezone', type: 'text', placeholder: 'Africa/Nairobi' },
+              ].map((field) => (
+                <div key={field.key} style={{ marginBottom: '14px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '6px' }}>{field.label}</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {field.type === 'select' ? (
+                      <select value={configValue(field.key)} onChange={(e) => handleConfigChange(field.key, e.target.value)} style={{ flex: 1, padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>
+                        <option value="true">Open schedule enforcement</option>
+                        <option value="false">Allow withdrawals at all times</option>
+                      </select>
+                    ) : (
+                      <input type={field.type} placeholder={field.placeholder} value={configValue(field.key)} onChange={(e) => handleConfigChange(field.key, e.target.value)} style={{ flex: 1, padding: '10px 14px', fontSize: '14px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', outline: 'none' }} />
+                    )}
+                    <button onClick={() => handleUpdateConfig(field.key, configValue(field.key))} disabled={savingConfig === field.key} style={{ padding: '0 16px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', opacity: savingConfig === field.key ? 0.7 : 1 }}>
+                      {savingConfig === field.key ? '...' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
