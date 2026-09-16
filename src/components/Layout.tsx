@@ -111,7 +111,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const mobileNavItems = navItems.filter(item => (item.label !== 'Admin' || isAdminUser) && item.label !== 'Settings')
 
   return (
-    <div style={{
+    <div className="site-shell" style={{
       display: 'flex',
       height: '100vh',
       backgroundColor: 'var(--bg-main)',

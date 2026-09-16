@@ -65,7 +65,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-main)', fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
+    <div className="admin-shell" style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-main)', fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
       <div style={{ position: isMobile ? 'fixed' : 'relative', top: 0, left: 0, bottom: 0, width: '260px', backgroundColor: 'var(--bg-sidebar)', color: 'var(--text-sidebar)', display: (isMobile && !isMenuOpen) ? 'none' : 'flex', flexDirection: 'column', boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, transition: 'transform 0.3s ease-in-out', transform: (isMobile && !isMenuOpen) ? 'translateX(-100%)' : 'translateX(0)' }}>
         <div style={{ padding: '24px', borderBottom: '1px solid var(--border-sidebar)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
