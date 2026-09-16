@@ -42,6 +42,10 @@ function getPlatform(): 'ios' | 'android' | 'desktop' {
   return 'desktop'
 }
 
+if (typeof window !== 'undefined') {
+  bindPwaEvents()
+}
+
 export function usePwaInstall() {
   const [, rerender] = useState(0)
   const [helpOpen, setHelpOpen] = useState(false)

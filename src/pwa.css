@@ -21,6 +21,7 @@
 .pwa-sidebar-item:empty { display: none; }
 .pwa-sidebar-item .pwa-install-button { width: 100%; justify-content: flex-start; background: transparent; border-color: transparent; color: var(--text-muted); }
 .pwa-sidebar-item .pwa-install-button:hover { background: var(--color-primary-soft); border-color: var(--color-primary-soft); color: var(--color-primary); }
+.pwa-mobile-install-bar { display: none; }
 
 .pwa-install-card {
   display: flex;
@@ -96,6 +97,9 @@
 }
 
 @media (max-width: 640px) {
+  .pwa-mobile-install-bar { position: fixed; right: 0; bottom: 75px; left: 0; z-index: 101; display: flex; justify-content: center; padding: 8px 12px; border-top: 1px solid var(--color-border-subtle); background: var(--color-surface); box-shadow: 0 -2px 8px rgba(0,0,0,.06); }
+  .pwa-mobile-install-bar:empty { display: none; }
+  .pwa-mobile-install-bar .pwa-install-button { width: 100%; min-height: 44px; }
   .pwa-install-card { align-items: flex-start; flex-direction: column; padding: 16px; }
   .pwa-install-card .pwa-install-button { width: 100%; }
   .pwa-modal { padding: 22px; }

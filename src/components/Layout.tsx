@@ -256,12 +256,18 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         </div>
 
         {/* Content */}
-        <div id="main-content" role="main" style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '80px' : '0' }}>
+        <div id="main-content" role="main" style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '148px' : '0' }}>
           <div style={{ padding: isMobile ? '20px' : '40px' }}>
             <Outlet />
           </div>
         </div>
       </div>
+
+      {isMobile && (
+        <div className="pwa-mobile-install-bar">
+          <PWAInstallButton />
+        </div>
+      )}
 
       {/* Mobile Bottom Nav */}
       {isMobile && (
@@ -325,9 +331,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                 </span>
               </Link>
             ))}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', flexShrink: 0, flex: 1, minWidth: '76px', height: '100%' }}>
-              <PWAInstallButton compact />
-            </div>
           </div>
         </div>
       )}
