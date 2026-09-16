@@ -184,8 +184,11 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                   )}
                 </div>
                 <span>{item.label}</span>
-              </Link>
+                </Link>
             ))}
+            <div className="pwa-sidebar-item">
+              <PWAInstallButton compact />
+            </div>
           </div>
 
           <div style={{ padding: '24px', borderTop: '1px solid var(--border-main)' }}>
@@ -232,7 +235,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {!isMobile && <PWAInstallButton compact />}
             {isMobile && <ThemeToggle />}
             <NotificationBell />
 

@@ -61,10 +61,15 @@ export function usePwaInstall() {
       setHelpOpen(true)
       return
     }
-    await deferredPrompt.prompt()
-    await deferredPrompt.userChoice
-    deferredPrompt = null
-    rerender((value) => value + 1)
+    try {
+      await deferredPrompt.prompt()
+      await deferredPrompt.userChoice
+      deferredPrompt = null
+      rerender((value) => value + 1)
+    } catch {
+      deferredPrompt = null
+      setHelpOpen(true)
+    }
   }
 
   return {

@@ -17,6 +17,10 @@
 
 .pwa-install-button:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
 .pwa-install-button--compact { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+.pwa-sidebar-item { margin: 8px 0 0; }
+.pwa-sidebar-item:empty { display: none; }
+.pwa-sidebar-item .pwa-install-button { width: 100%; justify-content: flex-start; background: transparent; border-color: transparent; color: var(--text-muted); }
+.pwa-sidebar-item .pwa-install-button:hover { background: var(--color-primary-soft); border-color: var(--color-primary-soft); color: var(--color-primary); }
 
 .pwa-install-card {
   display: flex;

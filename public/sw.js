@@ -1,4 +1,4 @@
-const CACHE_NAME = 'atlas-shell-v1'
+const CACHE_NAME = 'atlas-shell-v2'
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/assets/logo.png']
 
 self.addEventListener('install', (event) => {
