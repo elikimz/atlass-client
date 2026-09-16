@@ -92,7 +92,7 @@ export function PWAInstallButton({ compact = false }: { compact?: boolean }) {
 
   return (
     <>
-      <button type="button" className={compact ? 'pwa-install-button pwa-install-button--compact' : 'pwa-install-button'} onClick={() => void installApp()} aria-label="Install Atlas App">
+      <button type="button" className={compact ? 'pwa-install-button pwa-install-button--compact' : 'pwa-install-button'} onClick={() => void installApp()} aria-label="Install AdPulseAI App">
         <span aria-hidden="true">↓</span>
         <span>Install App</span>
       </button>
@@ -100,15 +100,15 @@ export function PWAInstallButton({ compact = false }: { compact?: boolean }) {
         <div className="pwa-modal-backdrop" role="presentation" onMouseDown={closeHelp}>
           <section className="pwa-modal" role="dialog" aria-modal="true" aria-labelledby="pwa-install-title" onMouseDown={(event) => event.stopPropagation()}>
             <div className="pwa-modal__icon" aria-hidden="true">↓</div>
-            <h2 id="pwa-install-title">Install Atlas App</h2>
-            <p>Get faster access to Atlas directly from your device.</p>
+            <h2 id="pwa-install-title">Install AdPulseAI App</h2>
+            <p>Get faster access to AdPulseAI directly from your device.</p>
             <ol>
               {platform === 'ios' && <li>Tap the <strong>Share</strong> button in Safari.</li>}
               {platform === 'ios' && <li>Choose <strong>Add to Home Screen</strong>, then confirm.</li>}
               {platform === 'android' && <li>Open your browser menu.</li>}
               {platform === 'android' && <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>}
               {platform === 'desktop' && <li>Select the <strong>Install</strong> icon in your browser address bar.</li>}
-              {platform === 'desktop' && <li>If it is not visible, open the browser menu and choose <strong>Install Atlas</strong>.</li>}
+              {platform === 'desktop' && <li>If it is not visible, open the browser menu and choose <strong>Install AdPulseAI</strong>.</li>}
             </ol>
             {!nativeInstallAvailable && <p className="pwa-modal__note">Your browser does not offer a direct install prompt right now, so use the steps above.</p>}
             <button type="button" className="pwa-modal__close" onClick={closeHelp}>Close</button>
@@ -129,8 +129,8 @@ export function PWAInstallCard() {
         <div className="pwa-install-card__copy">
           <div className="pwa-install-card__icon" aria-hidden="true">↓</div>
           <div>
-            <h2 id="pwa-card-title">Install Atlas App</h2>
-            <p>Get faster access to Atlas directly from your device.</p>
+            <h2 id="pwa-card-title">Install AdPulseAI App</h2>
+            <p>Get faster access to AdPulseAI directly from your device.</p>
           </div>
         </div>
         <button type="button" className="pwa-install-button" onClick={() => void installApp()}>Install App</button>
@@ -139,14 +139,14 @@ export function PWAInstallCard() {
         <div className="pwa-modal-backdrop" role="presentation" onMouseDown={closeHelp}>
           <section className="pwa-modal" role="dialog" aria-modal="true" aria-labelledby="pwa-card-modal-title" onMouseDown={(event) => event.stopPropagation()}>
             <div className="pwa-modal__icon" aria-hidden="true">↓</div>
-            <h2 id="pwa-card-modal-title">Install Atlas App</h2>
-            <p>Get faster access to Atlas directly from your device.</p>
+            <h2 id="pwa-card-modal-title">Install AdPulseAI App</h2>
+            <p>Get faster access to AdPulseAI directly from your device.</p>
             <ol>
               {platform === 'ios' && <li>Tap <strong>Share</strong> in Safari, then choose <strong>Add to Home Screen</strong>.</li>}
               {platform === 'android' && <li>Open the browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>}
               {platform === 'desktop' && <li>Use the <strong>Install</strong> icon in the address bar or browser menu.</li>}
             </ol>
-            {!nativeInstallAvailable && <p className="pwa-modal__note">The browser install prompt is not available yet. You can still install Atlas using these instructions.</p>}
+            {!nativeInstallAvailable && <p className="pwa-modal__note">The browser install prompt is not available yet. You can still install AdPulseAI using these instructions.</p>}
             <button type="button" className="pwa-modal__close" onClick={closeHelp}>Close</button>
           </section>
         </div>
@@ -172,7 +172,7 @@ export function OfflineStatus() {
   if (!offline) return null
   return (
     <div className="pwa-offline-banner" role="status">
-      <strong>You are offline.</strong> Atlas is showing the app shell only. Do not submit payments or other actions until your connection returns.
+      <strong>You are offline.</strong> AdPulseAI is showing the app shell only. Do not submit payments or other actions until your connection returns.
     </div>
   )
 }

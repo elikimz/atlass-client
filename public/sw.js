@@ -1,4 +1,4 @@
-const CACHE_NAME = 'atlas-shell-v2'
+const CACHE_NAME = 'adpulseai-shell-v3'
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/assets/logo.png']
 
 self.addEventListener('install', (event) => {
@@ -12,7 +12,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((key) => key.startsWith('atlas-shell-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
+      .then((keys) => Promise.all(keys.filter((key) => (key.startsWith('atlas-shell-') || key.startsWith('adpulseai-shell-')) && key !== CACHE_NAME).map((key) => caches.delete(key))))
       .then(() => self.clients.claim())
   )
 })
