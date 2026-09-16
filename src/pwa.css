@@ -1,0 +1,98 @@
+.pwa-install-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pwa-install-button:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.pwa-install-button--compact { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+
+.pwa-install-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  border: 1px solid var(--color-border-subtle);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-surface);
+  box-shadow: var(--card-shadow);
+}
+
+.pwa-install-card__copy { display: flex; align-items: center; gap: 14px; }
+.pwa-install-card__icon, .pwa-modal__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 22px;
+  font-weight: 700;
+}
+.pwa-install-card h2 { margin: 0 0 4px; color: var(--color-text); font-size: 18px; line-height: 1.3; }
+.pwa-install-card p { margin: 0; color: var(--color-text-muted); font-size: 14px; }
+
+.pwa-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(29, 35, 39, .55);
+}
+.pwa-modal {
+  width: min(100%, 440px);
+  padding: 28px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
+}
+.pwa-modal__icon { margin-bottom: 16px; }
+.pwa-modal h2 { margin: 0 0 8px; color: var(--color-text); font-size: 22px; }
+.pwa-modal p { margin: 0 0 16px; color: var(--color-text-secondary); }
+.pwa-modal ol { margin: 0 0 16px; padding-left: 22px; color: var(--color-text-secondary); }
+.pwa-modal li { padding: 5px 0; line-height: 1.45; }
+.pwa-modal__note { font-size: 13px; color: var(--color-text-muted) !important; }
+.pwa-modal__close { min-height: 40px; padding: 9px 16px; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-surface); color: var(--color-text-secondary); cursor: pointer; font-weight: 600; }
+.pwa-modal__close:hover { background: var(--color-surface-subtle); }
+
+.pwa-offline-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 2500;
+  width: min(100% - 24px, 720px);
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border: 1px solid var(--color-warning);
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  font-size: 13px;
+  text-align: center;
+  box-shadow: var(--card-shadow);
+}
+
+@media (max-width: 640px) {
+  .pwa-install-card { align-items: flex-start; flex-direction: column; padding: 16px; }
+  .pwa-install-card .pwa-install-button { width: 100%; }
+  .pwa-modal { padding: 22px; }
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import { PWAInstallCard } from '../components/PWAInstall'
 
 interface DashboardData {
   footage_labeled_min: number
@@ -128,6 +129,8 @@ export default function Dashboard() {
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Welcome back, {firstName}! Here's your overview.</p>
       </div>
+
+      <PWAInstallCard />
 
       {/* ── Wallet Balances Section ─────────────────────────────────────────── */}
       {/* 4 cards: Deposit Wallet | Withdrawal Wallet | Locked Refund | Total Earnings */}

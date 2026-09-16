@@ -6,6 +6,7 @@ import { endSession } from '../services/session'
 import { queryKeys } from '../services/queryClient'
 import ThemeToggle from './ThemeToggle'
 import NotificationBell from './NotificationBell'
+import { PWAInstallButton } from './PWAInstall'
 
 interface LayoutProps {
   setIsAuthenticated: (value: boolean) => void
@@ -231,6 +232,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {!isMobile && <PWAInstallButton compact />}
             {isMobile && <ThemeToggle />}
             <NotificationBell />
 
@@ -321,6 +323,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
                 </span>
               </Link>
             ))}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', flexShrink: 0, flex: 1, minWidth: '76px', height: '100%' }}>
+              <PWAInstallButton compact />
+            </div>
           </div>
         </div>
       )}

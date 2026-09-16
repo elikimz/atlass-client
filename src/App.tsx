@@ -32,6 +32,7 @@ import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import Placeholder from './pages/Placeholder'
 import PaymentHistory from './pages/PaymentHistory'
+import { OfflineStatus } from './components/PWAInstall'
 import api from './services/api'
 import { clearSession, hasSession, persistUser } from './services/session'
 import { queryKeys } from './services/queryClient'
@@ -112,6 +113,7 @@ function AppContent() {
 
   return (
     <Router>
+      <OfflineStatus />
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
