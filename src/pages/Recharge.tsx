@@ -14,6 +14,7 @@ const CLOUDINARY_CLOUD_NAME = "doste1wr0"
 type RechargeMethod = 'crypto' | 'mpesa' | 'paypal' | 'wise' | 'payoneer'
 
 const maintenanceMessage = 'The payment method is currently under maintenance and is temporarily unavailable. Our technical team is working on the necessary updates to restore the service.'
+const TEMPORARY_MIN_RECHARGE_USD = 1 / 130
 
 const comingSoonLabels: Record<'paypal' | 'wise' | 'payoneer', string> = {
   paypal: 'PayPal',
@@ -62,7 +63,7 @@ export default function Recharge() {
   }
 
   const handleProceed = () => {
-    if (finalAmount < 20) return
+    if (finalAmount < TEMPORARY_MIN_RECHARGE_USD) return
     if (isComingSoon) {
       setError(maintenanceMessage)
       return
@@ -247,7 +248,7 @@ export default function Recharge() {
                   >✕</button>
                 )}
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>Minimum deposit is $20</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>Temporary test minimum is KES 1 (about $0.01)</p>
             </div>
           </div>
 
