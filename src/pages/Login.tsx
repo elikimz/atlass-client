@@ -208,7 +208,8 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     fontFamily: 'inherit',
     padding: '0',
     position: 'relative',
-    overflow: 'hidden',
+    overflowX: 'hidden',
+    overflowY: 'auto',
   }
 
   const starsStyle: React.CSSProperties = {
@@ -288,11 +289,11 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   }
 
   const cardStyle: React.CSSProperties = {
-    width: 'min(90%, 480px)',
+    width: 'calc(100% - 24px)',
     maxWidth: '480px',
     backgroundColor: 'var(--color-surface)',
     borderRadius: '4px',
-    padding: '32px',
+    padding: 'clamp(20px, 5vw, 32px)',
     boxShadow: 'var(--card-shadow)',
     border: '1px solid var(--color-border-subtle)',
     position: 'relative',
@@ -416,12 +417,12 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       </div>
 
       {/* Card */}
-      <div style={cardStyle}>
+      <div className="auth-card" style={cardStyle}>
         {isRegistering ? (
           <>
             {/* Step indicators */}
             {step < 3 && (
-              <div style={stepRowStyle}>
+              <div className="auth-step-row" style={stepRowStyle}>
                 <div style={stepCircle(step === 1, step > 1)}>1</div>
                 <div style={stepLine(step > 1)} />
                 <div style={stepCircle(step === 2, step > 2)}>2</div>
@@ -576,7 +577,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                 </div>
 
                 {/* Country Code + Phone Number */}
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+                <div className="auth-phone-row" style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
                   {/* Country code selector */}
                   <div style={{ position: 'relative' }} ref={dropdownRef}>
                       <button
@@ -643,7 +644,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   </div>
 
                   {/* Phone input */}
-                  <div style={{ ...inputWrapStyle, flex: 1, marginBottom: 0 }}>
+                  <div className="auth-phone-input" style={{ ...inputWrapStyle, flex: 1, marginBottom: 0 }}>
                     <span style={iconStyle}>📱</span>
                     <input
                       type="tel"
@@ -657,7 +658,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                 </div>
 
                 {/* Captcha row */}
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+                <div className="auth-captcha-row" style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
                   <div style={{ ...inputWrapStyle, flex: 1, marginBottom: 0 }}>
                     <span style={iconStyle}>🔐</span>
                     <input
@@ -717,7 +718,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   </p>
                 )}
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div className="auth-action-row" style={{ display: 'flex', gap: '10px' }}>
                   <button
                     type="button"
                     onClick={() => { setStep(1); setError('') }}
@@ -778,7 +779,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
           /* ── LOGIN FORM ── */
           <>
             {/* Step indicators for login (decorative) */}
-            <div style={stepRowStyle}>
+            <div className="auth-step-row" style={stepRowStyle}>
               <div style={stepCircle(true, false)}>1</div>
               <div style={stepLine(false)} />
               <div style={stepCircle(false, false)}>2</div>
