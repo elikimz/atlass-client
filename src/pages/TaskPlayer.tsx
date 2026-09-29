@@ -26,7 +26,7 @@ export default function TaskPlayer() {
   const [completed, setCompleted] = useState(false)
   const [error, setError] = useState('')
   const [videoWatched, setVideoWatched] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(60)
+  const [timeLeft, setTimeLeft] = useState(20)
   const taskIdNumber = Number(taskId || 0)
 
   useEffect(() => {
