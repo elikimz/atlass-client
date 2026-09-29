@@ -14,7 +14,7 @@ const CLOUDINARY_CLOUD_NAME = "doste1wr0"
 type RechargeMethod = 'crypto' | 'mpesa' | 'paypal' | 'wise' | 'payoneer'
 
 const maintenanceMessage = 'The payment method is currently under maintenance and is temporarily unavailable. Our technical team is working on the necessary updates to restore the service.'
-const TEMPORARY_MIN_RECHARGE_USD = 1 / 130
+const MIN_DEPOSIT_USD = 20
 
 const comingSoonLabels: Record<'paypal' | 'wise' | 'payoneer', string> = {
   paypal: 'PayPal',
@@ -54,6 +54,7 @@ export default function Recharge() {
 
   const finalAmount = customAmount ? parseFloat(customAmount) : (selectedAmount || 0)
   const isComingSoon = method === 'paypal' || method === 'wise' || method === 'payoneer'
+  const isValidDepositAmount = Number.isFinite(finalAmount) && finalAmount >= MIN_DEPOSIT_USD
 
   const handleCopy = () => {
     navigator.clipboard.writeText(USDT_ADDRESS).then(() => {
@@ -63,7 +64,7 @@ export default function Recharge() {
   }
 
   const handleProceed = () => {
-    if (finalAmount < TEMPORARY_MIN_RECHARGE_USD) return
+    if (!isValidDepositAmount) return
     if (isComingSoon) {
       setError(maintenanceMessage)
       return
@@ -248,7 +249,7 @@ export default function Recharge() {
                   >✕</button>
                 )}
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>Temporary test minimum is KES 1 (about $0.01)</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>Minimum deposit is $20.00</p>
             </div>
           </div>
 
@@ -363,14 +364,14 @@ export default function Recharge() {
 
             <button
               onClick={handleProceed}
-              disabled={finalAmount < 20}
+              disabled={!isValidDepositAmount || isComingSoon}
               style={{
                 width: '100%', height: '56px', borderRadius: '16px',
-                  backgroundColor: finalAmount < 20 || isComingSoon
+                  backgroundColor: !isValidDepositAmount || isComingSoon
                   ? 'var(--text-muted)'
                   : method === 'mpesa' ? '#00AC4F' : 'var(--accent-primary)',
                 color: 'white', fontSize: '16px', fontWeight: 700, border: 'none',
-                cursor: finalAmount < 20 || isComingSoon ? 'not-allowed' : 'pointer',
+                cursor: !isValidDepositAmount || isComingSoon ? 'not-allowed' : 'pointer',
                 boxShadow: finalAmount < 20 ? 'none' : '0 4px 12px rgba(49, 151, 149, 0.2)',
                 transition: 'all 0.2s'
               }}
