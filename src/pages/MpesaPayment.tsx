@@ -95,9 +95,7 @@ export default function MpesaPayment() {
   const [reference, setReference] = useState<string | null>(null)
   const [initiateData, setInitiateData] = useState<InitiateResponse | null>(null)
   const [statusData, setStatusData] = useState<StatusResponse | null>(null)
-  const [pollCount, setPollCount] = useState(0)
   const [timeoutReached, setTimeoutReached] = useState(false)
-  const MAX_POLL_ATTEMPTS = 24
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhone(e.target.value)
@@ -145,7 +143,7 @@ export default function MpesaPayment() {
       setReference(data.reference)
       // Do not depend on callbacks or provider polling. Every recharge attempt
       // is placed in the admin payment queue for manual verification.
-      setStep('review')
+      setStep(data.review_payment_id ? 'review' : 'pending')
     } catch (err: any) {
       const httpStatus = err?.response?.status
       const detail = err?.response?.data?.detail
@@ -179,6 +177,20 @@ export default function MpesaPayment() {
     }
   }
 
+  const handleSubmitReview = async () => {
+    if (!reference) return
+    setLoading(true)
+    setError(null)
+    try {
+      await api.post(`/pesaflux/submit-review/${reference}`)
+      setStep('review')
+    } catch (err: any) {
+      setError(err?.response?.data?.detail || 'Could not submit the deposit for review. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleRetry = () => {
     setStep('input')
     setError(null)
@@ -187,7 +199,6 @@ export default function MpesaPayment() {
     setInitiateData(null)
     setStatusData(null)
     setTimeoutReached(false)
-    setPollCount(0)
   }
 
   const handleGoBack = () => {
@@ -487,23 +498,21 @@ export default function MpesaPayment() {
             </div>
           </div>
 
-          {/* Polling indicator */}
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px'
-          }}>
-            <span style={{
-              width: '12px', height: '12px',
-              border: '2px solid var(--border-main)',
-              borderTop: '2px solid #00AC4F',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              display: 'inline-block',
-              flexShrink: 0
-            }} />
-            Waiting for confirmation... ({pollCount}/{MAX_POLL_ATTEMPTS})
-          </div>
-          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.5' }}>
+            After entering your PIN, tap the button below. Your deposit will then move to <strong>Under Review</strong> for admin verification.
+          </p>
+          <button
+            onClick={handleSubmitReview}
+            disabled={loading}
+            style={{
+              width: '100%', height: '50px', borderRadius: '12px',
+              backgroundColor: '#f59e0b', color: 'white', border: 'none',
+              fontSize: '15px', fontWeight: 700, cursor: loading ? 'wait' : 'pointer',
+              marginBottom: '12px'
+            }}
+          >
+            {loading ? 'Submitting for review...' : 'I Entered My PIN — Submit for Review'}
+          </button>
 
           {/* Reference */}
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '20px' }}>
