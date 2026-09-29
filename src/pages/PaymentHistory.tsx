@@ -19,13 +19,14 @@ interface Payment {
 
 const statusColors: { [key: string]: { bg: string; text: string; icon: string } } = {
   pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳' },
+  under_review: { bg: '#fffbeb', text: '#92400e', icon: '🔎' },
   paid: { bg: 'rgba(34, 197, 94, 0.1)', text: '#065f46', icon: '✓' },
   rejected: { bg: 'rgba(220, 38, 38, 0.1)', text: '#991b1b', icon: '✕' },
   cancelled: { bg: 'var(--bg-main)', text: 'var(--text-muted)', icon: '−' },
 }
 
 const getDisplayStatus = (status: string) => {
-  return status === 'pending' ? 'Processing' : (status.charAt(0).toUpperCase() + status.slice(1))
+  return status === 'pending' ? 'Processing' : status === 'under_review' ? 'Under Review' : (status.charAt(0).toUpperCase() + status.slice(1))
 }
 
 const typeColors: { [key: string]: { bg: string; text: string; icon: string } } = {
@@ -102,7 +103,7 @@ export default function PaymentHistory() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}><h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Payment Details</h2><button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div><p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, margin: '0 0 6px' }}>TYPE</p><p style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{selectedPayment.type === 'deposit' ? '📥 Deposit' : '📤 Payout'}</p></div>
-              <div><p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, margin: '0 0 6px' }}>STATUS</p><div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: statusColors[selectedPayment.status]?.bg || '#f3f4f6', color: statusColors[selectedPayment.status]?.text || '#374151', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 700 }}>{statusColors[selectedPayment.status]?.icon} {selectedPayment.status.charAt(0).toUpperCase() + selectedPayment.status.slice(1)}</div></div>
+              <div><p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, margin: '0 0 6px' }}>STATUS</p><div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: statusColors[selectedPayment.status]?.bg || '#f3f4f6', color: statusColors[selectedPayment.status]?.text || '#374151', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 700 }}>{statusColors[selectedPayment.status]?.icon} {getDisplayStatus(selectedPayment.status)}</div></div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
               <div><p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600, margin: '0 0 6px' }}>AMOUNT</p><p style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>${selectedPayment.amount.toFixed(2)}</p></div>

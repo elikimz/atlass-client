@@ -100,9 +100,9 @@ export default function AdminPayments() {
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Method</div><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{reviewingPayment.payment_method}</div></div>
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Network</div><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{reviewingPayment.network || 'N/A'}</div></div>
               </div>
-              {(reviewingPayment.type === 'payout' || reviewingPayment.type === 'withdrawal') && reviewingPayment.destination_number && (
+              {reviewingPayment.destination_number && (
                 <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-main)' }}>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Withdrawal Number / Address</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{reviewingPayment.type === 'deposit' ? 'M-Pesa Phone Number' : 'Withdrawal Number / Address'}</div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                     <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--accent-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>{reviewingPayment.destination_number}</div>
                     <button 
@@ -119,6 +119,12 @@ export default function AdminPayments() {
               )}
               {reviewingPayment.proof_url && (
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>Payment Proof</div><a href={reviewingPayment.proof_url} target="_blank" rel="noreferrer"><img src={reviewingPayment.proof_url} alt="Proof" style={{ width: '100%', borderRadius: '8px', border: '1px solid var(--border-main)' }} /></a></div>
+              )}
+              {reviewingPayment.admin_notes && (
+                <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-main)' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Review Notes</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: 1.5, wordBreak: 'break-word' }}>{reviewingPayment.admin_notes}</div>
+                </div>
               )}
               <div><label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Rejection Reason (Required if rejecting)</label><textarea value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} placeholder="Explain why this payment is being rejected..." rows={3} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-main)', fontSize: '14px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
             </div>
@@ -155,9 +161,9 @@ export default function AdminPayments() {
                 <td style={{ padding: '16px' }}><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{payment.user?.first_name} {payment.user?.last_name}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{payment.user?.email}</div></td>
                 <td style={{ padding: '16px', fontSize: '14px', fontWeight: 700, color: activeTab === 'deposit' ? '#059669' : '#DC2626' }}>{activeTab === 'deposit' ? '+' : '-'}${payment.amount.toFixed(2)}</td>
                 <td style={{ padding: '16px' }}><div style={{ fontSize: '14px', color: 'var(--text-main)' }}>{payment.payment_method}</div><div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{payment.network || 'N/A'}</div></td>
-                <td style={{ padding: '16px' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, backgroundColor: payment.status === 'paid' ? 'rgba(34, 197, 94, 0.1)' : payment.status === 'pending' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: payment.status === 'paid' ? '#166534' : payment.status === 'pending' ? '#92400E' : '#991B1B' }}>{payment.status.toUpperCase()}</span></td>
+                <td style={{ padding: '16px' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, backgroundColor: payment.status === 'paid' ? 'rgba(34, 197, 94, 0.1)' : ['pending', 'under_review'].includes(payment.status) ? 'rgba(245, 158, 11, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: payment.status === 'paid' ? '#166534' : ['pending', 'under_review'].includes(payment.status) ? '#92400E' : '#991B1B' }}>{payment.type === 'deposit' && ['pending', 'under_review'].includes(payment.status) ? 'UNDER REVIEW' : payment.status.toUpperCase()}</span></td>
                 <td style={{ padding: '16px', fontSize: '13px', color: 'var(--text-muted)' }}>{new Date(payment.created_at).toLocaleDateString()}</td>
-                <td style={{ padding: '16px', textAlign: 'center' }}>{payment.status === 'pending' ? <button onClick={() => setReviewingPayment(payment)} style={{ padding: '8px 16px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Review</button> : <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Processed</span>}</td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>{['pending', 'under_review'].includes(payment.status) ? <button onClick={() => setReviewingPayment(payment)} style={{ padding: '8px 16px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Review</button> : <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Processed</span>}</td>
               </tr>
             ))}
           </tbody>

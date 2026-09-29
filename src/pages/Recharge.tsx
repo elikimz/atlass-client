@@ -312,7 +312,7 @@ export default function Recharge() {
                   }}>M</div>
                   <div>
                     <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>M-PESA (Instant KES)</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Pay via M-Pesa STK Push — instant confirmation</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Pay via M-Pesa — admin verifies every deposit</div>
                   </div>
                 </div>
                 <div style={{
@@ -551,12 +551,13 @@ export default function Recharge() {
               {depositHistory.slice(0, 5).map((payment, index) => {
                 const statusColors: { [key: string]: { bg: string; text: string; icon: string } } = {
                   pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳' },
+                  under_review: { bg: '#fffbeb', text: '#92400e', icon: '🔎' },
                   paid: { bg: '#ecfdf5', text: '#065f46', icon: '✓' },
                   rejected: { bg: '#fef2f2', text: '#991b1b', icon: '✕' },
                   cancelled: { bg: '#f3f4f6', text: '#374151', icon: '−' },
                 }
                 const statusColor = statusColors[payment.status] || statusColors.pending
-                const displayStatus = payment.status === 'pending' ? 'Processing' : (payment.status.charAt(0).toUpperCase() + payment.status.slice(1))
+                const displayStatus = payment.status === 'pending' ? 'Processing' : payment.status === 'under_review' ? 'Under Review' : (payment.status.charAt(0).toUpperCase() + payment.status.slice(1))
                 const formattedDate = payment.created_at
                   ? new Date(payment.created_at).toLocaleDateString('en-US', {
                       month: 'short',

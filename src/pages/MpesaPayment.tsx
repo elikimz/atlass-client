@@ -11,8 +11,8 @@
  *   1. Display plan details or recharge amount
  *   2. Collect and validate Kenyan phone number
  *   3. Call backend to initiate STK Push (backend calls PesaFlux — never frontend)
- *   4. Show pending state with polling for payment confirmation
- *   5. On success: show confirmation and redirect
+ *   4. Show an under-review state immediately after the attempt
+ *   5. Admin verifies the M-Pesa payment and approves/rejects the deposit
  *   6. Handle all error states gracefully
  *
  * Security:
@@ -21,11 +21,9 @@
  *   - Amount is loaded from the backend — never sent from frontend.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
-import { queryKeys } from '../services/queryClient'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,11 +43,12 @@ interface InitiateResponse {
   amount_usd: number
   plan_name: string
   message: string
+  review_payment_id?: number
 }
 
 interface StatusResponse {
   reference: string
-  status: 'pending' | 'completed' | 'failed'
+  status: 'pending' | 'under_review' | 'completed' | 'failed'
   plan_name: string | null
   amount_usd: number
   amount_kes?: number
@@ -57,7 +56,7 @@ interface StatusResponse {
   message?: string
 }
 
-type PaymentStep = 'input' | 'pending' | 'success' | 'failed'
+type PaymentStep = 'input' | 'pending' | 'review' | 'success' | 'failed'
 
 // ─── Phone Validation ─────────────────────────────────────────────────────────
 
@@ -80,8 +79,6 @@ function isValidKenyanPhone(phone: string): boolean {
 export default function MpesaPayment() {
   const navigate = useNavigate()
   const location = useLocation()
-  const queryClient = useQueryClient()
-
   // Plan passed via navigation state from InvestmentPlans
   const plan: Plan | null = (location.state as any)?.plan || null
   // Recharge amount passed from Recharge page (when plan is null)
@@ -100,90 +97,7 @@ export default function MpesaPayment() {
   const [statusData, setStatusData] = useState<StatusResponse | null>(null)
   const [pollCount, setPollCount] = useState(0)
   const [timeoutReached, setTimeoutReached] = useState(false)
-
-  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const pollCountRef = useRef(0)
-
-  // Max polling: 24 attempts × 5s = 2 minutes
   const MAX_POLL_ATTEMPTS = 24
-  const POLL_INTERVAL_MS = 5000
-
-  // If neither plan nor rechargeAmount was passed, redirect back
-  useEffect(() => {
-    if (!plan && !isRechargeMode) {
-      navigate('/payments/recharge', { replace: true })
-    }
-  }, [plan, isRechargeMode, navigate])
-
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
-      }
-    }
-  }, [])
-
-  const stopPolling = useCallback(() => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current)
-      pollIntervalRef.current = null
-    }
-  }, [])
-
-  const pollStatus = useCallback(async (ref: string) => {
-    pollCountRef.current += 1
-    setPollCount(pollCountRef.current)
-
-    if (pollCountRef.current > MAX_POLL_ATTEMPTS) {
-      stopPolling()
-      setTimeoutReached(true)
-      setStep('failed')
-      setError(
-        'Payment confirmation timed out. If you completed the M-Pesa prompt, ' +
-        'please contact support with your reference number.'
-      )
-      return
-    }
-
-    try {
-      const res = await api.get<StatusResponse>(`/pesaflux/status/${ref}`)
-      const data = res.data
-      setStatusData(data)
-
-      if (data.status === 'completed') {
-        stopPolling()
-        setStep('success')
-        // Invalidate all relevant queries so the UI reflects the new plan,
-        // updated task list, and wallet balances immediately after M-Pesa payment.
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.tasks.available }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.plans.all }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.payments.historyBase }),
-        ])
-      } else if (data.status === 'failed') {
-        stopPolling()
-        setStep('failed')
-        setError('Payment was not completed. Please try again.')
-      }
-      // If still pending, continue polling
-    } catch (err: any) {
-      // Network error during polling — don't stop, just log
-      console.warn('PesaFlux status poll error:', err?.message)
-    }
-  }, [stopPolling])
-
-  const startPolling = useCallback((ref: string) => {
-    pollCountRef.current = 0
-    setPollCount(0)
-    pollIntervalRef.current = setInterval(() => {
-      pollStatus(ref)
-    }, POLL_INTERVAL_MS)
-  }, [pollStatus])
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhone(e.target.value)
@@ -229,10 +143,9 @@ export default function MpesaPayment() {
       const data = res.data
       setInitiateData(data)
       setReference(data.reference)
-      setStep('pending')
-
-      // Start polling for payment status
-      startPolling(data.reference)
+      // Do not depend on callbacks or provider polling. Every recharge attempt
+      // is placed in the admin payment queue for manual verification.
+      setStep('review')
     } catch (err: any) {
       const httpStatus = err?.response?.status
       const detail = err?.response?.data?.detail
@@ -267,7 +180,6 @@ export default function MpesaPayment() {
   }
 
   const handleRetry = () => {
-    stopPolling()
     setStep('input')
     setError(null)
     setPhoneError(null)
@@ -275,7 +187,6 @@ export default function MpesaPayment() {
     setInitiateData(null)
     setStatusData(null)
     setTimeoutReached(false)
-    pollCountRef.current = 0
     setPollCount(0)
   }
 
@@ -611,6 +522,52 @@ export default function MpesaPayment() {
           >
             Cancel / Try Again
           </button>
+        </div>
+      )}
+
+      {/* ── STEP: Manual review ──────────────────────────────────────────── */}
+      {step === 'review' && initiateData && (
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          borderRadius: '16px',
+          padding: '32px 24px',
+          border: '2px solid #f59e0b',
+          textAlign: 'center',
+          boxShadow: 'var(--card-shadow)'
+        }}>
+          <div style={{
+            width: '80px', height: '80px', borderRadius: '50%',
+            backgroundColor: '#fffbeb', border: '3px solid #f59e0b',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px', fontSize: '40px'
+          }}>⏳</div>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#92400e', marginBottom: '8px' }}>
+            Deposit Under Review
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
+            Your M-Pesa deposit attempt has been sent to the admin review queue.
+            The wallet will only be credited after an administrator verifies the payment,
+            whether the M-Pesa attempt succeeded or failed.
+          </p>
+          <div style={{
+            backgroundColor: '#fffbeb', borderRadius: '10px', padding: '12px 16px',
+            marginBottom: '20px', border: '1px solid #fde68a', textAlign: 'left'
+          }}>
+            <div style={{ fontSize: '12px', color: '#92400e' }}>
+              Reference: <strong style={{ fontFamily: 'monospace' }}>{initiateData.reference}</strong>
+            </div>
+            <div style={{ fontSize: '12px', color: '#92400e', marginTop: '4px' }}>
+              Amount: <strong>KES {initiateData.amount_kes.toLocaleString()} (${initiateData.amount_usd.toFixed(2)})</strong>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/payments/history')}
+            style={{
+              width: '100%', height: '52px', borderRadius: '12px',
+              backgroundColor: '#f59e0b', color: 'white',
+              fontSize: '16px', fontWeight: 700, border: 'none', cursor: 'pointer'
+            }}
+          >View Deposit History →</button>
         </div>
       )}
 
