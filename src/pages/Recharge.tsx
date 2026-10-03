@@ -5,7 +5,7 @@ import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 
 const USDT_ADDRESS = '0xcfed1cdcce064dc27f60bbf2292fc5c15082fc86'
-const USDT_NETWORK = 'ERC20 (Ethereum)'
+const USDT_NETWORK = 'BEP20 (BNB Smart Chain)'
 
 // Cloudinary configuration (unsigned upload preset)
 const CLOUDINARY_UPLOAD_PRESET = "task_images"
@@ -143,7 +143,7 @@ export default function Recharge() {
       await api.post('/payments/deposit', {
         amount: finalAmount,
         payment_method: 'USDT',
-        network: 'ERC20',
+        network: 'BEP20',
         proof_url: uploadedProofUrl
       })
       await Promise.all([
@@ -280,8 +280,8 @@ export default function Recharge() {
                     fontSize: '22px', color: 'white', fontWeight: 800
                   }}>₮</div>
                   <div>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>Crypto (USDT - ERC20)</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Tether on Ethereum network</div>
+                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>Crypto (USDT - BEP20)</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Tether on BNB Smart Chain</div>
                   </div>
                 </div>
                 <div style={{
@@ -352,7 +352,7 @@ export default function Recharge() {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
               <span style={{ color: 'var(--text-heading)', fontWeight: 500 }}>Method:</span>
               <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>
-                {method === 'mpesa' ? 'M-PESA (KES)' : method === 'crypto' ? 'Crypto (USDT-ERC20)' : comingSoonLabels[method]}
+                {method === 'mpesa' ? 'M-PESA (KES)' : method === 'crypto' ? 'Crypto (USDT-BEP20)' : comingSoonLabels[method]}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '14px' }}>
