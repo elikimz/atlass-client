@@ -48,7 +48,8 @@ export default function WithdrawFunds() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId)
-  const minimumWithdrawal = selectedAccount?.type?.toLowerCase() === 'crypto' ? 3 : 0
+  const isCryptoDestination = selectedAccount?.type?.toLowerCase() === 'crypto'
+  const minimumWithdrawal = isCryptoDestination ? 3 : 0
 
   const amounts = [2.50, 3.00, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
   const networkFee = 0.00
@@ -58,6 +59,10 @@ export default function WithdrawFunds() {
     const primary = accounts.find((account) => account.is_primary)
     setSelectedAccountId(primary?.id ?? accounts[0].id)
   }, [accounts, selectedAccountId])
+
+  useEffect(() => {
+    if (!isCryptoDestination && selectedAmount === 3) setSelectedAmount(null)
+  }, [isCryptoDestination, selectedAmount])
 
   const handleConfirmWithdrawal = () => {
     if (hasWithdrawalToday) { setError('You can only make one withdrawal per day. Please try again tomorrow.'); return }
@@ -120,7 +125,7 @@ export default function WithdrawFunds() {
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>1. Select Amount</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '12px' }}>
           {amounts.map(amt => (
-            <button key={amt} disabled={amt < minimumWithdrawal} onClick={() => setSelectedAmount(amt)} style={{ height: '48px', borderRadius: '12px', border: selectedAmount === amt ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)', backgroundColor: selectedAmount === amt ? 'var(--accent-primary)' : 'var(--bg-card)', color: selectedAmount === amt ? 'white' : 'var(--text-main)', fontSize: '15px', fontWeight: 700, cursor: amt < minimumWithdrawal ? 'not-allowed' : 'pointer', opacity: amt < minimumWithdrawal ? 0.5 : 1 }}>${amt.toFixed(2).replace('.00', '')}</button>
+            <button key={amt} disabled={isCryptoDestination ? amt < minimumWithdrawal : amt === 3} onClick={() => setSelectedAmount(amt)} style={{ height: '48px', borderRadius: '12px', border: selectedAmount === amt ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)', backgroundColor: selectedAmount === amt ? 'var(--accent-primary)' : 'var(--bg-card)', color: selectedAmount === amt ? 'white' : 'var(--text-main)', fontSize: '15px', fontWeight: 700, cursor: (isCryptoDestination ? amt < minimumWithdrawal : amt === 3) ? 'not-allowed' : 'pointer', opacity: (isCryptoDestination ? amt < minimumWithdrawal : amt === 3) ? 0.5 : 1 }}>${amt.toFixed(2).replace('.00', '')}</button>
           ))}
         </div>
         {minimumWithdrawal > 0 && <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '8px 0 0', fontWeight: 500 }}>Minimum crypto withdrawal is $3.00</p>}
