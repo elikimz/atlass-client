@@ -26,7 +26,7 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editData, setEditData] = useState<Partial<User & { password?: string }>>({})
+  const [editData, setEditData] = useState<Partial<User & { password?: string; withdrawalPassword?: string }>>({})
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -51,6 +51,19 @@ export default function AdminUsers() {
       await api.put(`/admin/users/${editingId}`, editData)
       setSuccess('User updated successfully'); setEditingId(null); fetchUsers()
     } catch (err: any) { setError(err.response?.data?.detail || 'Failed to update user') }
+  }
+
+  const handleResetWithdrawalPassword = async () => {
+    if (!editingId || !editData.withdrawalPassword) {
+      setError('Enter a new withdrawal password before resetting it')
+      return
+    }
+    if (!window.confirm('Reset this user\'s withdrawal password?')) return
+    try {
+      await api.post(`/admin/users/${editingId}/withdrawal-password`, { new_password: editData.withdrawalPassword })
+      setSuccess('User withdrawal password reset successfully')
+      setEditData((current) => ({ ...current, withdrawalPassword: '' }))
+    } catch (err: any) { setError(err.response?.data?.detail || 'Failed to reset withdrawal password') }
   }
 
   const handleDelete = async (id: number) => {
@@ -163,6 +176,8 @@ export default function AdminUsers() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>
                       <input type="password" placeholder="New Password" value={editData.password || ''} onChange={(e) => setEditData({ ...editData, password: e.target.value })} style={{ padding: '6px 8px', fontSize: '12px', border: '1px solid var(--border-main)', borderRadius: '6px', width: '120px' }} />
+                      <input type="password" placeholder="New Withdrawal Password" value={editData.withdrawalPassword || ''} onChange={(e) => setEditData({ ...editData, withdrawalPassword: e.target.value })} style={{ padding: '6px 8px', fontSize: '12px', border: '1px solid var(--border-main)', borderRadius: '6px', width: '150px' }} />
+                      <button onClick={handleResetWithdrawalPassword} style={{ padding: '5px 8px', backgroundColor: '#7C3AED', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '11px' }}>Reset Withdrawal Password</button>
                     </div>
                   ) : (
                     <span style={{ padding: '4px 8px', backgroundColor: user.role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: user.role === 'admin' ? '#92400E' : '#1E40AF', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{user.role}</span>
