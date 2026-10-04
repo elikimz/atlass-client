@@ -34,6 +34,8 @@ export default function WithdrawFunds() {
   const balance = userQuery.data?.withdrawal_wallet_balance ?? 0
   const isEligible = Boolean(userQuery.data?.has_purchased_first_package && userQuery.data?.current_plan_id)
   const accounts = accountsQuery.data ?? []
+  const selectedAccount = accounts.find((account) => account.id === selectedAccountId)
+  const minimumWithdrawal = selectedAccount?.type?.toLowerCase() === 'crypto' ? 3 : 0
   const withdrawalHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'payout')
   const pendingWithdrawal = withdrawalHistory.find((payment: any) => ['pending', 'processing', 'in_progress'].includes(payment.status))
   const hasPendingWithdrawal = Boolean(pendingWithdrawal)
@@ -62,6 +64,7 @@ export default function WithdrawFunds() {
     if (hasPendingWithdrawal) { setError('You already have a withdrawal being processed. Wait until it is processed or canceled before requesting another withdrawal.'); return }
     if (!isEligible) { setError('Recharge your account and purchase a plan before requesting a withdrawal.'); return }
     if (!selectedAmount || !selectedAccountId) return
+    if (selectedAmount < minimumWithdrawal) { setError(`Minimum crypto withdrawal amount is $${minimumWithdrawal.toFixed(2)}.`); return }
     if (selectedAmount > balance) { setError('Insufficient balance'); return }
     setError(null); setShowPasswordModal(true)
   }
@@ -117,9 +120,10 @@ export default function WithdrawFunds() {
         <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>1. Select Amount</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '12px' }}>
           {amounts.map(amt => (
-            <button key={amt} onClick={() => setSelectedAmount(amt)} style={{ height: '48px', borderRadius: '12px', border: selectedAmount === amt ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)', backgroundColor: selectedAmount === amt ? 'var(--accent-primary)' : 'var(--bg-card)', color: selectedAmount === amt ? 'white' : 'var(--text-main)', fontSize: '15px', fontWeight: 700, cursor: 'pointer' }}>${amt.toFixed(2).replace('.00', '')}</button>
+            <button key={amt} disabled={amt < minimumWithdrawal} onClick={() => setSelectedAmount(amt)} style={{ height: '48px', borderRadius: '12px', border: selectedAmount === amt ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)', backgroundColor: selectedAmount === amt ? 'var(--accent-primary)' : 'var(--bg-card)', color: selectedAmount === amt ? 'white' : 'var(--text-main)', fontSize: '15px', fontWeight: 700, cursor: amt < minimumWithdrawal ? 'not-allowed' : 'pointer', opacity: amt < minimumWithdrawal ? 0.5 : 1 }}>${amt.toFixed(2).replace('.00', '')}</button>
           ))}
         </div>
+        {minimumWithdrawal > 0 && <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '8px 0 0', fontWeight: 500 }}>Minimum crypto withdrawal is $3.00</p>}
       </div>
 
       <div style={{ marginBottom: '24px' }}>
