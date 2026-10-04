@@ -21,7 +21,7 @@ export default function WithdrawalAccounts() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [type, setType] = useState('crypto')
   const [address, setAddress] = useState('')
-  const [network, setNetwork] = useState('ERC20')
+  const [network] = useState('BEP20')
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [isPrimary, setIsPrimary] = useState(true)
@@ -112,7 +112,7 @@ export default function WithdrawalAccounts() {
             <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-heading)', marginBottom: '20px', textAlign: 'center' }}>Add Withdrawal Account</h3>
             <form onSubmit={handleAddAccount}>
               <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Account Type</label><select value={type} onChange={e => setType(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="crypto">Crypto (USDT)</option><option value="mpesa">M-Pesa</option></select></div>
-              {type === 'crypto' && (<div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Network</label><select value={network} onChange={e => setNetwork(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="ERC20">ERC20</option><option value="BEP20">BEP20</option></select></div>)}
+              {type === 'crypto' && (<div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Network</label><div style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}>BEP20</div></div>)}
               {type === 'crypto' ? (
                 <div style={{ marginBottom: '16px' }}><label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', marginBottom: '8px' }}>Wallet Address</label><input type="text" required placeholder="0x..." value={address} onChange={e => setAddress(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }} /></div>
               ) : (
