@@ -26,7 +26,7 @@ export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editData, setEditData] = useState<Partial<User & { password?: string; withdrawalPassword?: string }>>({})
+  const [editData, setEditData] = useState<Partial<User & { password?: string }>>({})
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
@@ -55,19 +55,18 @@ export default function AdminUsers() {
   }
 
   const handleResetWithdrawalPassword = () => {
-    if (!editingId || !editData.withdrawalPassword) {
-      setError('Enter a new withdrawal password before resetting it')
+    if (!editingId) {
+      setError('Select a user before clearing the withdrawal password')
       return
     }
     setConfirmResetOpen(true)
   }
 
   const confirmWithdrawalPasswordReset = async () => {
-    if (!editingId || !editData.withdrawalPassword) return
+    if (!editingId) return
     try {
-      await api.post(`/admin/users/${editingId}/withdrawal-password`, { new_password: editData.withdrawalPassword })
-      setSuccess('User withdrawal password reset successfully')
-      setEditData((current) => ({ ...current, withdrawalPassword: '' }))
+      await api.post(`/admin/users/${editingId}/withdrawal-password`)
+      setSuccess('User withdrawal password cleared. The user can set a new one now.')
       setConfirmResetOpen(false)
     } catch (err: any) { setError(err.response?.data?.detail || 'Failed to reset withdrawal password') }
   }
@@ -182,8 +181,7 @@ export default function AdminUsers() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>
                       <input type="password" placeholder="New Password" value={editData.password || ''} onChange={(e) => setEditData({ ...editData, password: e.target.value })} style={{ padding: '6px 8px', fontSize: '12px', border: '1px solid var(--border-main)', borderRadius: '6px', width: '120px' }} />
-                      <input type="password" placeholder="New Withdrawal Password" value={editData.withdrawalPassword || ''} onChange={(e) => setEditData({ ...editData, withdrawalPassword: e.target.value })} style={{ padding: '6px 8px', fontSize: '12px', border: '1px solid var(--border-main)', borderRadius: '6px', width: '150px' }} />
-                      <button onClick={handleResetWithdrawalPassword} style={{ padding: '5px 8px', backgroundColor: '#7C3AED', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '11px' }}>Reset Withdrawal Password</button>
+                      <button onClick={handleResetWithdrawalPassword} style={{ padding: '5px 8px', backgroundColor: '#7C3AED', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '11px' }}>Clear Withdrawal Password</button>
                     </div>
                   ) : (
                     <span style={{ padding: '4px 8px', backgroundColor: user.role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: user.role === 'admin' ? '#92400E' : '#1E40AF', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{user.role}</span>
@@ -218,11 +216,11 @@ export default function AdminUsers() {
       {confirmResetOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 2000 }}>
           <div role="dialog" aria-modal="true" style={{ width: '100%', maxWidth: '420px', backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 45px rgba(15, 23, 42, 0.25)', border: '1px solid var(--border-main)' }}>
-            <h2 style={{ margin: '0 0 10px', fontSize: '20px', color: 'var(--text-heading)' }}>Reset withdrawal password?</h2>
-            <p style={{ margin: '0 0 22px', color: 'var(--text-muted)', fontSize: '14px', lineHeight: 1.5 }}>This will replace the user’s current withdrawal password. The new password will be stored securely.</p>
+            <h2 style={{ margin: '0 0 10px', fontSize: '20px', color: 'var(--text-heading)' }}>Clear withdrawal password?</h2>
+            <p style={{ margin: '0 0 22px', color: 'var(--text-muted)', fontSize: '14px', lineHeight: 1.5 }}>This will remove the user’s withdrawal password. The user will be asked to create a new one before withdrawing.</p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button onClick={() => setConfirmResetOpen(false)} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={confirmWithdrawalPasswordReset} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#7C3AED', color: 'white', fontWeight: 700, cursor: 'pointer' }}>Confirm Reset</button>
+              <button onClick={confirmWithdrawalPasswordReset} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#7C3AED', color: 'white', fontWeight: 700, cursor: 'pointer' }}>Confirm Clear</button>
             </div>
           </div>
         </div>
