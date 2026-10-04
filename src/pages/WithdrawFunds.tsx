@@ -34,8 +34,6 @@ export default function WithdrawFunds() {
   const balance = userQuery.data?.withdrawal_wallet_balance ?? 0
   const isEligible = Boolean(userQuery.data?.has_purchased_first_package && userQuery.data?.current_plan_id)
   const accounts = accountsQuery.data ?? []
-  const selectedAccount = accounts.find((account) => account.id === selectedAccountId)
-  const minimumWithdrawal = selectedAccount?.type?.toLowerCase() === 'crypto' ? 3 : 0
   const withdrawalHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'payout')
   const pendingWithdrawal = withdrawalHistory.find((payment: any) => ['pending', 'processing', 'in_progress'].includes(payment.status))
   const hasPendingWithdrawal = Boolean(pendingWithdrawal)
@@ -49,6 +47,8 @@ export default function WithdrawFunds() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const selectedAccount = accounts.find((account) => account.id === selectedAccountId)
+  const minimumWithdrawal = selectedAccount?.type?.toLowerCase() === 'crypto' ? 3 : 0
 
   const amounts = [2.50, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
   const networkFee = 0.00
