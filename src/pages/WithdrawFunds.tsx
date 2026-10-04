@@ -50,7 +50,7 @@ export default function WithdrawFunds() {
   const selectedAccount = accounts.find((account) => account.id === selectedAccountId)
   const minimumWithdrawal = selectedAccount?.type?.toLowerCase() === 'crypto' ? 3 : 0
 
-  const amounts = [2.50, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
+  const amounts = [2.50, 3.00, 8.00, 12.00, 20.00, 50.00, 100.00, 150.00, 500.00, 1000.00]
   const networkFee = 0.00
 
   useEffect(() => {
