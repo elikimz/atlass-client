@@ -180,7 +180,6 @@ export default function AdminUsers() {
                   {editingId === user.id ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>
-                      <input type="password" placeholder="New Password" value={editData.password || ''} onChange={(e) => setEditData({ ...editData, password: e.target.value })} style={{ padding: '6px 8px', fontSize: '12px', border: '1px solid var(--border-main)', borderRadius: '6px', width: '120px' }} />
                       <button onClick={handleResetWithdrawalPassword} style={{ padding: '5px 8px', backgroundColor: '#7C3AED', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '11px' }}>Clear Withdrawal Password</button>
                     </div>
                   ) : (
