@@ -33,6 +33,7 @@ export default function AdminUsers() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [confirmResetOpen, setConfirmResetOpen] = useState(false)
+  const [clearingWithdrawalPassword, setClearingWithdrawalPassword] = useState(false)
 
   useEffect(() => { fetchUsers() }, [])
 
@@ -64,11 +65,19 @@ export default function AdminUsers() {
 
   const confirmWithdrawalPasswordReset = async () => {
     if (!editingId) return
+    setClearingWithdrawalPassword(true)
     try {
       await api.post(`/admin/users/${editingId}/withdrawal-password`)
       setSuccess('User withdrawal password cleared. The user can set a new one now.')
+      toast.success('Withdrawal password cleared. User can set a new one now.')
       setConfirmResetOpen(false)
-    } catch (err: any) { setError(err.response?.data?.detail || 'Failed to reset withdrawal password') }
+    } catch (err: any) {
+      const message = err.response?.data?.detail || 'Failed to clear withdrawal password'
+      setError(message)
+      toast.error(message)
+    } finally {
+      setClearingWithdrawalPassword(false)
+    }
   }
 
   const handleDelete = async (id: number) => {
@@ -180,7 +189,7 @@ export default function AdminUsers() {
                   {editingId === user.id ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <select value={editData.role || 'user'} onChange={(e) => setEditData({ ...editData, role: e.target.value })} style={{ padding: '6px 8px', fontSize: '13px', border: '1px solid var(--border-main)', borderRadius: '6px', outline: 'none', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)' }}><option value="user">User</option><option value="admin">Admin</option></select>
-                      <button onClick={handleResetWithdrawalPassword} style={{ padding: '5px 8px', backgroundColor: '#7C3AED', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '11px' }}>Clear Withdrawal Password</button>
+                      <button onClick={handleResetWithdrawalPassword} disabled={clearingWithdrawalPassword} style={{ padding: '5px 8px', backgroundColor: '#7C3AED', color: 'white', border: 'none', borderRadius: '6px', cursor: clearingWithdrawalPassword ? 'not-allowed' : 'pointer', opacity: clearingWithdrawalPassword ? 0.65 : 1, fontWeight: 600, fontSize: '11px' }}>{clearingWithdrawalPassword ? 'Clearing...' : 'Clear Withdrawal Password'}</button>
                     </div>
                   ) : (
                     <span style={{ padding: '4px 8px', backgroundColor: user.role === 'admin' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)', color: user.role === 'admin' ? '#92400E' : '#1E40AF', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{user.role}</span>
@@ -219,7 +228,7 @@ export default function AdminUsers() {
             <p style={{ margin: '0 0 22px', color: 'var(--text-muted)', fontSize: '14px', lineHeight: 1.5 }}>This will remove the user’s withdrawal password. The user will be asked to create a new one before withdrawing.</p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button onClick={() => setConfirmResetOpen(false)} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={confirmWithdrawalPasswordReset} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#7C3AED', color: 'white', fontWeight: 700, cursor: 'pointer' }}>Confirm Clear</button>
+              <button onClick={confirmWithdrawalPasswordReset} disabled={clearingWithdrawalPassword} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#7C3AED', color: 'white', fontWeight: 700, cursor: clearingWithdrawalPassword ? 'not-allowed' : 'pointer', opacity: clearingWithdrawalPassword ? 0.7 : 1, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>{clearingWithdrawalPassword && <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.45)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />}{clearingWithdrawalPassword ? 'Clearing...' : 'Confirm Clear'}</button>
             </div>
           </div>
         </div>
