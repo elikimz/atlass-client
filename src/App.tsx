@@ -17,6 +17,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminTasks from './pages/AdminTasks'
 import AdminTraining from './pages/AdminTraining'
 import AdminUsers from './pages/AdminUsers'
+import AdminPasswordManagement from './pages/AdminPasswordManagement'
 import AdminPayments from './pages/AdminPayments'
 import AdminPlans from './pages/AdminPlans'
 import AdminInvites from './pages/AdminInvites'
@@ -140,7 +141,8 @@ function AppContent() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/tasks" element={<AdminTasks />} />
             <Route path="/admin/training" element={<AdminTraining />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/password-management" element={<AdminPasswordManagement />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/plans" element={<AdminPlans />} />
             <Route path="/admin/invites" element={<AdminInvites />} />

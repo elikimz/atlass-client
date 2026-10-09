@@ -56,6 +56,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
     { label: 'Video Tasks', path: '/admin/tasks', icon: '🎬' },
     { label: 'Training', path: '/admin/training', icon: '📚' },
     { label: 'Users', path: '/admin/users', icon: '👥' },
+    { label: 'Password Management', path: '/admin/password-management', icon: '🔑' },
     { label: 'Payments', path: '/admin/payments', icon: '💳' },
     { label: 'Plans', path: '/admin/plans', icon: '💎' },
     { label: 'Invites', path: '/admin/invites', icon: '✉️' },
