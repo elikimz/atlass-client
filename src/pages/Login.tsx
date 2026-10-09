@@ -81,6 +81,13 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [showLoginPassword, setShowLoginPassword] = useState(false)
+  const [recoveryStep, setRecoveryStep] = useState<0 | 1 | 2>(0)
+  const [recoveryEmail, setRecoveryEmail] = useState('')
+  const [recoveryCode, setRecoveryCode] = useState('')
+  const [recoveryPassword, setRecoveryPassword] = useState('')
+  const [recoveryConfirmPassword, setRecoveryConfirmPassword] = useState('')
+  const [showRecoveryPassword, setShowRecoveryPassword] = useState(false)
+  const [showRecoveryConfirmPassword, setShowRecoveryConfirmPassword] = useState(false)
   // const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   const [loading, setLoading] = useState(false)
@@ -118,6 +125,47 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       }
     } catch (error: unknown) {
       setError(apiErrorMessage(error, 'Login failed. Please check your credentials.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRequestPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail.trim())) {
+      setError('Please enter the email address linked to your account')
+      return
+    }
+    setLoading(true)
+    setError('')
+    try {
+      await api.post('/auth/password-reset/request', { email: recoveryEmail.trim() })
+      setRecoveryStep(2)
+    } catch (error: unknown) {
+      setError(apiErrorMessage(error, 'Unable to send the reset code. Please try again.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConfirmPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!/^\d{6}$/.test(recoveryCode)) { setError('Enter the 6-digit code from your email'); return }
+    if (recoveryPassword.length < 8) { setError('Password must be at least 8 characters'); return }
+    if (recoveryPassword !== recoveryConfirmPassword) { setError('Passwords do not match'); return }
+    setLoading(true)
+    setError('')
+    try {
+      await api.post('/auth/password-reset/confirm', { email: recoveryEmail.trim(), code: recoveryCode, new_password: recoveryPassword })
+      setLoginUsername(recoveryEmail.trim())
+      setLoginPassword('')
+      setRecoveryStep(0)
+      setRecoveryCode('')
+      setRecoveryPassword('')
+      setRecoveryConfirmPassword('')
+      setError('Password reset successfully. You can now log in with your new password.')
+    } catch (error: unknown) {
+      setError(apiErrorMessage(error, 'Invalid or expired reset code.'))
     } finally {
       setLoading(false)
     }
@@ -787,6 +835,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
               <div style={stepCircle(false, false)}>3</div>
             </div>
 
+            {recoveryStep === 0 ? <>
             <form onSubmit={handleLogin}>
               {/* Username */}
               <div style={inputWrapStyle}>
@@ -826,6 +875,29 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                 {loading ? 'Signing in...' : 'Login'}
               </button>
             </form>
+            <button type="button" onClick={() => { setRecoveryStep(1); setRecoveryEmail(''); setError('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Forgot password?</button>
+            </> : (
+              <>
+                <h2 style={{ color: 'var(--color-text-secondary)', fontSize: '21px', textAlign: 'center', margin: '0 0 10px' }}>{recoveryStep === 1 ? 'Reset your password' : 'Enter reset code'}</h2>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '13px', lineHeight: 1.5, textAlign: 'center', margin: '0 0 20px' }}>{recoveryStep === 1 ? 'Enter the email linked to your account and we will send you a 6-digit code.' : `We sent a 6-digit code to ${recoveryEmail}. The code expires in 10 minutes.`}</p>
+                {recoveryStep === 1 ? (
+                  <form onSubmit={handleRequestPasswordReset}>
+                    <div style={inputWrapStyle}><span style={iconStyle}>✉️</span><input type="email" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} placeholder="Email address" style={inputStyle} autoComplete="email" required /></div>
+                    {error && <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>{error}</p>}
+                    <button type="submit" style={loginBtnStyle} disabled={loading}>{loading ? 'Sending code...' : 'Send reset code'}</button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleConfirmPasswordReset}>
+                    <div style={inputWrapStyle}><span style={iconStyle}>🔢</span><input type="text" inputMode="numeric" maxLength={6} value={recoveryCode} onChange={(event) => setRecoveryCode(event.target.value.replace(/\D/g, ''))} placeholder="6-digit code" style={inputStyle} autoComplete="one-time-code" required /></div>
+                    <div style={inputWrapStyle}><span style={iconStyle}>🔒</span><input type={showRecoveryPassword ? 'text' : 'password'} value={recoveryPassword} onChange={(event) => setRecoveryPassword(event.target.value)} placeholder="New password" style={inputStyle} autoComplete="new-password" minLength={8} required /><button type="button" onClick={() => setShowRecoveryPassword((value) => !value)} aria-label={showRecoveryPassword ? 'Hide new password' : 'Show new password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showRecoveryPassword ? '🙈' : '👁️'}</button></div>
+                    <div style={inputWrapStyle}><span style={iconStyle}>🔒</span><input type={showRecoveryConfirmPassword ? 'text' : 'password'} value={recoveryConfirmPassword} onChange={(event) => setRecoveryConfirmPassword(event.target.value)} placeholder="Confirm new password" style={inputStyle} autoComplete="new-password" minLength={8} required /><button type="button" onClick={() => setShowRecoveryConfirmPassword((value) => !value)} aria-label={showRecoveryConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showRecoveryConfirmPassword ? '🙈' : '👁️'}</button></div>
+                    {error && <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>{error}</p>}
+                    <button type="submit" style={loginBtnStyle} disabled={loading}>{loading ? 'Updating password...' : 'Set new password'}</button>
+                  </form>
+                )}
+                <button type="button" onClick={() => { setRecoveryStep(0); setError('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Back to login</button>
+              </>
+            )}
 
             <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
               Don't have an account?{' '}
