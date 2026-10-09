@@ -21,6 +21,8 @@ export default function AdminPasswordManagement() {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -98,11 +100,17 @@ export default function AdminPasswordManagement() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
           <div>
             <label htmlFor="new-password" style={{ display: 'block', marginBottom: '7px', fontSize: '13px', fontWeight: 700, color: 'var(--text-heading)' }}>New password</label>
-            <input id="new-password" type="password" minLength={8} maxLength={72} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="At least 8 characters" required style={{ width: '100%', boxSizing: 'border-box', padding: '11px 12px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px' }} />
+            <div style={{ position: 'relative' }}>
+              <input id="new-password" type={showNewPassword ? 'text' : 'password'} minLength={8} maxLength={72} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="At least 8 characters" required style={{ width: '100%', boxSizing: 'border-box', padding: '11px 42px 11px 12px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px' }} />
+              <button type="button" onClick={() => setShowNewPassword((visible) => !visible)} aria-label={showNewPassword ? 'Hide new password' : 'Show new password'} title={showNewPassword ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: '4px' }}>{showNewPassword ? '◉' : '◌'}</button>
+            </div>
           </div>
           <div>
             <label htmlFor="confirm-password" style={{ display: 'block', marginBottom: '7px', fontSize: '13px', fontWeight: 700, color: 'var(--text-heading)' }}>Confirm new password</label>
-            <input id="confirm-password" type="password" minLength={8} maxLength={72} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Repeat the new password" required style={{ width: '100%', boxSizing: 'border-box', padding: '11px 12px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px' }} />
+            <div style={{ position: 'relative' }}>
+              <input id="confirm-password" type={showConfirmPassword ? 'text' : 'password'} minLength={8} maxLength={72} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Repeat the new password" required style={{ width: '100%', boxSizing: 'border-box', padding: '11px 42px 11px 12px', border: '1px solid var(--border-main)', borderRadius: '8px', backgroundColor: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '14px' }} />
+              <button type="button" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'} title={showConfirmPassword ? 'Hide password' : 'Show password'} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: '4px' }}>{showConfirmPassword ? '◉' : '◌'}</button>
+            </div>
           </div>
         </div>
 
