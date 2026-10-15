@@ -45,6 +45,7 @@ export const queryKeys = {
     summary: ['referrals', 'summary'] as const,
     active: ['referrals', 'active'] as const,
     codes: ['referrals', 'codes'] as const,
+    commissions: ['referrals', 'commissions'] as const,
   },
   notifications: {
     list: (page = 1, limit = 50) => ['notifications', 'list', page, limit] as const,

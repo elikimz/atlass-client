@@ -24,6 +24,19 @@ interface ReferralSummary {
   task_rebate: number
   total_invites: number
   active_invites: number
+  tier_a_invite_earnings?: number
+  tier_b_invite_earnings?: number
+  tier_c_invite_earnings?: number
+}
+
+interface CommissionHistoryEntry {
+  id: number
+  tier: number
+  amount: number
+  rate: number
+  eligible_amount: number
+  source_type: string
+  created_at?: string
 }
 
 export default function Invite() {
@@ -43,10 +56,16 @@ export default function Invite() {
     queryFn: async () => (await api.get<ReferralSummary>('/referrals/summary')).data,
     staleTime: 2 * 60 * 1000,
   })
+  const commissionHistoryQuery = useQuery({
+    queryKey: queryKeys.referrals.commissions,
+    queryFn: async () => (await api.get<CommissionHistoryEntry[]>('/referrals/commissions')).data ?? [],
+    staleTime: 2 * 60 * 1000,
+  })
   const activeInvites = activeInvitesQuery.data ?? []
   const referralCodes = referralCodesQuery.data ?? []
   const summary = summaryQuery.data ?? null
-  const loading = activeInvitesQuery.isLoading || referralCodesQuery.isLoading || summaryQuery.isLoading
+  const commissionHistory = commissionHistoryQuery.data ?? []
+  const loading = activeInvitesQuery.isLoading || referralCodesQuery.isLoading || summaryQuery.isLoading || commissionHistoryQuery.isLoading
 
   const handleCopy = (text: string, type: 'link' | 'code') => {
     navigator.clipboard.writeText(text)
@@ -80,7 +99,7 @@ export default function Invite() {
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.5' }}>
           1. Copy your link or code.<br/>
           2. Share with friends.<br/>
-          3. Get 10%, 4%, or 1% commission based on their level.
+          3. Earn up to 10%, 4%, or 1% by referral tier. Membership rates are configurable and capped by the tier rate.
         </p>
       </div>
 
@@ -105,7 +124,7 @@ export default function Invite() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '0 0 4px', fontWeight: 500 }}>Total Commission</p>
-            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>${((summary?.earnings || 0) + (summary?.task_rebate || 0)).toFixed(2)}</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>${(summary?.earnings || 0).toFixed(2)}</p>
           </div>
           <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px', border: '1px solid var(--border-main)', boxShadow: 'var(--card-shadow)' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
@@ -150,17 +169,17 @@ export default function Invite() {
             <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px 12px', textAlign: 'center', border: '1px solid var(--border-main)' }}>
               <div style={{ fontSize: '28px', marginBottom: '8px' }}>🥇</div>
               <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 6px' }}>(Tier A: 10% Rebate)</p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.3' }}>Learn the souring commission of 10%.</p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.3' }}>Direct referrals earn up to 10% of the eligible transaction amount.</p>
             </div>
             <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px 12px', textAlign: 'center', border: '1px solid var(--border-main)' }}>
               <div style={{ fontSize: '28px', marginBottom: '8px' }}>🥈</div>
               <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 6px' }}>(Tier B: 4% Rebate)</p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.3' }}>Learn the shaming commission of 4%.</p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.3' }}>Second-level referrals earn up to 4%.</p>
             </div>
             <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '16px 12px', textAlign: 'center', border: '1px solid var(--border-main)' }}>
               <div style={{ fontSize: '28px', marginBottom: '8px' }}>🥉</div>
               <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 6px' }}>(Tier C: 1% Rebate)</p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.3' }}>Learn the scrowing commission of 1%.</p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0, lineHeight: '1.3' }}>Third-level referrals earn up to 1%.</p>
             </div>
           </div>
         </div>
@@ -187,6 +206,18 @@ export default function Invite() {
               ))}
             </div>
           )}
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 12px', padding: '0 12px' }}>Commission History</h3>
+          <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-main)', overflow: 'hidden' }}>
+            {commissionHistory.length === 0 ? <p style={{ padding: '24px', color: 'var(--text-muted)', margin: 0 }}>No referral commissions have been awarded yet.</p> : commissionHistory.map((entry) => (
+              <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '14px 16px', borderBottom: '1px solid var(--border-main)' }}>
+                <div><p style={{ margin: 0, fontWeight: 600, color: 'var(--text-heading)' }}>Tier {entry.tier} · {entry.source_type.replace('_', ' ')}</p><p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>{entry.created_at ? new Date(entry.created_at).toLocaleString() : '—'} · {(entry.rate * 100).toFixed(2)}% of ${entry.eligible_amount.toFixed(2)}</p></div>
+                <strong style={{ color: '#F97316' }}>+${entry.amount.toFixed(2)}</strong>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
