@@ -50,6 +50,67 @@ interface UserData {
   performance_bonus_balance: number
 }
 
+interface AppConfig {
+  key: string
+  value: string
+}
+
+function WhatsAppJoinGate() {
+  const [groupOpened, setGroupOpened] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
+  const configQuery = useQuery({
+    queryKey: ['app-config'],
+    queryFn: async () => (await api.get<AppConfig[]>('/settings/config')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const groupLink = (configQuery.data ?? []).find((config) => config.key === 'whatsapp_link')?.value?.trim() || ''
+  const hasGroupLink = groupLink !== '' && groupLink !== '#'
+
+  if (configQuery.isLoading || !isOpen) return null
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="whatsapp-join-title"
+      style={{
+        position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px', backgroundColor: 'rgba(8, 15, 28, 0.78)', backdropFilter: 'blur(8px)',
+      }}
+    >
+      <div style={{ width: 'min(100%, 460px)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-main)', borderRadius: '20px', padding: '30px', boxShadow: '0 24px 70px rgba(0,0,0,.3)', textAlign: 'center' }}>
+        <div style={{ width: '58px', height: '58px', margin: '0 auto 16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#25D366', color: '#fff', fontSize: '28px' }} aria-hidden="true">◉</div>
+        <h2 id="whatsapp-join-title" style={{ margin: '0 0 10px', color: 'var(--text-heading)', fontSize: '24px', fontWeight: 800 }}>Join our WhatsApp group</h2>
+        <p style={{ margin: '0 auto 24px', maxWidth: '360px', color: 'var(--text-muted)', fontSize: '14px', lineHeight: 1.65 }}>
+          Join the official AdPulseAI community for announcements, support, and important updates before continuing to your dashboard.
+        </p>
+        {hasGroupLink ? (
+          <a
+            href={groupLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setGroupOpened(true)}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '13px 18px', borderRadius: '10px', backgroundColor: '#25D366', color: '#fff', fontWeight: 800, textDecoration: 'none', fontSize: '14px' }}
+          >
+            {groupOpened ? 'Open WhatsApp Group Again' : 'Join WhatsApp Group'}
+          </a>
+        ) : (
+          <p style={{ margin: '0 0 14px', color: 'var(--text-muted)', fontSize: '13px' }}>The WhatsApp group link is not configured yet.</p>
+        )}
+        <button
+          type="button"
+          disabled={hasGroupLink && !groupOpened}
+          onClick={() => setIsOpen(false)}
+          style={{ width: '100%', marginTop: '12px', padding: '13px 18px', border: 'none', borderRadius: '10px', backgroundColor: 'var(--accent-primary)', color: '#fff', fontWeight: 800, fontSize: '14px', cursor: hasGroupLink && !groupOpened ? 'not-allowed' : 'pointer', opacity: hasGroupLink && !groupOpened ? .5 : 1 }}
+        >
+          Continue to Dashboard
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
   const dashboardQuery = useQuery({
@@ -73,12 +134,15 @@ export default function Dashboard() {
 
   if (dashboardQuery.isLoading || userQuery.isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading...</p>
+      <>
+        <WhatsAppJoinGate />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading...</p>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
@@ -121,7 +185,9 @@ export default function Dashboard() {
   const chartWidth = isMobile ? windowWidth - 80 : (isTablet ? windowWidth - 360 : windowWidth - 460)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+    <>
+      <WhatsAppJoinGate />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
 
       <div>
         <h1 style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -396,6 +462,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
