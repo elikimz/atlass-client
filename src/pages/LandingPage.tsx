@@ -50,6 +50,7 @@ export default function LandingPage() {
           <h1>Your progress<br /><em>builds momentum.</em></h1>
           <p className="reference-subtitle">TRAIN. WORK. EARN. GROW.</p>
           <div className="reference-rotator" aria-live="polite"><span className="reference-rotator-dot" />{rotatingLabels[labelIndex]}<span className="reference-rotator-arrow">↗</span></div>
+          {referralCode && <p className="reference-invite-note" role="status"><span aria-hidden="true">✓</span> You’ve been invited to join AdPulseAI. Your invitation is ready for registration.</p>}
           <div className="reference-hero-actions">
             <Link className="reference-primary-cta" to={registerPath}>Create your account <Arrow /></Link>
             <Link className="reference-secondary-cta" to="/login">Already a member? Log in <span>→</span></Link>
