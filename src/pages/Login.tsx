@@ -53,7 +53,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const navigate = useNavigate()
   const location = useLocation()
   const searchParams = new URLSearchParams(location.search)
-  const referralFromUrl = searchParams.get('ref') || ''
+  const referralFromUrl = (searchParams.get('ref') || localStorage.getItem('pending_referral_code') || '').trim()
   const registerFromUrl = referralFromUrl.length > 0 || searchParams.get('mode') === 'register'
 
   const [isRegistering, setIsRegistering] = useState(registerFromUrl)
@@ -93,6 +93,12 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (referralFromUrl) {
+      localStorage.setItem('pending_referral_code', referralFromUrl)
+    }
+  }, [referralFromUrl])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -214,6 +220,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       persistTokens(loginResponse.data)
       const userResponse = await api.get('/auth/me')
       persistUser(userResponse.data)
+      localStorage.removeItem('pending_referral_code')
       await setIsAuthenticated()
       navigate('/dashboard')
     } catch (error: unknown) {

@@ -26,6 +26,12 @@ export default function LandingPage() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    if (referralCode) {
+      localStorage.setItem('pending_referral_code', referralCode)
+    }
+  }, [referralCode])
+
   return (
     <div className="reference-landing">
       <a className="reference-skip" href="#reference-main">Skip to content</a>
