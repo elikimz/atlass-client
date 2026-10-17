@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Runtime configuration stays local; only the non-sensitive template is shared.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

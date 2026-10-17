@@ -105,3 +105,56 @@
   .reference-footer p { flex:1 1 100%; }
 }
 @media (prefers-reduced-motion:reduce) { .reference-landing *, .reference-landing *::before, .reference-landing *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+
+/* The real workflow takes center stage, rather than a full-screen empty hero. */
+.reference-header { min-height:86px; }
+.reference-nav-demo { color:var(--ref-accent) !important; }
+.reference-nav-demo span { margin-left:4px; }
+.reference-hero { min-height:0; padding:92px 0 56px; }
+.reference-hero h1 { font-size:clamp(48px,7.4vw,96px); line-height:1.02; letter-spacing:-.065em; }
+.reference-hero h1 em { color:#a9aaa4; }
+.reference-hero .reference-overline { display:flex; align-items:center; gap:9px; margin-bottom:28px; color:#b8b8b1; letter-spacing:.15em; }
+.reference-overline-dot { width:6px; height:6px; border-radius:50%; background:var(--ref-accent); }
+.reference-hero-description { margin:27px 0 22px; max-width:600px; color:#a5a69d; font-size:16px; line-height:1.75; }
+.reference-rotator { min-height:32px; padding:6px 12px; border-color:#30352a; font-size:11px; background:#11130e; animation:none; }
+.reference-rotator-dot { width:5px; height:5px; box-shadow:none; }
+.reference-hero-actions { margin-top:28px; gap:28px; }
+.reference-demo-cta { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 23px; border:1px solid var(--ref-accent); border-radius:999px; background:var(--ref-accent); color:#11150a !important; font-size:13px; font-weight:750; text-decoration:none; transition:transform .2s ease,background .2s ease; }
+.reference-demo-cta > span { margin-left:8px; }
+.reference-demo-cta:hover { background:#d7ff74; transform:translateY(-2px); }
+.reference-demo-assurance { display:flex; align-items:center; gap:10px; margin:20px 0 0; color:#777a70; font-size:10px; letter-spacing:.02em; }
+.reference-demo-assurance span { color:#53584a; }
+.reference-section { padding:105px 0; scroll-margin-top:30px; }
+.reference-feature-grid { margin-top:48px; }
+.reference-feature-card { border-radius:12px; }
+.reference-feature-card h3 { line-height:1.15; }
+.reference-quote-section { padding:95px 24px; }
+.reference-quote-section .reference-overline { color:#a3b372; }
+.reference-quote-section blockquote { margin-top:15px; line-height:1.08; }
+.reference-quote-section > p:not(.reference-overline) { max-width:510px; line-height:1.75; }
+.reference-quote-section > a { display:inline-flex; margin-top:25px; }
+.reference-section-intro .reference-plan-note { margin-top:20px; padding-left:15px; border-left:2px solid #3d4630; color:#82877a; font-size:12px; line-height:1.65; }
+.reference-plans { gap:75px; }
+.reference-final { padding:105px 24px; }
+.reference-final h2 { font-size:clamp(47px,7vw,82px); line-height:1.03; }
+@media (max-width:760px) {
+  .reference-header { min-height:72px; }
+  .reference-nav { top:72px; }
+  .reference-hero { min-height:0; padding:64px 0 44px; }
+  .reference-hero h1 { font-size:clamp(42px,11.4vw,76px); }
+  .reference-hero-description { font-size:14px; margin:23px 0 20px; }
+  .reference-desktop-break { display:none; }
+  .reference-hero .reference-overline { font-size:9px; margin-bottom:24px; }
+  .reference-hero-actions { gap:20px; }
+  .reference-demo-cta { width:min(100%,280px); }
+  .reference-demo-assurance { font-size:9px; gap:7px; flex-wrap:wrap; justify-content:center; }
+  .reference-section { padding:76px 0; }
+  .reference-quote-section { padding:76px 20px; }
+  .reference-plans-list { padding:0; }
+  .reference-final { padding:82px 20px; }
+}
+
+/* Plan descriptions retain their rhythm even when a separate disclaimer follows. */
+.reference-plans .reference-section-intro h2 { line-height:1.02; }
+.reference-plans .reference-section-intro > p:not(.reference-overline) { max-width:490px; margin:28px 0 0; color:var(--ref-muted); font-size:15px; line-height:1.75; }
+.reference-plans .reference-section-intro > p.reference-plan-note { margin-top:20px; color:#82877a; font-size:12px; line-height:1.65; }
