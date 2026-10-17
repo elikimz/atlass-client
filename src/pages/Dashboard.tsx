@@ -106,6 +106,15 @@ function WhatsAppJoinGate() {
         >
           Continue to Dashboard
         </button>
+        {hasGroupLink && !groupOpened && (
+          <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            style={{ width: '100%', marginTop: '10px', padding: '10px 18px', border: 'none', background: 'transparent', color: 'var(--accent-primary)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+          >
+            I already joined
+          </button>
+        )}
       </div>
     </div>
   )
