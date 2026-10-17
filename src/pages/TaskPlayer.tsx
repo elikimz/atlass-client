@@ -145,7 +145,7 @@ export default function TaskPlayer() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: '16px', color: '#DC2626', marginBottom: '16px' }}>{error || loadError}</p>
-          <button 
+          <button className="task-secondary-button"
             onClick={() => navigate('/tasks')}
             style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
           >
@@ -163,7 +163,7 @@ export default function TaskPlayer() {
       
       {/* Header */}
       <div>
-        <button 
+        <button className="task-back-button"
           onClick={() => navigate('/tasks')}
           style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '14px', fontWeight: 600, marginBottom: '16px', padding: 0 }}
         >
@@ -181,7 +181,7 @@ export default function TaskPlayer() {
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
             <h3 style={{ color: 'white', marginBottom: '20px' }}>This video is on YouTube</h3>
-            <button 
+            <button className="task-watch-button"
               onClick={() => {
                 window.open(task.video_url, '_blank')
                 setVideoWatched(true)
@@ -225,7 +225,7 @@ export default function TaskPlayer() {
             {error}
             {error.includes('Daily task limit reached') && (
               <div style={{ marginTop: '10px' }}>
-                <button
+                <button className="task-upgrade-button"
                   onClick={() => navigate('/plans')}
                   style={{ backgroundColor: '#DC2626', color: 'white', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
                 >
@@ -242,7 +242,7 @@ export default function TaskPlayer() {
           </div>
         )}
 
-        <button
+        <button className="task-complete-button"
           onClick={handleCompleteTask}
           disabled={timeLeft > 0 || !videoWatched || completing || completed}
           style={{

@@ -14,7 +14,7 @@
   --color-border: #d4d4cb;
   --color-border-subtle: #e3e3da;
   --color-primary: #111111;
-  --color-primary-hover: #c9ff3d;
+  --color-primary-hover: #71833a;
   --color-primary-soft: #efffc5;
   --color-focus: #9fce17;
   --color-success: #067a2f;
@@ -61,10 +61,10 @@
   --color-text-muted: #9d9d9a;
   --color-border: #3a3a37;
   --color-border-subtle: #2b2b2b;
-  --color-primary: #c9ff3d;
-  --color-primary-hover: #ddff79;
-  --color-primary-soft: #202b0b;
-  --color-focus: #c9ff3d;
+  --color-primary: #a8bf58;
+  --color-primary-hover: #bed56d;
+  --color-primary-soft: #202716;
+  --color-focus: #a8bf58;
   --color-success: #68de7c;
   --color-success-bg: #143b25;
   --color-warning: #f1cf6a;
@@ -297,3 +297,27 @@ body { background: var(--color-canvas); }
   .site-shell .app-content > div { padding-top: 24px !important; }
   .admin-shell .admin-content { padding: 20px 16px !important; }
 }
+
+/* Task controls: restrained sizing and lower-contrast action color for comfortable scanning. */
+.site-shell .task-start-button,
+.site-shell .task-watch-button,
+.site-shell .task-complete-button,
+.site-shell .task-upgrade-button,
+.site-shell .task-secondary-button {
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+  line-height: 1.25;
+}
+.site-shell .task-start-button { padding: 7px 12px !important; gap: 5px !important; }
+.site-shell .task-start-button svg { width: 14px; height: 14px; }
+.site-shell .task-watch-button { padding: 10px 16px !important; gap: 8px !important; }
+.site-shell .task-watch-button svg { width: 17px; height: 17px; }
+.site-shell .task-complete-button { min-height: 44px; padding: 11px 18px !important; font-size: 14px !important; }
+.site-shell .task-upgrade-button { padding: 7px 12px !important; font-size: 12px !important; }
+.site-shell .task-secondary-button { padding: 8px 13px !important; }
+.site-shell .task-back-button { border-radius: 5px !important; }
+.site-shell .app-sidebar-nav a[aria-current='page'],
+.admin-shell .admin-sidebar-nav a[aria-current='page'] { background: #a8bf58 !important; color: #10130a !important; }
+.site-shell .app-sidebar-footer button { color: #a8bf58 !important; border-color: rgba(168,191,88,.28) !important; }
+.site-shell .app-mobile-nav a[aria-current='page'] { color: #a8bf58 !important; }

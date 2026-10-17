@@ -198,7 +198,7 @@ export default function Tasks() {
                       DONE ✓
                     </div>
                   ) : (
-                    <button 
+                    <button className="task-start-button"
                       onClick={() => handleStartTask(task.id)}
                       style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}>
                       START TASK
