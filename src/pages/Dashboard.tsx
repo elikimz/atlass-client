@@ -71,46 +71,47 @@ function WhatsAppJoinGate() {
 
   return (
     <div
+      className="whatsapp-gate-backdrop"
       role="dialog"
       aria-modal="true"
       aria-labelledby="whatsapp-join-title"
-      style={{
-        position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '20px', backgroundColor: 'rgba(8, 15, 28, 0.78)', backdropFilter: 'blur(8px)',
-      }}
     >
-      <div style={{ width: 'min(100%, 460px)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-main)', borderRadius: '20px', padding: '30px', boxShadow: '0 24px 70px rgba(0,0,0,.3)', textAlign: 'center' }}>
-        <div style={{ width: '58px', height: '58px', margin: '0 auto 16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#25D366', color: '#fff', fontSize: '28px' }} aria-hidden="true">◉</div>
-        <h2 id="whatsapp-join-title" style={{ margin: '0 0 10px', color: 'var(--text-heading)', fontSize: '24px', fontWeight: 800 }}>Join our WhatsApp group</h2>
-        <p style={{ margin: '0 auto 24px', maxWidth: '360px', color: 'var(--text-muted)', fontSize: '14px', lineHeight: 1.65 }}>
+      <div className="whatsapp-gate-modal">
+        <div className="whatsapp-gate-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.51 2 2 6.51 2 12.04c0 1.77.46 3.5 1.34 5.03L2.05 22l5.08-1.33a10.02 10.02 0 0 0 4.91 1.29h.01c5.53 0 10.04-4.51 10.04-10.04S17.57 2 12.04 2Zm0 18.14h-.01a8.1 8.1 0 0 1-4.12-1.13l-.3-.18-3.02.79.81-2.94-.2-.31a8.1 8.1 0 1 1 6.84 3.77Zm4.45-6.08c-.24-.12-1.43-.71-1.65-.79-.22-.08-.38-.12-.54.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.41-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.43-.58 1.63-1.15.2-.57.2-1.06.14-1.15-.06-.1-.22-.16-.46-.28Z" /></svg>
+        </div>
+        <h2 id="whatsapp-join-title">Join Our <span>WhatsApp</span> Group</h2>
+        <p className="whatsapp-gate-description">
           Join the official AdPulseAI community for announcements, support, and important updates before continuing to your dashboard.
         </p>
         {hasGroupLink ? (
           <a
+            className="whatsapp-gate-join"
             href={groupLink}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setGroupOpened(true)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '13px 18px', borderRadius: '10px', backgroundColor: '#25D366', color: '#fff', fontWeight: 800, textDecoration: 'none', fontSize: '14px' }}
           >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.51 2 2 6.51 2 12.04c0 1.77.46 3.5 1.34 5.03L2.05 22l5.08-1.33a10.02 10.02 0 0 0 4.91 1.29h.01c5.53 0 10.04-4.51 10.04-10.04S17.57 2 12.04 2Zm0 18.14h-.01a8.1 8.1 0 0 1-4.12-1.13l-.3-.18-3.02.79.81-2.94-.2-.31a8.1 8.1 0 1 1 6.84 3.77Zm4.45-6.08c-.24-.12-1.43-.71-1.65-.79-.22-.08-.38-.12-.54.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.47-.4-.41-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.43-.58 1.63-1.15.2-.57.2-1.06.14-1.15-.06-.1-.22-.16-.46-.28Z" /></svg>
             {groupOpened ? 'Open WhatsApp Group Again' : 'Join WhatsApp Group'}
           </a>
         ) : (
-          <p style={{ margin: '0 0 14px', color: 'var(--text-muted)', fontSize: '13px' }}>The WhatsApp group link is not configured yet.</p>
+          <p className="whatsapp-gate-unavailable">The WhatsApp group link is not configured yet.</p>
         )}
         <button
+          className="whatsapp-gate-continue"
           type="button"
           disabled={hasGroupLink && !groupOpened}
           onClick={() => setIsOpen(false)}
-          style={{ width: '100%', marginTop: '12px', padding: '13px 18px', border: 'none', borderRadius: '10px', backgroundColor: 'var(--accent-primary)', color: '#fff', fontWeight: 800, fontSize: '14px', cursor: hasGroupLink && !groupOpened ? 'not-allowed' : 'pointer', opacity: hasGroupLink && !groupOpened ? .5 : 1 }}
         >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
           Continue to Dashboard
         </button>
         {hasGroupLink && !groupOpened && (
           <button
+            className="whatsapp-gate-already"
             type="button"
             onClick={() => setIsOpen(false)}
-            style={{ width: '100%', marginTop: '10px', padding: '10px 18px', border: 'none', background: 'transparent', color: 'var(--accent-primary)', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
           >
             I already joined
           </button>

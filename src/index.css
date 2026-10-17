@@ -178,3 +178,82 @@ td, th { border-color: var(--color-border-subtle); }
   .auth-mode-heading { margin-bottom: 16px; }
   .auth-mode-switch { margin-bottom: 16px; }
 }
+
+/* Premium WhatsApp dashboard gate. */
+.whatsapp-gate-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(1, 8, 22, .72);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  animation: whatsapp-gate-fade-in .25s ease both;
+}
+.whatsapp-gate-modal {
+  position: relative;
+  width: min(100%, 500px);
+  overflow: hidden;
+  padding: 38px 38px 30px;
+  border: 1px solid rgba(55, 202, 255, .82);
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(9, 35, 78, .97), rgba(2, 14, 39, .98) 55%, rgba(2, 25, 56, .98));
+  box-shadow: 0 0 0 1px rgba(21, 122, 255, .25), 0 0 34px rgba(31, 183, 255, .28), 0 28px 90px rgba(0, 0, 0, .52), inset 0 1px 0 rgba(255, 255, 255, .12);
+  text-align: center;
+  color: #fff;
+}
+.whatsapp-gate-modal::before {
+  content: '';
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: rgba(0, 200, 255, .18);
+  filter: blur(18px);
+  pointer-events: none;
+}
+.whatsapp-gate-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 21px;
+  border: 1px solid rgba(104, 255, 188, .75);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, #36f28a, #08bf5e 64%, #07924b);
+  color: #fff;
+  box-shadow: 0 0 0 9px rgba(37, 211, 102, .08), 0 0 34px rgba(37, 211, 102, .58), inset 0 1px 10px rgba(255, 255, 255, .35);
+}
+.whatsapp-gate-icon svg { width: 54px; height: 54px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.18)); }
+.whatsapp-gate-modal h2 { position: relative; z-index: 1; margin: 0 0 13px; color: #f7fbff; font-size: clamp(24px, 4vw, 31px); font-weight: 800; letter-spacing: -.035em; line-height: 1.15; }
+.whatsapp-gate-modal h2 span { color: #28ed7d; text-shadow: 0 0 18px rgba(40, 237, 125, .35); }
+.whatsapp-gate-description { position: relative; z-index: 1; max-width: 390px; margin: 0 auto 28px; color: #bbd0e8; font-size: 14px; line-height: 1.7; }
+.whatsapp-gate-join, .whatsapp-gate-continue { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 53px; border-radius: 13px; font-size: 14px; font-weight: 800; letter-spacing: .01em; transition: transform .2s ease, box-shadow .2s ease, background .2s ease, opacity .2s ease; }
+.whatsapp-gate-join { gap: 10px; background: linear-gradient(135deg, #28ed7d, #0abf5c); color: #032317; text-decoration: none; box-shadow: 0 8px 24px rgba(37, 211, 102, .27), inset 0 1px 0 rgba(255, 255, 255, .35); }
+.whatsapp-gate-join:hover { transform: translateY(-2px); background: linear-gradient(135deg, #4bff95, #13d86b); box-shadow: 0 12px 30px rgba(37, 211, 102, .42), 0 0 18px rgba(37, 211, 102, .23); }
+.whatsapp-gate-join svg { width: 23px; height: 23px; }
+.whatsapp-gate-continue { gap: 9px; margin-top: 13px; border: 1px solid rgba(69, 198, 255, .52); background: linear-gradient(135deg, #1e65b4, #144482); color: #fff; box-shadow: 0 8px 22px rgba(0, 73, 164, .2), inset 0 1px 0 rgba(255,255,255,.1); cursor: pointer; }
+.whatsapp-gate-continue:not(:disabled):hover { transform: translateY(-2px); background: linear-gradient(135deg, #287bcf, #1a579b); box-shadow: 0 12px 26px rgba(0, 119, 255, .32), 0 0 16px rgba(0, 181, 255, .18); }
+.whatsapp-gate-continue:disabled { cursor: not-allowed; opacity: .5; filter: saturate(.7); }
+.whatsapp-gate-continue svg { width: 20px; height: 20px; }
+.whatsapp-gate-already { position: relative; z-index: 1; margin-top: 20px; border: 0; background: transparent; color: #37d7ff; cursor: pointer; font-size: 13px; font-weight: 700; text-decoration: none; transition: color .2s ease, text-shadow .2s ease; }
+.whatsapp-gate-already:hover { color: #8cecff; text-shadow: 0 0 14px rgba(55, 215, 255, .55); }
+.whatsapp-gate-unavailable { margin: 0 0 14px; color: #bbd0e8; font-size: 13px; }
+@keyframes whatsapp-gate-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 520px) {
+  .whatsapp-gate-backdrop { padding: 15px; }
+  .whatsapp-gate-modal { padding: 31px 22px 25px; border-radius: 22px; }
+  .whatsapp-gate-icon { width: 78px; height: 78px; margin-bottom: 17px; }
+  .whatsapp-gate-icon svg { width: 45px; height: 45px; }
+  .whatsapp-gate-description { margin-bottom: 23px; font-size: 13px; line-height: 1.6; }
+  .whatsapp-gate-join, .whatsapp-gate-continue { min-height: 50px; font-size: 13px; }
+}
