@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 
 const rotatingLabels = ['Digital Promotion Tasks', 'Video Reviewing Mastery', 'Flexible Daily Work', 'Invite & Community Growth']
 const plans = [
-  { name: 'Intern', price: 'Free', detail: '3-day trial · 2 daily tasks' },
-  { name: 'LV1', price: '$20', detail: '60-day access · 2 daily tasks' },
-  { name: 'LV2', price: '$50', detail: '60-day access · 5 daily tasks' },
-  { name: 'LV3', price: '$100', detail: '60-day access · 7 daily tasks' },
-  { name: 'LV4', price: '$150', detail: '60-day access · 10 daily tasks' },
+  { name: 'Internship', price: '$0', detail: '3 days · 2 daily tasks' },
+  { name: 'Level 1', price: '$20', detail: '365 days · 2 daily tasks' },
+  { name: 'Level 2', price: '$50', detail: '365 days · 5 daily tasks' },
+  { name: 'Level 3', price: '$100', detail: '365 days · 10 daily tasks' },
+  { name: 'Level 4', price: '$150', detail: '365 days · 14 daily tasks' },
 ]
 
 function Arrow() { return <span aria-hidden="true">↗</span> }
