@@ -18,6 +18,7 @@ export default function LandingPage() {
   const [labelIndex, setLabelIndex] = useState(0)
   const closeMenu = () => setMenuOpen(false)
   const referralCode = new URLSearchParams(location.search).get('ref')?.trim() || ''
+  const loginPath = referralCode ? `/login?ref=${encodeURIComponent(referralCode)}` : '/login'
   const registerPath = referralCode ? `/login?mode=register&ref=${encodeURIComponent(referralCode)}` : '/login?mode=register'
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function LandingPage() {
           <a href="#platform" onClick={closeMenu}>Platform</a>
           <a href="#plans" onClick={closeMenu}>Plans</a>
           <a href="#community" onClick={closeMenu}>Community</a>
-          <Link className="reference-nav-login" to="/login" onClick={closeMenu}>Log in</Link>
+          <Link className="reference-nav-login" to={loginPath} onClick={closeMenu}>Log in</Link>
           <Link className="reference-nav-cta" to={registerPath} onClick={closeMenu}>Get started <Arrow /></Link>
         </nav>
       </header>
@@ -53,7 +54,7 @@ export default function LandingPage() {
           {referralCode && <p className="reference-invite-note" role="status"><span aria-hidden="true">✓</span> You’ve been invited to join AdPulseAI. Your invitation is ready for registration.</p>}
           <div className="reference-hero-actions">
             <Link className="reference-primary-cta" to={registerPath}>Create your account <Arrow /></Link>
-            <Link className="reference-secondary-cta" to="/login">Already a member? Log in <span>→</span></Link>
+            <Link className="reference-secondary-cta" to={loginPath}>Already a member? Log in <span>→</span></Link>
           </div>
           <div className="reference-scroll-note"><span /> Scroll to explore</div>
         </section>
@@ -68,7 +69,7 @@ export default function LandingPage() {
           <div className="reference-feature-grid">
             <article className="reference-feature-card reference-feature-card-image"><img src="/assets/adpulseai-hero.png" alt="AdPulseAI workspace on a laptop and phone" /><div><span>01</span><strong>Work from one clear place.</strong></div></article>
             <article className="reference-feature-card"><span className="reference-card-number">02</span><h3>Learn the path.</h3><p>Start with Video Reviewing Mastery, then move into the tasks and plan access available to you.</p><Link to={registerPath}>Start your account <span>→</span></Link></article>
-            <article className="reference-feature-card reference-feature-card-accent"><span className="reference-card-number">03</span><h3>Keep progress visible.</h3><p>Return to a focused dashboard with your training, tasks, wallet activity, and invite history together.</p><Link to="/login">View the workspace <span>→</span></Link></article>
+            <article className="reference-feature-card reference-feature-card-accent"><span className="reference-card-number">03</span><h3>Keep progress visible.</h3><p>Return to a focused dashboard with your training, tasks, wallet activity, and invite history together.</p><Link to={loginPath}>View the workspace <span>→</span></Link></article>
           </div>
         </section>
 
@@ -78,7 +79,7 @@ export default function LandingPage() {
 
         <section id="plans" className="reference-section reference-plans">
           <div className="reference-section-intro"><p className="reference-overline">Access that fits your next step</p><h2>Choose your<br /><em>starting point.</em></h2><p>Plans currently available inside the application. Purchase and upgrades happen securely after sign in.</p></div>
-          <div className="reference-plans-list">{plans.map((plan) => <div className="reference-plan" key={plan.name}><strong>{plan.name}</strong><b>{plan.price}</b><span>{plan.detail}</span><Link to="/login">View plan <span>→</span></Link></div>)}</div>
+          <div className="reference-plans-list">{plans.map((plan) => <div className="reference-plan" key={plan.name}><strong>{plan.name}</strong><b>{plan.price}</b><span>{plan.detail}</span><Link to={loginPath}>View plan <span>→</span></Link></div>)}</div>
         </section>
 
         <section className="reference-final"><p className="reference-overline">Your next step</p><h2>Make progress<br /><em>visible.</em></h2><p>Open your AdPulseAI workspace and begin at your own pace.</p><Link className="reference-primary-cta" to={registerPath}>Join AdPulseAI <Arrow /></Link></section>
