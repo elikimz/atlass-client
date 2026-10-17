@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 const rotatingLabels = ['Digital Promotion Tasks', 'Video Reviewing Mastery', 'Flexible Daily Work', 'Invite & Community Growth']
 const plans = [
@@ -13,9 +13,12 @@ const plans = [
 function Arrow() { return <span aria-hidden="true">↗</span> }
 
 export default function LandingPage() {
+  const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [labelIndex, setLabelIndex] = useState(0)
   const closeMenu = () => setMenuOpen(false)
+  const referralCode = new URLSearchParams(location.search).get('ref')?.trim() || ''
+  const registerPath = referralCode ? `/login?mode=register&ref=${encodeURIComponent(referralCode)}` : '/login?mode=register'
 
   useEffect(() => {
     const timer = window.setInterval(() => setLabelIndex((index) => (index + 1) % rotatingLabels.length), 2600)
@@ -37,7 +40,7 @@ export default function LandingPage() {
           <a href="#plans" onClick={closeMenu}>Plans</a>
           <a href="#community" onClick={closeMenu}>Community</a>
           <Link className="reference-nav-login" to="/login" onClick={closeMenu}>Log in</Link>
-          <Link className="reference-nav-cta" to="/login?mode=register" onClick={closeMenu}>Get started <Arrow /></Link>
+          <Link className="reference-nav-cta" to={registerPath} onClick={closeMenu}>Get started <Arrow /></Link>
         </nav>
       </header>
 
@@ -48,7 +51,7 @@ export default function LandingPage() {
           <p className="reference-subtitle">TRAIN. WORK. EARN. GROW.</p>
           <div className="reference-rotator" aria-live="polite"><span className="reference-rotator-dot" />{rotatingLabels[labelIndex]}<span className="reference-rotator-arrow">↗</span></div>
           <div className="reference-hero-actions">
-            <Link className="reference-primary-cta" to="/login?mode=register">Create your account <Arrow /></Link>
+            <Link className="reference-primary-cta" to={registerPath}>Create your account <Arrow /></Link>
             <Link className="reference-secondary-cta" to="/login">Already a member? Log in <span>→</span></Link>
           </div>
           <div className="reference-scroll-note"><span /> Scroll to explore</div>
@@ -63,7 +66,7 @@ export default function LandingPage() {
           <div className="reference-section-intro"><p className="reference-overline">The AdPulseAI workspace</p><h2>Less noise.<br /><em>More direction.</em></h2><p>One member workspace for learning the workflow, viewing available tasks, managing access, tracking payments, and staying connected to your invite activity.</p></div>
           <div className="reference-feature-grid">
             <article className="reference-feature-card reference-feature-card-image"><img src="/assets/adpulseai-hero.png" alt="AdPulseAI workspace on a laptop and phone" /><div><span>01</span><strong>Work from one clear place.</strong></div></article>
-            <article className="reference-feature-card"><span className="reference-card-number">02</span><h3>Learn the path.</h3><p>Start with Video Reviewing Mastery, then move into the tasks and plan access available to you.</p><Link to="/login?mode=register">Start your account <span>→</span></Link></article>
+            <article className="reference-feature-card"><span className="reference-card-number">02</span><h3>Learn the path.</h3><p>Start with Video Reviewing Mastery, then move into the tasks and plan access available to you.</p><Link to={registerPath}>Start your account <span>→</span></Link></article>
             <article className="reference-feature-card reference-feature-card-accent"><span className="reference-card-number">03</span><h3>Keep progress visible.</h3><p>Return to a focused dashboard with your training, tasks, wallet activity, and invite history together.</p><Link to="/login">View the workspace <span>→</span></Link></article>
           </div>
         </section>
@@ -77,7 +80,7 @@ export default function LandingPage() {
           <div className="reference-plans-list">{plans.map((plan) => <div className="reference-plan" key={plan.name}><strong>{plan.name}</strong><b>{plan.price}</b><span>{plan.detail}</span><Link to="/login">View plan <span>→</span></Link></div>)}</div>
         </section>
 
-        <section className="reference-final"><p className="reference-overline">Your next step</p><h2>Make progress<br /><em>visible.</em></h2><p>Open your AdPulseAI workspace and begin at your own pace.</p><Link className="reference-primary-cta" to="/login?mode=register">Join AdPulseAI <Arrow /></Link></section>
+        <section className="reference-final"><p className="reference-overline">Your next step</p><h2>Make progress<br /><em>visible.</em></h2><p>Open your AdPulseAI workspace and begin at your own pace.</p><Link className="reference-primary-cta" to={registerPath}>Join AdPulseAI <Arrow /></Link></section>
       </main>
 
       <footer className="reference-footer"><Link className="reference-brand" to="/" aria-label="AdPulseAI home"><img src="/assets/logo.png" alt="" /><span>AdPulse<span>AI</span></span></Link><p>Digital promotion tasks, training, and workspace clarity.</p><span>© {new Date().getFullYear()} AdPulseAI</span></footer>

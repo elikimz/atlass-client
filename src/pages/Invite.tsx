@@ -81,7 +81,7 @@ export default function Invite() {
     )
   }
 
-  const inviteLink = referralCodes.length > 0 ? `${window.location.origin}/login?ref=${referralCodes[0].code}` : ''
+  const inviteLink = referralCodes.length > 0 ? `${window.location.origin}/?ref=${encodeURIComponent(referralCodes[0].code)}` : ''
   const inviteCode = referralCodes.length > 0 ? referralCodes[0].code : ''
 
   const renderEmptyCode = (label: string) => (

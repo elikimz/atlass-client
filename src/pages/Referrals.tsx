@@ -108,9 +108,9 @@ export default function Referrals() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', backgroundColor: 'var(--bg-main)', borderRadius: '16px', border: '1px solid var(--border-main)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--accent-light)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🔗</div>
-              <div style={{ flex: 1 }}><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px', fontFamily: 'monospace', wordBreak: 'break-all' }}>{`${window.location.origin}/login?ref=${referralCodes[0].code}`}</p><p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>Share your referral link to invite friends directly.</p></div>
+              <div style={{ flex: 1 }}><p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px', fontFamily: 'monospace', wordBreak: 'break-all' }}>{`${window.location.origin}/?ref=${encodeURIComponent(referralCodes[0].code)}`}</p><p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>Share your referral link to invite friends directly.</p></div>
             </div>
-            <button onClick={() => handleCopy(`${window.location.origin}/login?ref=${referralCodes[0].code}`)} style={{ padding: '10px 20px', borderRadius: '12px', backgroundColor: copied ? 'rgba(34, 197, 94, 0.1)' : 'var(--accent-primary)', color: copied ? '#15803D' : 'white', border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>{copied ? '✓ Copied' : 'Copy Link'}</button>
+            <button onClick={() => handleCopy(`${window.location.origin}/?ref=${encodeURIComponent(referralCodes[0].code)}`)} style={{ padding: '10px 20px', borderRadius: '12px', backgroundColor: copied ? 'rgba(34, 197, 94, 0.1)' : 'var(--accent-primary)', color: copied ? '#15803D' : 'white', border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>{copied ? '✓ Copied' : 'Copy Link'}</button>
           </div>
         )}
       </div>
