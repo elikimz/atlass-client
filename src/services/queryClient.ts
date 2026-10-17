@@ -44,6 +44,7 @@ export const queryKeys = {
   referrals: {
     summary: ['referrals', 'summary'] as const,
     active: ['referrals', 'active'] as const,
+    network: ['referrals', 'network'] as const,
     codes: ['referrals', 'codes'] as const,
     commissions: ['referrals', 'commissions'] as const,
   },

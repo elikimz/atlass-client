@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 import { PWAInstallCard } from '../components/PWAInstall'
+import ReferralNetwork from '../components/ReferralNetwork'
 
 interface DashboardData {
   footage_labeled_min: number
@@ -472,6 +473,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      <ReferralNetwork />
       </div>
     </>
   )
