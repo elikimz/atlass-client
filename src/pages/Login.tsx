@@ -92,6 +92,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [whatsappGroupLink, setWhatsappGroupLink] = useState('')
 
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -216,7 +217,20 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       const userResponse = await api.get('/auth/me')
       persistUser(userResponse.data)
       await setIsAuthenticated()
-      navigate(userResponse.data.role === 'admin' || userResponse.data.is_admin ? '/admin' : '/training')
+      try {
+        const configResponse = await api.get('/settings/config')
+        const whatsappConfig = Array.isArray(configResponse.data)
+          ? configResponse.data.find((config: { key?: string; value?: string }) => config.key === 'whatsapp_link')
+          : null
+        const groupLink = typeof whatsappConfig?.value === 'string' ? whatsappConfig.value.trim() : ''
+        setWhatsappGroupLink(groupLink && groupLink !== '#' ? groupLink : '')
+        if (groupLink && groupLink !== '#') {
+          window.open(groupLink, '_blank', 'noopener,noreferrer')
+        }
+      } catch {
+        setWhatsappGroupLink('')
+      }
+      setStep(3)
     } catch (error: unknown) {
       setError(apiErrorMessage(error, 'Registration failed. Please try again.'))
       setCaptchaValue(generateCaptcha())
@@ -834,15 +848,31 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                     Congratulations!
                   </h2>
                   <p style={{ color: 'var(--color-text-muted)', fontSize: '14px', lineHeight: 1.7, padding: '0 8px' }}>
-                    Congratulations and welcome to AdpulseAI! Your registration is complete. Now you're ready to explore opportunities, complete tasks, and start growing with us.
+                    Your registration is complete. Join the AdPulseAI WhatsApp community for announcements and support, then continue to your dashboard.
                   </p>
                 </div>
 
+                {whatsappGroupLink ? (
+                  <a
+                    href={whatsappGroupLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ ...registerBtnStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', backgroundColor: '#25D366', textDecoration: 'none' }}
+                  >
+                    <span aria-hidden="true">◉</span> Join WhatsApp Group
+                  </a>
+                ) : (
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '13px', margin: '0 0 14px' }}>
+                    The WhatsApp group link is not available right now. You can still continue to your dashboard.
+                  </p>
+                )}
+
                 <button
-                  onClick={() => { setIsRegistering(false); resetRegistration() }}
-                  style={registerBtnStyle}
+                  type="button"
+                  onClick={() => navigate('/dashboard')}
+                  style={{ ...registerBtnStyle, marginTop: '12px', backgroundColor: 'var(--accent-primary)' }}
                 >
-                  MainPage
+                  Continue to Dashboard
                 </button>
               </div>
             )}
