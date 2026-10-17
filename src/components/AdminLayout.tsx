@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { endSession, persistUser } from '../services/session'
-import ThemeToggle from './ThemeToggle'
 
 interface AdminLayoutProps {
   setIsAuthenticated: (value: boolean) => void
@@ -100,7 +99,6 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <button onClick={() => window.open('/dashboard', '_blank', 'noopener,noreferrer')} style={{ padding: '9px 14px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>View User Site</button>
-            <ThemeToggle />
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               {!isMobile && <div style={{ textAlign: 'right' }}><div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>{adminName}</div><div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Admin Account</div></div>}
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', fontWeight: 700 }}>{adminName.charAt(0).toUpperCase()}</div>

@@ -4,54 +4,6 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  --color-canvas: #f1f1ec;
-  --color-surface: #ffffff;
-  --color-surface-subtle: #f7f7f2;
-  --color-surface-inset: #e9e9e2;
-  --color-text: #141414;
-  --color-text-secondary: #2e2e2a;
-  --color-text-muted: #6d6d67;
-  --color-border: #d4d4cb;
-  --color-border-subtle: #e3e3da;
-  --color-primary: #111111;
-  --color-primary-hover: #71833a;
-  --color-primary-soft: #efffc5;
-  --color-focus: #9fce17;
-  --color-success: #067a2f;
-  --color-success-bg: #e8f5e9;
-  --color-warning: #765500;
-  --color-warning-bg: #fff7d6;
-  --color-danger: #b32d2e;
-  --color-danger-bg: #fde8e8;
-  --bg-main: var(--color-canvas);
-  --bg-card: var(--color-surface);
-  --bg-sidebar: var(--color-surface);
-  --text-main: var(--color-text-secondary);
-  --text-heading: var(--color-text);
-  --text-muted: var(--color-text-muted);
-  --border-main: var(--color-border-subtle);
-  --border-sidebar: var(--color-border-subtle);
-  --text-muted-sidebar: var(--color-text-muted);
-  --accent-primary: var(--color-primary);
-  --accent-light: var(--color-primary-soft);
-  --sidebar-shadow: 1px 0 0 rgba(0, 0, 0, 0.08);
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --focus-ring: 0 0 0 2px #fff, 0 0 0 4px rgba(56, 88, 233, 0.55);
-  --radius-sm: 4px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --shell-sidebar: 248px;
-  --shell-header: 56px;
-  color-scheme: light;
-  color: var(--text-main);
-  background: var(--bg-main);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-[data-theme='dark'] {
   --color-canvas: #050505;
   --color-surface: #111111;
   --color-surface-subtle: #181818;
@@ -84,8 +36,19 @@
   --accent-light: var(--color-primary-soft);
   --sidebar-shadow: 1px 0 0 rgba(255, 255, 255, 0.08);
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
-  --focus-ring: 0 0 0 2px #23282d, 0 0 0 4px rgba(114, 174, 230, 0.6);
+  --focus-ring: 0 0 0 2px #111, 0 0 0 4px rgba(168, 191, 88, 0.6);
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shell-sidebar: 248px;
+  --shell-header: 56px;
   color-scheme: dark;
+  color: var(--text-main);
+  background: var(--bg-main);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -116,9 +79,8 @@ td { color: var(--color-text-secondary); font-size: 14px; }
 td, th { border-color: var(--color-border-subtle); }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #c3c4c7; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #8c8f94; }
-[data-theme='dark'] ::-webkit-scrollbar-thumb { background: #646970; }
+::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #666; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .8; transform: scale(.95); } }
 @keyframes progress-bar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
@@ -289,7 +251,6 @@ body { background: var(--color-canvas); }
 .site-shell th, .admin-shell th { background: var(--color-surface-subtle); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .08em; font-size: 10px; }
 .site-shell td, .admin-shell td { border-color: var(--color-border-subtle); }
 .site-shell [style*="box-shadow"], .admin-shell [style*="box-shadow"] { box-shadow: 0 12px 32px rgba(0,0,0,.07) !important; }
-[data-theme='dark'] .site-shell [style*="box-shadow"], [data-theme='dark'] .admin-shell [style*="box-shadow"] { box-shadow: 0 12px 32px rgba(0,0,0,.25) !important; }
 .admin-shell .admin-topbar button { border-radius: 999px !important; }
 
 @media (max-width: 768px) {

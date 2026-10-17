@@ -5,7 +5,6 @@ import './index.css'
 import './pwa.css'
 import './landing.css'
 import App from './App.tsx'
-import { ThemeProvider } from './context/ThemeContext'
 import { queryClient } from './services/queryClient'
 
 if ('serviceWorker' in navigator) {
@@ -17,9 +16,7 @@ if ('serviceWorker' in navigator) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+      <App />
     </QueryClientProvider>
   </StrictMode>,
 )

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import ThemeToggle from '../components/ThemeToggle'
 
 const rotatingLabels = ['Digital Promotion Tasks', 'Video Reviewing Mastery', 'Flexible Daily Work', 'Invite & Community Growth']
 const plans = [
@@ -37,7 +36,6 @@ export default function LandingPage() {
           <a href="#platform" onClick={closeMenu}>Platform</a>
           <a href="#plans" onClick={closeMenu}>Plans</a>
           <a href="#community" onClick={closeMenu}>Community</a>
-          <ThemeToggle />
           <Link className="reference-nav-login" to="/login" onClick={closeMenu}>Log in</Link>
           <Link className="reference-nav-cta" to="/login?mode=register" onClick={closeMenu}>Get started <Arrow /></Link>
         </nav>

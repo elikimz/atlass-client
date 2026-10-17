@@ -4,7 +4,6 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { endSession } from '../services/session'
 import { queryKeys } from '../services/queryClient'
-import ThemeToggle from './ThemeToggle'
 import NotificationBell from './NotificationBell'
 import { PWAInstallButton } from './PWAInstall'
 
@@ -136,7 +135,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
               <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
               <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>AdPulseAI</span>
             </div>
-            <ThemeToggle />
           </div>
 
           <div className="app-sidebar-nav" style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
@@ -236,7 +234,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {isMobile && <ThemeToggle />}
             <NotificationBell />
 
             <div 
