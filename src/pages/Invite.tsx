@@ -39,8 +39,11 @@ interface CommissionHistoryEntry {
   created_at?: string
 }
 
+const INVITES_PER_PAGE = 10
+
 export default function Invite() {
   const [copied, setCopied] = useState<string | null>(null)
+  const [currentInvitePage, setCurrentInvitePage] = useState(1)
   const activeInvitesQuery = useQuery({
     queryKey: queryKeys.referrals.active,
     queryFn: async () => (await api.get<InvitedUser[]>('/referrals/active')).data ?? [],
@@ -66,6 +69,9 @@ export default function Invite() {
   const summary = summaryQuery.data ?? null
   const commissionHistory = commissionHistoryQuery.data ?? []
   const loading = activeInvitesQuery.isLoading || referralCodesQuery.isLoading || summaryQuery.isLoading || commissionHistoryQuery.isLoading
+  const invitePageCount = Math.max(1, Math.ceil(activeInvites.length / INVITES_PER_PAGE))
+  const safeInvitePage = Math.min(currentInvitePage, invitePageCount)
+  const visibleInvites = activeInvites.slice((safeInvitePage - 1) * INVITES_PER_PAGE, safeInvitePage * INVITES_PER_PAGE)
 
   const handleCopy = (text: string, type: 'link' | 'code') => {
     navigator.clipboard.writeText(text)
@@ -192,8 +198,8 @@ export default function Invite() {
             </div>
           ) : (
             <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-main)', overflow: 'hidden' }}>
-              {activeInvites.map((invite, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: i < activeInvites.length - 1 ? '1px solid var(--border-main)' : 'none' }}>
+              {visibleInvites.map((invite, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: i < visibleInvites.length - 1 ? '1px solid var(--border-main)' : 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>👤</div>
                     <div>
@@ -204,6 +210,29 @@ export default function Invite() {
                   <div style={{ padding: '4px 12px', borderRadius: '20px', backgroundColor: invite.is_active ? 'rgba(34, 197, 94, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: invite.is_active ? '#22C55E' : '#DC2626', fontSize: '12px', fontWeight: 600 }}>{invite.is_active ? 'Active' : 'Inactive'}</div>
                 </div>
               ))}
+            </div>
+          )}
+          {activeInvites.length > INVITES_PER_PAGE && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '12px', padding: '0 4px' }}>
+              <button
+                type="button"
+                onClick={() => setCurrentInvitePage((page) => Math.max(1, page - 1))}
+                disabled={safeInvitePage === 1}
+                style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-card)', color: safeInvitePage === 1 ? 'var(--text-muted)' : 'var(--text-heading)', cursor: safeInvitePage === 1 ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 600 }}
+              >
+                Previous
+              </button>
+              <span style={{ color: 'var(--text-muted)', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                Page {safeInvitePage} of {invitePageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentInvitePage((page) => Math.min(invitePageCount, page + 1))}
+                disabled={safeInvitePage === invitePageCount}
+                style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-card)', color: safeInvitePage === invitePageCount ? 'var(--text-muted)' : 'var(--text-heading)', cursor: safeInvitePage === invitePageCount ? 'not-allowed' : 'pointer', fontSize: '12px', fontWeight: 600 }}
+              >
+                Next
+              </button>
             </div>
           )}
         </div>
