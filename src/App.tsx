@@ -121,7 +121,7 @@ function AppContent() {
       <AppUpdatePrompt />
       <ToastContainer position="top-center" reverseOrder={false} />
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace /> : <LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
         {isAuthenticated && isAdmin ? (
           <>
