@@ -122,7 +122,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       <a className="skip-link" href="#main-content">Skip to content</a>
       {/* Sidebar (Desktop Only) */}
       {!isMobile && (
-        <div style={{
+        <div className="app-sidebar" style={{
           width: '248px',
           minWidth: '248px',
           backgroundColor: 'var(--bg-card)',
@@ -131,7 +131,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           boxShadow: 'var(--sidebar-shadow)',
           zIndex: 20,
         }}>
-          <div style={{ padding: '20px 20px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
+          <div className="app-sidebar-header" style={{ padding: '20px 20px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
               <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>AdPulseAI</span>
@@ -139,11 +139,12 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
             <ThemeToggle />
           </div>
 
-          <div style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
+          <div className="app-sidebar-nav" style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
             {navItems.filter(item => item.label !== 'Admin' || isAdminUser).map((item) => (
               <Link
                 key={item.label}
                 to={item.path}
+                aria-current={isActive(item.path) ? 'page' : undefined}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -191,7 +192,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
             </div>
           </div>
 
-          <div style={{ padding: '24px', borderTop: '1px solid var(--border-main)' }}>
+          <div className="app-sidebar-footer" style={{ padding: '24px', borderTop: '1px solid var(--border-main)' }}>
             <button 
               onClick={handleSignOut}
               style={{
@@ -213,7 +214,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       {/* Main Area */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {/* Top Bar */}
-        <div style={{
+        <div className="app-topbar" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -256,7 +257,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         </div>
 
         {/* Content */}
-        <div id="main-content" role="main" style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '148px' : '0' }}>
+        <div className="app-content" id="main-content" role="main" style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '148px' : '0' }}>
           <div style={{ padding: isMobile ? '20px' : '40px' }}>
             <Outlet />
           </div>
@@ -271,7 +272,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
 
       {/* Mobile Bottom Nav */}
       {isMobile && (
-        <div style={{
+        <div className="app-mobile-nav" style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
           display: 'flex', alignItems: 'center',
           backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-main)', height: '75px', zIndex: 100,
@@ -292,6 +293,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
               <Link
                 key={item.label}
                 to={item.path}
+                aria-current={isActive(item.path) ? 'page' : undefined}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
                   textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
