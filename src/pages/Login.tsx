@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
 import { persistTokens, persistUser } from '../services/session'
 
@@ -433,26 +433,23 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
       {/* Header */}
       <div style={headerStyle}>
-        <button
-          style={backBtnStyle}
-          onClick={() => {
-            if (isRegistering) {
-              if (step === 2) { setStep(1); setError('') }
-              else { setIsRegistering(false); resetRegistration() }
-            }
-          }}
-        >
-          <span style={{ fontSize: '20px' }}>‹</span>
-          <span>{isRegistering ? (step === 2 ? 'Back' : 'Login') : 'Login'}</span>
-        </button>
+        {isRegistering && step === 2 ? (
+          <button style={backBtnStyle} onClick={() => { setStep(1); setError('') }}>
+            <span style={{ fontSize: '20px' }}>‹</span><span>Back</span>
+          </button>
+        ) : (
+          <Link to="/" style={{ ...backBtnStyle, textDecoration: 'none' }}>
+            <span style={{ fontSize: '20px' }}>‹</span><span>Home</span>
+          </Link>
+        )}
       </div>
 
       {/* Logo */}
-      <div style={logoContainerStyle}>
+      <Link to="/" aria-label="Return to AdPulseAI landing page" style={{ ...logoContainerStyle, textDecoration: 'none' }}>
         <div style={logoBoxStyle}>
           <img src="/assets/logo.png" alt="AdPulseAI" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
         </div>
-      </div>
+      </Link>
 
       {/* Language selector */}
       <div style={langSelectorStyle}>

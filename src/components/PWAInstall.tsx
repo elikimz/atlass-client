@@ -176,3 +176,57 @@ export function OfflineStatus() {
     </div>
   )
 }
+
+export function AppUpdatePrompt() {
+  const [updateReady, setUpdateReady] = useState(false)
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null)
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+    let disposed = false
+    let refreshing = false
+    const inspectRegistration = (nextRegistration: ServiceWorkerRegistration) => {
+      if (nextRegistration.waiting && navigator.serviceWorker.controller && !disposed) {
+        setWaitingWorker(nextRegistration.waiting)
+        setUpdateReady(true)
+      }
+      nextRegistration.addEventListener('updatefound', () => {
+        const installing = nextRegistration.installing
+        if (!installing) return
+        installing.addEventListener('statechange', () => {
+          if (installing.state === 'installed' && navigator.serviceWorker.controller && !disposed) {
+            setWaitingWorker(nextRegistration.waiting || installing)
+            setUpdateReady(true)
+          }
+        })
+      })
+    }
+
+    void navigator.serviceWorker.getRegistration('/').then((nextRegistration) => {
+      if (!nextRegistration || disposed) return
+      inspectRegistration(nextRegistration)
+      void nextRegistration.update().catch(() => undefined)
+    })
+
+    const handleControllerChange = () => {
+      if (refreshing || disposed) return
+      refreshing = true
+      window.location.reload()
+    }
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
+
+    return () => {
+      disposed = true
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+    }
+  }, [])
+
+  if (!updateReady) return null
+
+  return (
+    <div className="pwa-update-banner" role="status">
+      <span><strong>New version available.</strong> Refresh to use the latest AdPulseAI updates.</span>
+      <button type="button" onClick={() => waitingWorker?.postMessage({ type: 'SKIP_WAITING' })}>Reload</button>
+    </div>
+  )
+}
