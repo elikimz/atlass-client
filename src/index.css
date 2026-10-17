@@ -164,3 +164,17 @@ td, th { border-color: var(--color-border-subtle); }
   .auth-action-row { flex-direction: column; }
   .auth-action-row button { width: 100%; flex: none !important; }
 }
+
+/* Clear authentication mode selection for login and registration. */
+.auth-mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 20px; padding: 4px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface-inset); }
+.auth-mode-switch button { min-height: 40px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: var(--color-text-muted); cursor: pointer; font-size: 14px; font-weight: 700; }
+.auth-mode-switch button:hover { color: var(--color-primary); background: var(--color-primary-soft); }
+.auth-mode-switch button.is-active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+.auth-mode-heading { margin: 0 0 20px; text-align: center; }
+.auth-mode-heading h1 { margin: 0 0 6px; color: var(--color-text); font-size: 24px; line-height: 1.2; font-weight: 700; }
+.auth-mode-heading p { margin: 0; color: var(--color-text-muted); font-size: 13px; line-height: 1.5; }
+@media (max-width: 480px) {
+  .auth-mode-heading h1 { font-size: 21px; }
+  .auth-mode-heading { margin-bottom: 16px; }
+  .auth-mode-switch { margin-bottom: 16px; }
+}

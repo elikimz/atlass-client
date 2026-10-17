@@ -466,6 +466,30 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
       {/* Card */}
       <div className="auth-card" style={cardStyle}>
+        <div className="auth-mode-switch" role="tablist" aria-label="Authentication mode">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={!isRegistering}
+            className={!isRegistering ? 'is-active' : ''}
+            onClick={() => { setIsRegistering(false); setStep(1); setRecoveryStep(0); setError(''); resetRegistration() }}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={isRegistering}
+            className={isRegistering ? 'is-active' : ''}
+            onClick={() => { setIsRegistering(true); setStep(1); setRecoveryStep(0); setError('') }}
+          >
+            Register
+          </button>
+        </div>
+        <div className="auth-mode-heading">
+          <h1>{isRegistering ? 'Create your account' : 'Welcome back'}</h1>
+          <p>{isRegistering ? 'Register to access the AdPulseAI workspace.' : 'Sign in to continue to your workspace.'}</p>
+        </div>
         {isRegistering ? (
           <>
             {/* Step indicators */}

@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, type ComponentType } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Toaster } from 'react-hot-toast'
+import { Toaster, type ToasterProps } from 'react-hot-toast'
 
 import Login from './pages/Login'
+import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import Training from './pages/Training'
 import LearningHub from './pages/LearningHub'
@@ -37,6 +38,8 @@ import { OfflineStatus } from './components/PWAInstall'
 import api from './services/api'
 import { clearSession, hasSession, persistUser } from './services/session'
 import { queryKeys } from './services/queryClient'
+
+const ToastContainer = Toaster as unknown as ComponentType<ToasterProps>
 
 function TrainingRoute() {
   return <Training />
@@ -115,8 +118,9 @@ function AppContent() {
   return (
     <Router>
       <OfflineStatus />
-      <Toaster position="top-center" reverseOrder={false} />
+      <ToastContainer position="top-center" reverseOrder={false} />
       <Routes>
+        <Route path="/" element={isAuthenticated ? <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace /> : <LandingPage />} />
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
         {isAuthenticated && isAdmin ? (
           <>
@@ -147,7 +151,6 @@ function AppContent() {
             <Route path="/admin/plans" element={<AdminPlans />} />
             <Route path="/admin/invites" element={<AdminInvites />} />
             <Route path="/admin/notifications" element={<AdminNotifications />} />
-            <Route path="/" element={<Navigate to="/admin" />} />
             <Route path="*" element={<Navigate to="/admin" />} />
           </Route>
           </>
@@ -181,7 +184,6 @@ function AppContent() {
             <Route path="/payments/periods" element={<Placeholder title="Earning Periods" />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Route>
         ) : (
