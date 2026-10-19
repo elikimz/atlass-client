@@ -105,3 +105,94 @@
   .reference-footer p { flex:1 1 100%; }
 }
 @media (prefers-reduced-motion:reduce) { .reference-landing *, .reference-landing *::before, .reference-landing *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+
+
+.app-choice-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, .78);
+  backdrop-filter: blur(9px);
+}
+.app-choice-dialog {
+  width: min(100%, 430px);
+  padding: 34px 30px 27px;
+  border: 1px solid #343434;
+  border-radius: 22px;
+  background: #101010;
+  color: #f7f7f4;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, .55);
+  text-align: center;
+}
+.app-choice-logo {
+  display: block;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  border-radius: 15px;
+  object-fit: cover;
+}
+.app-choice-eyebrow {
+  margin: 0 0 12px;
+  color: #c9ff3d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+.app-choice-dialog h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(25px, 6vw, 31px);
+  font-weight: 760;
+  letter-spacing: -.055em;
+  line-height: 1.1;
+}
+.app-choice-dialog > p:not(.app-choice-eyebrow) {
+  margin: 14px 0 22px;
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.app-choice-open,
+.app-choice-browser {
+  display: flex;
+  width: 100%;
+  min-height: 49px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-choice-open {
+  border: 1px solid #c9ff3d;
+  background: #c9ff3d;
+  color: #080808 !important;
+}
+.app-choice-open span { font-size: 17px; }
+.app-choice-browser {
+  margin-top: 10px;
+  border: 1px solid #424242;
+  background: transparent;
+  color: #f7f7f4;
+}
+.app-choice-open:focus-visible,
+.app-choice-browser:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.app-choice-footnote {
+  margin: 16px 0 0 !important;
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+}
+@media (max-width: 420px) {
+  .app-choice-dialog { padding: 29px 21px 23px; }
+}
