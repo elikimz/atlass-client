@@ -15,6 +15,7 @@ function Arrow() { return <span aria-hidden="true">↗</span> }
 export default function LandingPage() {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showAppChoice, setShowAppChoice] = useState(false)
   const [labelIndex, setLabelIndex] = useState(0)
   const closeMenu = () => setMenuOpen(false)
   const referralCode = new URLSearchParams(location.search).get('ref')?.trim() || ''
@@ -32,8 +33,38 @@ export default function LandingPage() {
     }
   }, [referralCode])
 
+  useEffect(() => {
+    const isAndroid = /Android/i.test(navigator.userAgent)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true
+    const dismissedThisSession = window.sessionStorage.getItem('adpulse_app_choice_dismissed') === '1'
+
+    if (isAndroid && !isStandalone && !dismissedThisSession) setShowAppChoice(true)
+  }, [])
+
+  const continueInBrowser = () => {
+    window.sessionStorage.setItem('adpulse_app_choice_dismissed', '1')
+    setShowAppChoice(false)
+  }
+
   return (
     <div className="reference-landing">
+      {showAppChoice && (
+        <div className="app-choice-backdrop" role="presentation">
+          <section className="app-choice-dialog" role="dialog" aria-modal="true" aria-labelledby="app-choice-title" aria-describedby="app-choice-description">
+            <img className="app-choice-logo" src="/assets/logo.png" alt="" />
+            <p className="app-choice-eyebrow">WELCOME TO ADPULSEAI</p>
+            <h2 id="app-choice-title">How would you like to continue?</h2>
+            <p id="app-choice-description">Open your AdPulseAI app for a focused mobile experience, or continue using the website in your browser.</p>
+            <a
+              className="app-choice-open"
+              href="intent://www.adpulseaiglobaltech.site/#Intent;scheme=https;package=site.adpulseaiglobaltech.app;S.browser_fallback_url=https%3A%2F%2Fwww.adpulseaiglobaltech.site%2F;end"
+            >Open AdPulseAI app <span aria-hidden="true">↗</span></a>
+            <button className="app-choice-browser" type="button" onClick={continueInBrowser}>Continue in browser</button>
+            <p className="app-choice-footnote">The app option works on Android when AdPulseAI is installed.</p>
+          </section>
+        </div>
+      )}
       <a className="reference-skip" href="#reference-main">Skip to content</a>
       <header className="reference-header">
         <Link className="reference-brand" to="/" onClick={closeMenu} aria-label="AdPulseAI home">
