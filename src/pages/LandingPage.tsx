@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import AndroidAppPrompt from '../components/AndroidAppPrompt'
 
 const rotatingLabels = ['Digital Promotion Tasks', 'Video Reviewing Mastery', 'Flexible Daily Work', 'Invite & Community Growth']
 const plans = [
@@ -34,6 +35,7 @@ export default function LandingPage() {
 
   return (
     <div className="reference-landing">
+      <AndroidAppPrompt />
       <a className="reference-skip" href="#reference-main">Skip to content</a>
       <header className="reference-header">
         <Link className="reference-brand" to="/" onClick={closeMenu} aria-label="AdPulseAI home">

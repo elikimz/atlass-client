@@ -105,3 +105,22 @@
   .reference-footer p { flex:1 1 100%; }
 }
 @media (prefers-reduced-motion:reduce) { .reference-landing *, .reference-landing *::before, .reference-landing *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; } }
+
+.android-app-prompt-backdrop { position:fixed; inset:0; z-index:120; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.78); backdrop-filter:blur(12px); animation:android-prompt-fade-in .18s ease-out both; }
+.android-app-prompt { width:min(100%,390px); padding:28px; border:1px solid #3b3b38; border-radius:24px; background:linear-gradient(145deg,#171717,#0d0d0d); box-shadow:0 24px 80px rgba(0,0,0,.52),0 0 0 1px rgba(201,255,61,.04); color:var(--ref-text); }
+.android-app-prompt-brand { display:flex; align-items:center; gap:10px; margin-bottom:30px; color:#fff; font-size:18px; font-weight:800; letter-spacing:-.04em; }
+.android-app-prompt-brand img { width:38px; height:38px; border-radius:10px; object-fit:cover; }
+.android-app-prompt-brand span span { color:var(--ref-accent); }
+.android-app-prompt-overline { margin:0 0 10px; color:var(--ref-accent); font-size:10px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+.android-app-prompt h2 { margin:0; color:#fff; font-size:clamp(28px,8vw,36px); font-weight:750; letter-spacing:-.06em; line-height:.98; }
+.android-app-prompt p:not(.android-app-prompt-overline) { margin:16px 0 25px; color:#aaa; font-size:14px; line-height:1.6; }
+.android-app-prompt-actions { display:grid; gap:10px; }
+.android-app-prompt-actions button { width:100%; min-height:48px; border-radius:999px; font:inherit; font-size:13px; font-weight:800; cursor:pointer; transition:transform .2s ease,background .2s ease,border-color .2s ease; }
+.android-app-prompt-actions button:focus-visible { outline:3px solid var(--ref-accent); outline-offset:3px; }
+.android-app-prompt-primary { border:1px solid #fff; background:#fff; color:#050505; }
+.android-app-prompt-primary:hover { transform:translateY(-1px); background:var(--ref-accent); border-color:var(--ref-accent); }
+.android-app-prompt-primary span { margin-left:6px; font-size:16px; }
+.android-app-prompt-secondary { border:1px solid #454540; background:transparent; color:#e6e6e1; }
+.android-app-prompt-secondary:hover { border-color:#8a8a84; background:#20201e; }
+@keyframes android-prompt-fade-in { from { opacity:0; } to { opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .android-app-prompt-backdrop { animation:none; } .android-app-prompt-actions button { transition:none; } }
