@@ -92,6 +92,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -117,6 +118,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     if (!trimmedUsername || !loginPassword) return
     setLoading(true)
     setError('')
+    setSuccessMessage('')
     try {
       const res = await api.post('/auth/login', { username: trimmedUsername, password: loginPassword })
       persistTokens(res.data)
@@ -143,6 +145,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     }
     setLoading(true)
     setError('')
+    setSuccessMessage('')
     try {
       await api.post('/auth/password-reset/request', { email: recoveryEmail.trim() })
       setRecoveryStep(2)
@@ -160,6 +163,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     if (recoveryPassword !== recoveryConfirmPassword) { setError('Passwords do not match'); return }
     setLoading(true)
     setError('')
+    setSuccessMessage('')
     try {
       await api.post('/auth/password-reset/confirm', { email: recoveryEmail.trim(), code: recoveryCode, new_password: recoveryPassword })
       setLoginUsername(recoveryEmail.trim())
@@ -168,7 +172,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       setRecoveryCode('')
       setRecoveryPassword('')
       setRecoveryConfirmPassword('')
-      setError('Password reset successfully. You can now log in with your new password.')
+      setSuccessMessage('Password reset successfully. You can now log in with your new password.')
     } catch (error: unknown) {
       setError(apiErrorMessage(error, 'Invalid or expired reset code.'))
     } finally {
@@ -856,12 +860,17 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                   {error}
                 </p>
               )}
+              {successMessage && (
+                <p role="status" style={{ color: '#a7f3b8', backgroundColor: 'rgba(34, 197, 94, 0.13)', border: '1px solid rgba(74, 222, 128, 0.32)', borderRadius: '10px', padding: '12px 14px', margin: '8px 0 12px', fontSize: '13px', lineHeight: 1.5, textAlign: 'center' }}>
+                  {successMessage}
+                </p>
+              )}
 
               <button type="submit" style={loginBtnStyle} disabled={loading}>
                 {loading ? 'Signing in...' : 'Login'}
               </button>
             </form>
-            <button type="button" onClick={() => { setRecoveryStep(1); setRecoveryEmail(''); setError('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Forgot password?</button>
+            <button type="button" onClick={() => { setRecoveryStep(1); setRecoveryEmail(''); setError(''); setSuccessMessage('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Forgot password?</button>
             </> : (
               <>
                 <h2 style={{ color: 'var(--color-text-secondary)', fontSize: '21px', textAlign: 'center', margin: '0 0 10px' }}>{recoveryStep === 1 ? 'Reset your password' : 'Enter reset code'}</h2>
@@ -881,7 +890,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
                     <button type="submit" style={loginBtnStyle} disabled={loading}>{loading ? 'Updating password...' : 'Set new password'}</button>
                   </form>
                 )}
-                <button type="button" onClick={() => { setRecoveryStep(0); setError('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Back to login</button>
+                <button type="button" onClick={() => { setRecoveryStep(0); setError(''); setSuccessMessage('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Back to login</button>
               </>
             )}
 
