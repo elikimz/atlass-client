@@ -1,7 +1,10 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { clearSession, getAccessToken, refreshSession } from './session'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const PRODUCTION_API_URL = 'https://atlasapi-bgh0h6g3a4b6hvfp.southafricanorth-01.azurewebsites.net'
+const API_BASE_URL = import.meta.env.PROD
+  ? PRODUCTION_API_URL
+  : import.meta.env.VITE_API_URL?.trim() || PRODUCTION_API_URL
 
 const api = axios.create({
   baseURL: API_BASE_URL,
