@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Toaster, type ToasterProps } from 'react-hot-toast'
 
 const Login = lazy(() => import('./pages/Login'))
-const LandingPage = lazy(() => import('./pages/LandingPage'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Training = lazy(() => import('./pages/Training'))
 const LearningHub = lazy(() => import('./pages/LearningHub'))
@@ -126,7 +125,7 @@ function AppContent() {
       <ToastContainer position="top-center" reverseOrder={false} />
       <Suspense fallback={<RouteLoading />}>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={isAuthenticated ? <Navigate to={isAdmin ? '/admin' : '/dashboard'} replace /> : <Login setIsAuthenticated={checkAuth} />} />
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
         {isAuthenticated && isAdmin ? (
           <>

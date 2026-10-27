@@ -203,7 +203,7 @@ export default function AdminNotifications() {
                   padding: '8px 16px',
                   borderRadius: '8px',
                   border: selectedUserId === null ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
-                  backgroundColor: selectedUserId === null ? 'rgba(93, 50, 234, 0.1)' : 'transparent',
+                  backgroundColor: selectedUserId === null ? 'rgba(214, 138, 155, 0.1)' : 'transparent',
                   color: selectedUserId === null ? 'var(--accent-primary)' : 'var(--text-main)',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -219,7 +219,7 @@ export default function AdminNotifications() {
                   padding: '8px 16px',
                   borderRadius: '8px',
                   border: selectedUserId !== null && selectedUserId !== -1 ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
-                  backgroundColor: selectedUserId !== null && selectedUserId !== -1 ? 'rgba(93, 50, 234, 0.1)' : 'transparent',
+                  backgroundColor: selectedUserId !== null && selectedUserId !== -1 ? 'rgba(214, 138, 155, 0.1)' : 'transparent',
                   color: selectedUserId !== null && selectedUserId !== -1 ? 'var(--accent-primary)' : 'var(--text-main)',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -301,7 +301,7 @@ export default function AdminNotifications() {
                             padding: '10px 12px',
                             cursor: 'pointer',
                             borderBottom: '1px solid var(--border-main)',
-                            backgroundColor: selectedUserId === user.id ? 'rgba(93, 50, 234, 0.1)' : 'transparent',
+                            backgroundColor: selectedUserId === user.id ? 'rgba(214, 138, 155, 0.1)' : 'transparent',
                             transition: 'background-color 0.2s'
                           }}
                         >
@@ -527,7 +527,7 @@ export default function AdminNotifications() {
                   padding: '14px 16px',
                   borderRadius: '10px',
                   border: '1px solid var(--border-main)',
-                  backgroundColor: notif.is_read ? 'var(--bg-main)' : 'rgba(93, 50, 234, 0.04)',
+                  backgroundColor: notif.is_read ? 'var(--bg-main)' : 'rgba(214, 138, 155, 0.04)',
                   transition: 'background-color 0.2s'
                 }}
               >
@@ -536,7 +536,7 @@ export default function AdminNotifications() {
                     <span style={{ fontSize: '14px' }}>{formatTypeIcon(notif.type)}</span>
                     <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)' }}>{notif.title}</span>
                     {notif.user_id === null ? (
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', padding: '2px 8px', borderRadius: '6px' }}>Global</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#D68A9B', backgroundColor: 'rgba(214, 138, 155,0.1)', padding: '2px 8px', borderRadius: '6px' }}>Global</span>
                     ) : (
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#059669', backgroundColor: 'rgba(5,150,105,0.1)', padding: '2px 8px', borderRadius: '6px' }}>Targeted</span>
                     )}

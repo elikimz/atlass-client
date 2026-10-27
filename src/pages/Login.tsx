@@ -248,7 +248,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   return (
     <main className="auth-scene">
       <section className="auth-showcase" aria-label="About Kinetiq">
-        <Link className="auth-showcase-brand" to="/" aria-label="Kinetiq home"><BrandMark /><span>Kinetiq</span></Link>
+        <Link className="auth-showcase-brand" to="/" aria-label="Kinetiq sign in"><BrandMark /><span>Kinetiq</span></Link>
         <div className="auth-showcase-copy">
           <span className="auth-kicker"><span className="auth-kicker-dot" /> A workspace built around your momentum</span>
           <h1>Make room<br />for your next<br /><em>big move.</em></h1>
@@ -263,7 +263,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       </section>
 
       <section className="auth-workspace">
-        <Link className="auth-mobile-brand" to="/" aria-label="Kinetiq home"><BrandMark /><span>Kinetiq</span></Link>
+        <Link className="auth-mobile-brand" to="/" aria-label="Kinetiq sign in"><BrandMark /><span>Kinetiq</span></Link>
         <div className="auth-form-card">
           <div className="auth-mode-switch" role="tablist" aria-label="Account access">
             <button type="button" role="tab" aria-selected={!isRegistering && recoveryStage === 0} className={!isRegistering && recoveryStage === 0 ? 'is-active' : ''} onClick={() => changeMode(false)}>Sign in</button>
@@ -316,7 +316,6 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
           {error && <div className="auth-feedback auth-feedback--error" role="alert">{error}</div>}
           {notice && <div className="auth-feedback auth-feedback--success" role="status">{notice}</div>}
         </div>
-        <Link className="auth-home-link" to="/">← Back to Kinetiq home</Link>
       </section>
     </main>
   )

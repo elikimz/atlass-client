@@ -2,7 +2,7 @@
   "routes": [
     {
       "path": "/",
-      "title": "Kinetiq home"
+      "title": "Sign in or create account"
     },
     {
       "path": "/login",

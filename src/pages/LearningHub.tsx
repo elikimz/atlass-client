@@ -28,14 +28,14 @@ const guidelinesPages = [
             </div>
           </div>
         </div>
-        <div style={{ backgroundColor: 'rgba(37, 99, 235, 0.1)', border: '1px solid rgba(37, 99, 235, 0.2)', borderRadius: '8px', padding: '14px 16px' }}>
+        <div style={{ backgroundColor: 'rgba(214, 138, 155, 0.1)', border: '1px solid rgba(214, 138, 155, 0.2)', borderRadius: '8px', padding: '14px 16px' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D68A9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', margin: '0 0 4px' }}>Tip</p>
-              <p style={{ fontSize: '13px', color: '#2563eb', margin: 0, lineHeight: 1.5 }}>Watch the full event before selecting a label. Context matters for accurate labeling.</p>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#D68A9B', margin: '0 0 4px' }}>Tip</p>
+              <p style={{ fontSize: '13px', color: '#D68A9B', margin: 0, lineHeight: 1.5 }}>Watch the full event before selecting a label. Context matters for accurate labeling.</p>
             </div>
           </div>
         </div>

@@ -7,13 +7,8 @@ import { PWAInstallCard } from '../components/PWAInstall'
 
 type User = {
   first_name?: string | null
-  last_name?: string | null
-  email?: string
   deposit_wallet_balance?: number
   withdrawal_wallet_balance?: number
-  current_plan_id?: number | null
-  current_plan_name?: string | null
-  plan_expiry?: string | null
 }
 
 type EarningsPoint = { day: string; value: number }
@@ -100,26 +95,11 @@ export default function Dashboard() {
   const referrals = useQuery({ queryKey: queryKeys.referrals.summary, queryFn: async () => (await api.get<Referrals>('/referrals/summary')).data, staleTime: 60_000 })
   const person = user.data
   const data = summary.data
-  const firstName = person?.first_name?.trim() || 'Your'
   const history = Array.isArray(data?.earnings_history) ? data.earnings_history : []
   const recentActivity = Array.isArray(data?.recent_activity) ? data.recent_activity : []
   const retrySummary = () => { void summary.refetch() }
 
   return <div className="member-dashboard">
-    <header className="member-dashboard-hero">
-      <div className="member-dashboard-hero-copy">
-        <span className="member-eyebrow"><i /> ACCOUNT OVERVIEW / VERIFIED DATA</span>
-        <h2>{firstName}<br /><em>at a glance.</em></h2>
-        <p>Your balances, completed work and earnings history — reported by Kinetiq.</p>
-        <Link className="member-button member-button--primary" to="/tasks">Browse available tasks <span aria-hidden="true">→</span></Link>
-      </div>
-      <aside className="member-dashboard-week">
-        <span>ACTIVE PLAN</span>
-        <strong>{person?.current_plan_name || (person?.current_plan_id ? `Plan #${person.current_plan_id}` : 'No active plan')}</strong>
-        <small>{person?.plan_expiry ? `Expires ${new Date(person.plan_expiry).toLocaleDateString()}` : 'Check current plan eligibility'}</small>
-      </aside>
-    </header>
-
     {orientation && <section className="dashboard-orientation">
       <div><strong>Welcome to your workspace</strong><p>Review your account, task activity and learning tools. Community links are optional and do not record membership.</p></div>
       <button className="member-button member-button--outline" type="button" onClick={() => { localStorage.setItem('kinetiq-orientation-dismissed', 'yes'); setOrientation(false) }}>Dismiss</button>
