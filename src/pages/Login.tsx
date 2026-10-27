@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import { persistTokens, persistUser, type SessionUser, type TokenPair } from '../services/session'
+import { clearSession, persistTokens, persistUser, type SessionUser, type TokenPair } from '../services/session'
 
 const COUNTRIES = [
   { code: '+254', flag: '🇰🇪', name: 'Kenya' }, { code: '+1', flag: '🇺🇸', name: 'United States' },
@@ -16,6 +16,73 @@ function getApiError(error: unknown, fallback: string): string {
   const data = (error as { response?: { data?: unknown } }).response?.data
   if (typeof data === 'object' && data !== null && 'detail' in data && typeof data.detail === 'string') return data.detail
   return fallback
+}
+
+function getRegistrationError(error: unknown): string {
+  if (typeof error !== 'object' || error === null || !('response' in error)) {
+    return 'We could not reach the account service. Check your connection. If you already submitted, try signing in before registering again.'
+  }
+
+  const response = (error as { response?: { data?: unknown; status?: number } }).response
+  if (!response) {
+    return 'We could not reach the account service. Check your connection. If you already submitted, try signing in before registering again.'
+  }
+
+  const status = response.status ?? 0
+  const data = response.data
+  const detail = typeof data === 'object' && data !== null && 'detail' in data ? data.detail : null
+
+  if (typeof detail === 'string') {
+    const message = detail.toLowerCase()
+    if (message.includes('email') && /(already|registered|exists|in use|duplicate)/.test(message)) {
+      return 'That email address is already registered. Sign in or use “Forgot password?” if you need to recover your account.'
+    }
+    if (/(phone|mobile)/.test(message) && /(already|registered|exists|in use|duplicate)/.test(message)) {
+      return 'That mobile number is already registered. Sign in with your phone or email, or use a different number.'
+    }
+    if (message.includes('password') && /(72|utf-8|too long|too short|at least|minimum)/.test(message)) {
+      return /(72|utf-8|too long)/.test(message)
+        ? 'Password must be no more than 72 UTF-8 bytes.'
+        : 'Password must contain at least 8 characters.'
+    }
+    if (status >= 500) {
+      return 'Account creation is temporarily unavailable. If you already submitted, try signing in before registering again.'
+    }
+    return detail
+  }
+
+  if (Array.isArray(detail)) {
+    const messages = detail.map((issue): string | null => {
+      if (typeof issue !== 'object' || issue === null) return null
+      const validation = issue as { loc?: unknown; type?: unknown; msg?: unknown }
+      const field = Array.isArray(validation.loc) && validation.loc.length > 0
+        ? String(validation.loc[validation.loc.length - 1])
+        : ''
+      const type = typeof validation.type === 'string' ? validation.type : ''
+      const rawMessage = typeof validation.msg === 'string' ? validation.msg.toLowerCase() : ''
+
+      if (field === 'password') {
+        if (type === 'string_too_short') return 'Password must contain at least 8 characters.'
+        if (type === 'string_too_long' || /72|utf-8|too long/.test(rawMessage)) return 'Password must be no more than 72 UTF-8 bytes.'
+        return 'Check your password. Use at least 8 characters and no more than 72 UTF-8 bytes.'
+      }
+      if (field === 'email') {
+        if (type === 'string_too_long') return 'Email address must be 254 characters or fewer.'
+        return 'Enter a valid email address.'
+      }
+      if (field === 'phone_number') return 'Enter a valid mobile number with its country calling code.'
+      if (field === 'referral_code') return 'Check your referral code, or clear the field to continue without one.'
+      return null
+    }).filter((message): message is string => Boolean(message))
+
+    if (messages.length > 0) return [...new Set(messages)].join(' ')
+  }
+
+  if (status === 409) return 'Some account details are already in use. Try signing in, or check your email address and mobile number.'
+  if (status === 422) return 'Some details need attention. Check your mobile number, email address, and password.'
+  if (status === 429) return 'There have been too many attempts. Wait a moment, then try again.'
+  if (status >= 500) return 'Account creation is temporarily unavailable. If you already submitted, try signing in before registering again.'
+  return 'We could not create your account. Check your details or try signing in if you may already have an account.'
 }
 
 function BrandMark() {
@@ -57,8 +124,15 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     setNotice('')
   }
 
-  const finishSession = async (tokens: TokenPair, profile: SessionUser) => {
+  const finishSession = async (tokens: TokenPair) => {
     persistTokens(tokens)
+    let profile: SessionUser
+    try {
+      profile = (await api.get<SessionUser>('/auth/me')).data
+    } catch (cause) {
+      clearSession()
+      throw cause
+    }
     persistUser(profile)
     await setIsAuthenticated()
     navigate(profile.role === 'admin' || profile.is_admin ? '/admin' : '/dashboard')
@@ -71,8 +145,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     setNotice('')
     try {
       const response = await api.post<TokenPair>('/auth/login', { username: identifier.trim(), password: loginPassword })
-      const profile = await api.get<SessionUser>('/auth/me')
-      await finishSession(response.data, profile.data)
+      await finishSession(response.data)
     } catch (cause) {
       setError(getApiError(cause, 'We could not sign you in. Check your details and try again.'))
     } finally {
@@ -84,8 +157,10 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
     event.preventDefault()
     setError('')
     setNotice('')
-    const cleanPhone = phone.replace(/\D/g, '')
-    if (cleanPhone.length < 5) {
+    const typedDigits = phone.replace(/\D/g, '')
+    const nationalDigits = countryCode === '+1' ? typedDigits : typedDigits.replace(/^0/, '')
+    const fullPhone = `${countryCode}${nationalDigits}`
+    if (nationalDigits.length < 5 || nationalDigits.length + countryCode.replace(/\D/g, '').length > 15) {
       setError('Enter a valid mobile number, including the area code if needed.')
       return
     }
@@ -98,20 +173,22 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       return
     }
     setBusy(true)
+    let registrationCompleted = false
     try {
-      const fullPhone = `${countryCode}${cleanPhone}`
       await api.post('/auth/register/final', {
         phone_number: fullPhone,
         email: email.trim(),
         password: registerPassword,
         referral_code: referralCode.trim() || undefined,
       })
+      registrationCompleted = true
       const response = await api.post<TokenPair>('/auth/login', { username: fullPhone, password: registerPassword })
-      const profile = await api.get<SessionUser>('/auth/me')
       localStorage.removeItem('pending_referral_code')
-      await finishSession(response.data, profile.data)
+      await finishSession(response.data)
     } catch (cause) {
-      setError(getApiError(cause, 'We could not create your account. Check your details and try again.'))
+      setError(registrationCompleted
+        ? 'Your account was created, but automatic sign-in did not finish. Sign in using your mobile number or email and password.'
+        : getRegistrationError(cause))
     } finally {
       setBusy(false)
     }
