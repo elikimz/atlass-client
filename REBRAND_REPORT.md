@@ -6,9 +6,9 @@
 
 The public marketing landing page and its stylesheet were removed. A guest visiting `/` now sees the sign-in/create-account screen; an authenticated member visiting `/` returns to the dashboard. The existing `/login` path remains available. The installed app now starts at `/` as well.
 
-The dashboard no longer renders the **“ACCOUNT OVERVIEW / VERIFIED DATA”** hero, the “Your at a glance” copy, its browse-tasks CTA, or the active-plan/no-active-plan card. Members land directly on the separate withdrawal/deposit balances, the API-backed seven-day task-earnings chart and account activity panels.
+The dashboard no longer renders the **“ACCOUNT OVERVIEW / VERIFIED DATA”** hero, the “Your at a glance” copy, its browse-tasks CTA, or the active-plan/no-active-plan card. Members land directly on separate withdrawal/deposit balances, the API-backed seven-day task-earnings chart and account activity panels.
 
-The previous slate/cobalt/teal treatment was replaced with **Rosewood & Porcelain**: rich claret `#8F354C`, dusty rose `#D68A9B`, deep ink `#2B2024`, and warm porcelain `#FAF6F5`. Shared member, authentication, public, referral, payment and admin styling was brought onto the new palette while preserving semantic success, warning and error colors. The Kinetiq SVG mark, favicon and installed-app PNG icons were recolored without changing the mark silhouette or its maskable safe area.
+The previous slate/cobalt/teal treatment was replaced with **Rosewood & Porcelain**: rich claret `#8F354C`, dusty rose `#D68A9B`, deep ink `#2B2024`, and warm porcelain `#FAF6F5`. Shared member, authentication, public, referral, payment and admin styling was brought onto the new palette while preserving semantic success, warning and error colors. The Kinetiq SVG mark, favicon and installed-app PNG icons were recolored without changing the mark silhouette or maskable safe area.
 
 ## Preserved experience and behavior
 
@@ -33,6 +33,8 @@ No backend files or business rules were changed in this visual follow-up. Earlie
 
 ## Deployment status and safety
 
-Browser testing used local fixtures/mocks only. No production signup, plan purchase, recharge, payout or withdrawal-account mutation was attempted. The preceding frontend release was verified on the public Vercel alias; the deployment state for this follow-up is to be recorded after its main-branch push. Azure API readiness remains unconfirmed by these frontend-only checks.
+Frontend commit **`22a6f2c`** was pushed to `main`; the corresponding Vercel Production deployment (**7358441960**) reports **success**. Read-only checks against `https://atlass-client.vercel.app/` returned HTTP 200 and the new sign-in title, Rosewood CSS, root-start PWA manifest and recolored icons. A production Chromium smoke test confirmed the guest root displays the sign-in form at 390px, uses `#8F354C`, has no landing component and has no horizontal overflow. Azure API readiness remains unconfirmed by these frontend-only checks.
 
-Screenshots in the task workspace: `kinetiq-login-root-mobile.png`, `kinetiq-redesign-signup-mobile.png`, `kinetiq-redesign-dashboard-desktop.png`, `kinetiq-redesign-dashboard-mobile.png`, `kinetiq-redesign-plans-after.png`, `kinetiq-redesign-referrals-desktop.png`, `kinetiq-recharge-pending-review.png`, `kinetiq-payout-under-review.png` and `kinetiq-admin-dashboard-mobile.png`.
+All browser/API regression fixtures were local or intercepted. No production signup, plan purchase, recharge, payout or withdrawal-account mutation was attempted.
+
+Screenshots in the task workspace: `kinetiq-login-root-mobile.png`, `kinetiq-live-login-root-mobile.png`, `kinetiq-redesign-signup-mobile.png`, `kinetiq-redesign-dashboard-desktop.png`, `kinetiq-redesign-dashboard-mobile.png`, `kinetiq-redesign-plans-after.png`, `kinetiq-redesign-referrals-desktop.png`, `kinetiq-recharge-pending-review.png`, `kinetiq-payout-under-review.png` and `kinetiq-admin-dashboard-mobile.png`.
