@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kinetiq-shell-v1'
+const CACHE_NAME = 'kinetiq-shell-v2'
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/assets/kinetiq-mark.svg', '/assets/kinetiq-icon-192.png']
 
 self.addEventListener('install', (event) => {

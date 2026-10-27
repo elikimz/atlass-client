@@ -1,911 +1,251 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState, type FormEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import { persistTokens, persistUser } from '../services/session'
+import { persistTokens, persistUser, type SessionUser, type TokenPair } from '../services/session'
 
-// Country codes list
-const COUNTRY_CODES = [
-  { code: '+254', flag: '🇰🇪', name: 'Kenya' },
-  { code: '+1', flag: '🇺🇸', name: 'USA' },
-  { code: '+44', flag: '🇬🇧', name: 'UK' },
-  { code: '+255', flag: '🇹🇿', name: 'Tanzania' },
-  { code: '+256', flag: '🇺🇬', name: 'Uganda' },
-  { code: '+251', flag: '🇪🇹', name: 'Ethiopia' },
-  { code: '+27', flag: '🇿🇦', name: 'South Africa' },
-  { code: '+234', flag: '🇳🇬', name: 'Nigeria' },
-  { code: '+233', flag: '🇬🇭', name: 'Ghana' },
-  { code: '+212', flag: '🇲🇦', name: 'Morocco' },
-  { code: '+20', flag: '🇪🇬', name: 'Egypt' },
-  { code: '+91', flag: '🇮🇳', name: 'India' },
-  { code: '+86', flag: '🇨🇳', name: 'China' },
-  { code: '+49', flag: '🇩🇪', name: 'Germany' },
-  { code: '+33', flag: '🇫🇷', name: 'France' },
-  { code: '+971', flag: '🇦🇪', name: 'UAE' },
+const COUNTRIES = [
+  { code: '+254', flag: '🇰🇪', name: 'Kenya' }, { code: '+1', flag: '🇺🇸', name: 'United States' },
+  { code: '+44', flag: '🇬🇧', name: 'United Kingdom' }, { code: '+255', flag: '🇹🇿', name: 'Tanzania' },
+  { code: '+256', flag: '🇺🇬', name: 'Uganda' }, { code: '+27', flag: '🇿🇦', name: 'South Africa' },
+  { code: '+234', flag: '🇳🇬', name: 'Nigeria' }, { code: '+233', flag: '🇬🇭', name: 'Ghana' },
+  { code: '+91', flag: '🇮🇳', name: 'India' }, { code: '+971', flag: '🇦🇪', name: 'United Arab Emirates' },
 ]
 
-// Generate a random captcha string
-function generateCaptcha(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
-  let result = ''
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return result
+function getApiError(error: unknown, fallback: string): string {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return fallback
+  const data = (error as { response?: { data?: unknown } }).response?.data
+  if (typeof data === 'object' && data !== null && 'detail' in data && typeof data.detail === 'string') return data.detail
+  return fallback
 }
 
-function apiErrorMessage(error: unknown, fallback: string): string {
-  if (typeof error !== 'object' || error === null || !('response' in error)) {
-    return fallback
-  }
-
-  const response = (error as { response?: { data?: unknown } }).response
-  const data = response?.data
-  if (typeof data === 'object' && data !== null && 'detail' in data) {
-    const detail = (data as { detail?: unknown }).detail
-    if (typeof detail === 'string') {
-      return detail
-    }
-  }
-  return fallback
+function BrandMark() {
+  return <img className="auth-brand-mark" src="/assets/kinetiq-mark.svg" alt="" />
 }
 
 export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () => Promise<void> }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const searchParams = new URLSearchParams(location.search)
-  const referralFromUrl = (searchParams.get('ref') || localStorage.getItem('pending_referral_code') || '').trim()
-  const registerFromUrl = referralFromUrl.length > 0 || searchParams.get('mode') === 'register'
-
-  const [isRegistering, setIsRegistering] = useState(registerFromUrl)
-  const [step, setStep] = useState(1)
-
-  // Step 1 fields
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [username, setUsername] = useState('')
-  const [inviteCode, setInviteCode] = useState(referralFromUrl)
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  // Step 2 fields
+  const search = new URLSearchParams(location.search)
+  const referralFromUrl = (search.get('ref') || localStorage.getItem('pending_referral_code') || '').trim()
+  const [isRegistering, setIsRegistering] = useState(Boolean(referralFromUrl) || search.get('mode') === 'register')
   const [countryCode, setCountryCode] = useState('+254')
-  const [phoneNumber, setPhoneNumber] = useState('')
-  const [captchaInput, setCaptchaInput] = useState('')
-  const [captchaValue, setCaptchaValue] = useState(generateCaptcha)
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
-
-  // Login fields
-  const [loginUsername, setLoginUsername] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [referralCode, setReferralCode] = useState(referralFromUrl)
+  const [registerPassword, setRegisterPassword] = useState('')
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false)
+  const [identifier, setIdentifier] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
   const [showLoginPassword, setShowLoginPassword] = useState(false)
-  const [recoveryStep, setRecoveryStep] = useState<0 | 1 | 2>(0)
+  const [recoveryStage, setRecoveryStage] = useState<0 | 1 | 2>(0)
   const [recoveryEmail, setRecoveryEmail] = useState('')
   const [recoveryCode, setRecoveryCode] = useState('')
-  const [recoveryPassword, setRecoveryPassword] = useState('')
-  const [recoveryConfirmPassword, setRecoveryConfirmPassword] = useState('')
-  const [showRecoveryPassword, setShowRecoveryPassword] = useState(false)
-  const [showRecoveryConfirmPassword, setShowRecoveryConfirmPassword] = useState(false)
-  // const [acceptedTerms, setAcceptedTerms] = useState(false)
-
-  const [loading, setLoading] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [notice, setNotice] = useState('')
 
   useEffect(() => {
-    if (referralFromUrl) {
-      localStorage.setItem('pending_referral_code', referralFromUrl)
-    }
+    if (referralFromUrl) localStorage.setItem('pending_referral_code', referralFromUrl)
   }, [referralFromUrl])
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setShowCountryDropdown(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const trimmedUsername = loginUsername.trim()
-    if (!trimmedUsername || !loginPassword) return
-    setLoading(true)
+  const changeMode = (register: boolean) => {
+    setIsRegistering(register)
+    setRecoveryStage(0)
     setError('')
-    setSuccessMessage('')
+    setNotice('')
+  }
+
+  const finishSession = async (tokens: TokenPair, profile: SessionUser) => {
+    persistTokens(tokens)
+    persistUser(profile)
+    await setIsAuthenticated()
+    navigate(profile.role === 'admin' || profile.is_admin ? '/admin' : '/dashboard')
+  }
+
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBusy(true)
+    setError('')
+    setNotice('')
     try {
-      const res = await api.post('/auth/login', { username: trimmedUsername, password: loginPassword })
-      persistTokens(res.data)
-      const meRes = await api.get('/auth/me')
-      persistUser(meRes.data)
-      await setIsAuthenticated()
-      if (meRes.data.role === 'admin' || meRes.data.is_admin) {
-        navigate('/admin')
-      } else {
-        navigate('/dashboard')
-      }
-    } catch (error: unknown) {
-      setError(apiErrorMessage(error, 'Login failed. Please check your credentials.'))
+      const response = await api.post<TokenPair>('/auth/login', { username: identifier.trim(), password: loginPassword })
+      const profile = await api.get<SessionUser>('/auth/me')
+      await finishSession(response.data, profile.data)
+    } catch (cause) {
+      setError(getApiError(cause, 'We could not sign you in. Check your details and try again.'))
     } finally {
-      setLoading(false)
+      setBusy(false)
     }
   }
 
-  const handleRequestPasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recoveryEmail.trim())) {
-      setError('Please enter the email address linked to your account')
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setError('')
+    setNotice('')
+    const cleanPhone = phone.replace(/\D/g, '')
+    if (cleanPhone.length < 5) {
+      setError('Enter a valid mobile number, including the area code if needed.')
       return
     }
-    setLoading(true)
+    if (registerPassword.length < 8) {
+      setError('Use a password with at least 8 characters.')
+      return
+    }
+    if (new TextEncoder().encode(registerPassword).length > 72) {
+      setError('Password must be 72 UTF-8 bytes or fewer.')
+      return
+    }
+    setBusy(true)
+    try {
+      const fullPhone = `${countryCode}${cleanPhone}`
+      await api.post('/auth/register/final', {
+        phone_number: fullPhone,
+        email: email.trim(),
+        password: registerPassword,
+        referral_code: referralCode.trim() || undefined,
+      })
+      const response = await api.post<TokenPair>('/auth/login', { username: fullPhone, password: registerPassword })
+      const profile = await api.get<SessionUser>('/auth/me')
+      localStorage.removeItem('pending_referral_code')
+      await finishSession(response.data, profile.data)
+    } catch (cause) {
+      setError(getApiError(cause, 'We could not create your account. Check your details and try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const handleRecoveryRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBusy(true)
     setError('')
-    setSuccessMessage('')
+    setNotice('')
     try {
       await api.post('/auth/password-reset/request', { email: recoveryEmail.trim() })
-      setRecoveryStep(2)
-    } catch (error: unknown) {
-      setError(apiErrorMessage(error, 'Unable to send the reset code. Please try again.'))
+      setRecoveryStage(2)
+      setNotice('A reset code is on its way to your inbox.')
+    } catch (cause) {
+      setError(getApiError(cause, 'We could not send the reset code. Try again in a moment.'))
     } finally {
-      setLoading(false)
+      setBusy(false)
     }
   }
 
-  const handleConfirmPasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!/^\d{6}$/.test(recoveryCode)) { setError('Enter the 6-digit code from your email'); return }
-    if (recoveryPassword.length < 8) { setError('Password must be at least 8 characters'); return }
-    if (recoveryPassword !== recoveryConfirmPassword) { setError('Passwords do not match'); return }
-    setLoading(true)
-    setError('')
-    setSuccessMessage('')
-    try {
-      await api.post('/auth/password-reset/confirm', { email: recoveryEmail.trim(), code: recoveryCode, new_password: recoveryPassword })
-      setLoginUsername(recoveryEmail.trim())
-      setLoginPassword('')
-      setRecoveryStep(0)
-      setRecoveryCode('')
-      setRecoveryPassword('')
-      setRecoveryConfirmPassword('')
-      setSuccessMessage('Password reset successfully. You can now log in with your new password.')
-    } catch (error: unknown) {
-      setError(apiErrorMessage(error, 'Invalid or expired reset code.'))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Step 1 → Step 2
-  const handleStep1Next = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    if (!firstName.trim()) { setError('First name is required'); return }
-    if (!lastName.trim()) { setError('Last name is required'); return }
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address'); return
-    }
-    if (!/^[A-Za-z0-9_-]{3,64}$/.test(username)) {
-      setError('Username must be 3–64 characters and use only letters, numbers, hyphens, or underscores'); return
-    }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return }
-    if (password.length > 72) { setError('Password must be no longer than 72 characters'); return }
-    if (password !== confirmPassword) { setError('Passwords do not match'); return }
-    setStep(2)
-  }
-
-  // Step 2 → Register
-  const handleRegisterFinal = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    if (!phoneNumber.trim()) { setError('Phone number is required'); return }
-    if (captchaInput.toLowerCase() !== captchaValue.toLowerCase()) {
-      setError('Verification code is incorrect')
-      setCaptchaValue(generateCaptcha())
-      setCaptchaInput('')
+  const handleRecoveryConfirm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!/^\d{6}$/.test(recoveryCode)) {
+      setError('Enter the six-digit code from your email.')
       return
     }
-    setLoading(true)
-    try {
-      await api.post('/auth/register/final', {
-        username,
-        password,
-        phone_number: `${countryCode}${phoneNumber}`,
-        referral_code: inviteCode.trim() || undefined,
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        email: email.trim(),
-      })
-      const loginResponse = await api.post('/auth/login', { username, password })
-      persistTokens(loginResponse.data)
-      const userResponse = await api.get('/auth/me')
-      persistUser(userResponse.data)
-      localStorage.removeItem('pending_referral_code')
-      await setIsAuthenticated()
-      navigate('/dashboard')
-    } catch (error: unknown) {
-      setError(apiErrorMessage(error, 'Registration failed. Please try again.'))
-      setCaptchaValue(generateCaptcha())
-      setCaptchaInput('')
-    } finally {
-      setLoading(false)
+    if (newPassword.length < 8 || new TextEncoder().encode(newPassword).length > 72) {
+      setError('Choose a password between 8 characters and 72 UTF-8 bytes.')
+      return
     }
-  }
-
-  const resetRegistration = () => {
-    setStep(1)
-    setFirstName('')
-    setLastName('')
-    setEmail('')
-    setUsername('')
-    setInviteCode('')
-    setPassword('')
-    setConfirmPassword('')
-    setPhoneNumber('')
-    setCaptchaInput('')
-    setCaptchaValue(generateCaptcha())
+    if (newPassword !== confirmNewPassword) {
+      setError('Those passwords do not match.')
+      return
+    }
+    setBusy(true)
     setError('')
-    // setAcceptedTerms(false)
-  }
-
-  const selectedCountry = COUNTRY_CODES.find(c => c.code === countryCode) || COUNTRY_CODES[0]
-
-  // ─── Styles ───────────────────────────────────────────────────────────────
-
-  const pageStyle: React.CSSProperties = {
-    minHeight: '100vh',
-    backgroundColor: 'var(--color-canvas)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    fontFamily: 'inherit',
-    padding: '0',
-    position: 'relative',
-    overflowX: 'hidden',
-    overflowY: 'auto',
-  }
-
-  const starsStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundImage: 'none',
-    pointerEvents: 'none',
-    zIndex: 0,
-  }
-
-  const headerStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '16px 24px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    position: 'relative',
-    zIndex: 1,
-  }
-
-  const backBtnStyle: React.CSSProperties = {
-    background: 'transparent',
-    border: '1px solid var(--color-border)',
-    color: 'var(--color-primary)',
-    fontSize: '18px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontWeight: 600,
-    padding: '8px 12px',
-    borderRadius: '4px',
-  }
-
-  const logoContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '16px',
-    position: 'relative',
-    zIndex: 1,
-  }
-
-  const logoBoxStyle: React.CSSProperties = {
-    width: 'min(90px, 20vw)',
-    height: 'min(90px, 20vw)',
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: '4px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: 'var(--card-shadow)',
-    border: '1px solid var(--color-border-subtle)',
-    overflow: 'hidden',
-  }
-
-  const langSelectorStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    padding: '0 20px',
-    marginBottom: '16px',
-    position: 'relative',
-    zIndex: 1,
-  }
-
-  const langBtnStyle: React.CSSProperties = {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    borderRadius: '4px',
-    padding: '8px 14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    color: 'var(--color-text-secondary)',
-  }
-
-  const cardStyle: React.CSSProperties = {
-    width: 'calc(100% - 24px)',
-    maxWidth: '480px',
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: '4px',
-    padding: 'clamp(20px, 5vw, 32px)',
-    boxShadow: 'var(--card-shadow)',
-    border: '1px solid var(--color-border-subtle)',
-    position: 'relative',
-    zIndex: 1,
-    margin: '0 auto 32px',
-    boxSizing: 'border-box',
-  }
-
-  const stepRowStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: '28px',
-    gap: '0',
-  }
-
-  const stepCircle = (active: boolean, completed: boolean) => ({
-    width: '36px',
-    height: '36px',
-    borderRadius: '50%',
-    backgroundColor: active || completed ? 'var(--color-primary)' : 'var(--color-border)',
-    color: active || completed ? 'white' : 'var(--color-text-muted)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 700,
-    fontSize: '15px',
-    flexShrink: 0,
-    zIndex: 1,
-  } as React.CSSProperties)
-
-  const stepLine = (active: boolean) => ({
-    flex: 1,
-    height: '2px',
-    backgroundColor: active ? 'var(--color-primary)' : 'var(--color-border)',
-    margin: '0 4px',
-  } as React.CSSProperties)
-
-  const inputWrapStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: '4px',
-    marginBottom: '12px',
-    padding: '0 12px',
-    height: '48px',
-    border: '1px solid var(--color-border)',
-  }
-
-  const inputStyle: React.CSSProperties = {
-    flex: 1,
-    background: 'none',
-    border: 'none',
-    outline: 'none',
-    color: 'var(--color-text-secondary)',
-    fontSize: '14px',
-    padding: '0 8px',
-    height: '100%',
-  }
-
-  const iconStyle: React.CSSProperties = {
-    color: 'var(--color-text-muted)',
-    fontSize: '18px',
-    flexShrink: 0,
-  }
-
-  const registerBtnStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '11px 16px',
-    fontSize: '14px',
-    fontWeight: 600,
-    backgroundColor: 'var(--color-primary)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginTop: '8px',
-    letterSpacing: '0',
-  }
-
-  const loginBtnStyle: React.CSSProperties = {
-    ...registerBtnStyle,
-    backgroundColor: 'var(--color-primary)',
+    setNotice('')
+    try {
+      const response = await api.post('/auth/password-reset/confirm', {
+        email: recoveryEmail.trim(), code: recoveryCode, new_password: newPassword,
+      })
+      setRecoveryStage(0)
+      setIdentifier(recoveryEmail.trim())
+      setLoginPassword('')
+      setRecoveryCode('')
+      setNewPassword('')
+      setConfirmNewPassword('')
+      setNotice(response.data.message || 'Password updated. Sign in with your new password.')
+    } catch (cause) {
+      setError(getApiError(cause, 'That code could not be verified. Request a fresh code and try again.'))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <div style={pageStyle}>
-      {/* Neutral background layer */}
-      <div style={starsStyle} />
-
-      {/* Header */}
-      <div style={headerStyle}>
-        {isRegistering && step === 2 ? (
-          <button style={backBtnStyle} onClick={() => { setStep(1); setError('') }}>
-            <span style={{ fontSize: '20px' }}>‹</span><span>Back</span>
-          </button>
-        ) : (
-          <Link to="/" style={{ ...backBtnStyle, textDecoration: 'none' }}>
-            <span style={{ fontSize: '20px' }}>‹</span><span>Home</span>
-          </Link>
-        )}
-      </div>
-
-      {/* Logo */}
-      <Link to="/" aria-label="Return to Kinetiq landing page" style={{ ...logoContainerStyle, textDecoration: 'none' }}>
-        <div style={logoBoxStyle}>
-          <img src="/assets/kinetiq-mark.svg" alt="Kinetiq" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+    <main className="auth-scene">
+      <section className="auth-showcase" aria-label="About Kinetiq">
+        <Link className="auth-showcase-brand" to="/" aria-label="Kinetiq home"><BrandMark /><span>Kinetiq</span></Link>
+        <div className="auth-showcase-copy">
+          <span className="auth-kicker"><span className="auth-kicker-dot" /> A workspace built around your momentum</span>
+          <h1>Make room<br />for your next<br /><em>big move.</em></h1>
+          <p>Learn a skill. Take on meaningful tasks. See your progress add up—all from one focused workspace.</p>
+          <div className="auth-orbit-art" aria-hidden="true">
+            <div className="auth-orbit-orbit auth-orbit-orbit--one" />
+            <div className="auth-orbit-orbit auth-orbit-orbit--two" />
+            <div className="auth-orbit-core"><BrandMark /></div>
+            <span className="auth-orbit-chip auth-orbit-chip--one">LEARN <b>↗</b></span>
+            <span className="auth-orbit-chip auth-orbit-chip--two">MAKE <b>✳</b></span>
+            <span className="auth-orbit-chip auth-orbit-chip--three">GROW <b>+</b></span>
+            <span className="auth-orbit-spark auth-orbit-spark--one">✳</span>
+            <span className="auth-orbit-spark auth-orbit-spark--two">✦</span>
+          </div>
         </div>
-      </Link>
+        <div className="auth-showcase-foot"><span>Learn by doing.</span><span>Move at your pace.</span><span>Keep the momentum.</span></div>
+      </section>
 
-      {/* Language selector */}
-      <div style={langSelectorStyle}>
-        <button style={langBtnStyle}>
-          <span>🇺🇸</span>
-          <span>US</span>
-          <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>▼</span>
-        </button>
-      </div>
+      <section className="auth-workspace">
+        <Link className="auth-mobile-brand" to="/" aria-label="Kinetiq home"><BrandMark /><span>Kinetiq</span></Link>
+        <div className="auth-form-card">
+          <div className="auth-mode-switch" role="tablist" aria-label="Account access">
+            <button type="button" role="tab" aria-selected={!isRegistering && recoveryStage === 0} className={!isRegistering && recoveryStage === 0 ? 'is-active' : ''} onClick={() => changeMode(false)}>Sign in</button>
+            <button type="button" role="tab" aria-selected={isRegistering} className={isRegistering ? 'is-active' : ''} onClick={() => changeMode(true)}>Create account</button>
+          </div>
 
-      {/* Card */}
-      <div className="auth-card" style={cardStyle}>
-        <div className="auth-mode-switch" role="tablist" aria-label="Authentication mode">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={!isRegistering}
-            className={!isRegistering ? 'is-active' : ''}
-            onClick={() => { setIsRegistering(false); setStep(1); setRecoveryStep(0); setError(''); resetRegistration() }}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={isRegistering}
-            className={isRegistering ? 'is-active' : ''}
-            onClick={() => { setIsRegistering(true); setStep(1); setRecoveryStep(0); setError('') }}
-          >
-            Register
-          </button>
-        </div>
-        <div className="auth-mode-heading">
-          <h1>{isRegistering ? 'Create your account' : 'Welcome back'}</h1>
-          <p>{isRegistering ? 'Register to access the Kinetiq workspace.' : 'Sign in to continue to your workspace.'}</p>
-        </div>
-        {isRegistering ? (
-          <>
-            {/* Step indicators */}
-            {step < 3 && (
-              <div className="auth-step-row" style={stepRowStyle}>
-                <div style={stepCircle(step === 1, step > 1)}>1</div>
-                <div style={stepLine(step > 1)} />
-                <div style={stepCircle(step === 2, step > 2)}>2</div>
-                <div style={stepLine(step > 2)} />
-                <div style={stepCircle(step === 3, false)}>3</div>
-              </div>
-            )}
-
-            {/* ── STEP 1 ── */}
-            {step === 1 && (
-              <form onSubmit={handleStep1Next}>
-                {/* First Name */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>👤</span>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={e => setFirstName(e.target.value)}
-                    placeholder="First Name"
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-
-                {/* Last Name */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>👤</span>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={e => setLastName(e.target.value)}
-                    placeholder="Last Name"
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>✉️</span>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Email Address"
-                    style={inputStyle}
-                    required
-                  />
-                </div>
-
-                {/* Username */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>@</span>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    placeholder="Username"
-                    style={inputStyle}
-                    minLength={3}
-                    maxLength={64}
-                    autoComplete="username"
-                    required
-                  />
-                </div>
-
-                {/* Invite Code */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>🎟️</span>
-                  <input
-                    type="text"
-                    value={inviteCode}
-                    onChange={e => setInviteCode(e.target.value)}
-                    placeholder="Invite Code (Optional)"
-                    style={inputStyle}
-                  />
-                </div>
-
-                {/* Password */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>🔒</span>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value.slice(0, 72))}
-                    placeholder="Create a password (8–72 characters)"
-                    style={inputStyle}
-                    autoComplete="new-password"
-                    required
-                    maxLength={72}
-                  />
-                  <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showPassword ? '🙈' : '👁️'}</button>
-                </div>
-
-                {/* Confirm Password */}
-                <div style={inputWrapStyle}>
-                  <span style={iconStyle}>🔒</span>
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value.slice(0, 72))}
-                    placeholder="Please enter the password again"
-                    style={inputStyle}
-                    autoComplete="new-password"
-                    required
-                    maxLength={72}
-                  />
-                  <button type="button" onClick={() => setShowConfirmPassword(value => !value)} aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showConfirmPassword ? '🙈' : '👁️'}</button>
-                </div>
-
-                {error && (
-                  <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
-                    {error}
-                  </p>
-                )}
-
-                <button type="submit" style={registerBtnStyle}>
-                  Next
-                </button>
-
-                <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                  Already have an account?{' '}
-                  <span
-                    onClick={() => { setIsRegistering(false); resetRegistration() }}
-                    style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Sign In
-                  </span>
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', justifyContent: 'center' }}>
-                  <input type="checkbox" id="terms" required />
-                  <label htmlFor="terms" style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                    I agree to the <span style={{ color: 'var(--color-primary)' }}>Terms and Conditions</span>
-                  </label>
-                </div>
-              </form>
-            )}
-
-            {/* ── STEP 2 ── */}
-            {step === 2 && (
-              <form onSubmit={handleRegisterFinal}>
-                {/* Chosen username (read-only confirmation) */}
-                <div style={{ ...inputWrapStyle, backgroundColor: 'var(--color-surface-inset)' }}>
-                  <span style={iconStyle}>@</span>
-                  <input
-                    type="text"
-                    value={username}
-                    readOnly
-                    aria-label="Chosen username"
-                    style={{ ...inputStyle, color: 'var(--color-text-muted)', cursor: 'not-allowed' }}
-                  />
-                </div>
-
-                {/* Country Code + Phone Number */}
-                <div className="auth-phone-row" style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-                  {/* Country code selector */}
-                  <div style={{ position: 'relative' }} ref={dropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                        style={{
-                          height: '48px',
-                          backgroundColor: 'var(--color-surface)',
-                          border: '1px solid var(--color-border)',
-                          borderRadius: '10px',
-                          padding: '0 10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          cursor: 'pointer',
-                          color: 'var(--color-text-secondary)',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                      <span>{selectedCountry.flag}</span>
-                      <span>{selectedCountry.code}</span>
-                      <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>▼</span>
-                    </button>
-                    {showCountryDropdown && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '56px',
-                        left: 0,
-                        backgroundColor: 'var(--color-surface)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: '10px',
-                        zIndex: 100,
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        minWidth: '180px',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-                      }}>
-                        {COUNTRY_CODES.map(c => (
-                          <div
-                            key={c.code}
-                            onClick={() => { setCountryCode(c.code); setShowCountryDropdown(false) }}
-                            style={{
-                              padding: '10px 14px',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '10px',
-                              fontSize: '14px',
-                              color: 'var(--color-text-secondary)',
-                              backgroundColor: countryCode === c.code ? 'var(--color-primary-soft)' : 'transparent',
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--color-primary-soft)')}
-                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = countryCode === c.code ? 'var(--color-surface)' : 'transparent')}
-                          >
-                            <span>{c.flag}</span>
-                            <span>{c.name}</span>
-                            <span style={{ marginLeft: 'auto', color: 'var(--color-text-muted)' }}>{c.code}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Phone input */}
-                  <div className="auth-phone-input" style={{ ...inputWrapStyle, flex: 1, marginBottom: 0 }}>
-                    <span style={iconStyle}>📱</span>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={e => setPhoneNumber(e.target.value)}
-                      placeholder="Please enter a mobile phone"
-                      style={inputStyle}
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Captcha row */}
-                <div className="auth-captcha-row" style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-                  <div style={{ ...inputWrapStyle, flex: 1, marginBottom: 0 }}>
-                    <span style={iconStyle}>🔐</span>
-                    <input
-                      type="text"
-                      value={captchaInput}
-                      onChange={e => setCaptchaInput(e.target.value)}
-                      placeholder="Verification Code"
-                      style={inputStyle}
-                      required
-                      maxLength={4}
-                    />
-                  </div>
-                  {/* Captcha display */}
-                  <div
-                    onClick={() => { setCaptchaValue(generateCaptcha()); setCaptchaInput('') }}
-                    title="Click to refresh"
-                    style={{
-                      width: '100px',
-                      height: '48px',
-                      backgroundColor: 'white',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                      overflow: 'hidden',
-                      position: 'relative',
-                    }}
-                  >
-                    <svg width="100" height="48" style={{ position: 'absolute' }}>
-                      {/* Noise lines */}
-                      <line x1="0" y1="15" x2="110" y2="38" stroke="var(--color-text-secondary)" strokeWidth="1" />
-                      <line x1="0" y1="35" x2="110" y2="18" stroke="var(--color-border-subtle)" strokeWidth="1" />
-                      <line x1="20" y1="0" x2="90" y2="52" stroke="var(--color-border-subtle)" strokeWidth="1" />
-                    </svg>
-                    <span style={{
-                      fontSize: '22px',
-                      fontWeight: 900,
-                      fontFamily: 'Georgia, serif',
-                      fontStyle: 'italic',
-                      letterSpacing: '4px',
-                      color: 'var(--color-primary)',
-                      position: 'relative',
-                      zIndex: 1,
-                      userSelect: 'none',
-                      textShadow: 'none',
-                    }}>
-                      {captchaValue}
-                    </span>
-                  </div>
-                </div>
-
-                {error && (
-                  <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
-                    {error}
-                  </p>
-                )}
-
-                <div className="auth-action-row" style={{ display: 'flex', gap: '10px' }}>
-                  <button
-                    type="button"
-                    onClick={() => { setStep(1); setError('') }}
-                    style={{ ...registerBtnStyle, backgroundColor: '#555', flex: 1 }}
-                  >
-                    Back
-                  </button>
-                  <button type="submit" style={{ ...registerBtnStyle, flex: 2 }} disabled={loading}>
-                    {loading ? 'Registering...' : 'Registration'}
-                  </button>
-                </div>
-              </form>
-            )}
-
-          </>
-        ) : (
-          /* ── LOGIN FORM ── */
-          <>
-            {/* Step indicators for login (decorative) */}
-            <div className="auth-step-row" style={stepRowStyle}>
-              <div style={stepCircle(true, false)}>1</div>
-              <div style={stepLine(false)} />
-              <div style={stepCircle(false, false)}>2</div>
-              <div style={stepLine(false)} />
-              <div style={stepCircle(false, false)}>3</div>
-            </div>
-
-            {recoveryStep === 0 ? <>
-            <form onSubmit={handleLogin}>
-              {/* Username */}
-              <div style={inputWrapStyle}>
-                <span style={iconStyle}>👤</span>
-                <input
-                  type="text"
-                  value={loginUsername}
-                  onChange={e => setLoginUsername(e.target.value)}
-                  placeholder="Please enter your username"
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              {/* Password */}
-              <div style={inputWrapStyle}>
-                <span style={iconStyle}>🔒</span>
-                <input
-                  type={showLoginPassword ? 'text' : 'password'}
-                  value={loginPassword}
-                  onChange={e => setLoginPassword(e.target.value)}
-                  placeholder="Please enter your password"
-                  style={inputStyle}
-                  autoComplete="current-password"
-                  required
-                />
-                <button type="button" onClick={() => setShowLoginPassword(value => !value)} aria-label={showLoginPassword ? 'Hide password' : 'Show password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showLoginPassword ? '🙈' : '👁️'}</button>
-              </div>
-
-              {error && (
-                <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>
-                  {error}
-                </p>
+          {recoveryStage > 0 ? (
+            <>
+              <div className="auth-form-heading"><span className="auth-eyebrow">ACCOUNT RECOVERY</span><h2>{recoveryStage === 1 ? 'Let’s get you back in.' : 'Set a new password.'}</h2><p>{recoveryStage === 1 ? 'We’ll email you a one-time reset code.' : `Enter the six-digit code sent to ${recoveryEmail}.`}</p></div>
+              {recoveryStage === 1 ? (
+                <form className="auth-form" onSubmit={handleRecoveryRequest}>
+                  <label className="auth-field"><span>Email address</span><input type="email" autoComplete="email" placeholder="you@example.com" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} required /></label>
+                  <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'Sending code…' : 'Send reset code'} <span>→</span></button>
+                </form>
+              ) : (
+                <form className="auth-form" onSubmit={handleRecoveryConfirm}>
+                  <label className="auth-field"><span>Six-digit code</span><input inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000" value={recoveryCode} onChange={(event) => setRecoveryCode(event.target.value.replace(/\D/g, ''))} required /></label>
+                  <label className="auth-field"><span>New password</span><input type="password" autoComplete="new-password" minLength={8} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required /></label>
+                  <label className="auth-field"><span>Confirm new password</span><input type="password" autoComplete="new-password" minLength={8} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} required /></label>
+                  <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'Updating…' : 'Update password'} <span>→</span></button>
+                </form>
               )}
-              {successMessage && (
-                <p role="status" style={{ color: '#a7f3b8', backgroundColor: 'rgba(34, 197, 94, 0.13)', border: '1px solid rgba(74, 222, 128, 0.32)', borderRadius: '10px', padding: '12px 14px', margin: '8px 0 12px', fontSize: '13px', lineHeight: 1.5, textAlign: 'center' }}>
-                  {successMessage}
-                </p>
-              )}
+              <button className="auth-text-button" type="button" onClick={() => { setRecoveryStage(0); setError(''); setNotice('') }}>← Back to sign in</button>
+            </>
+          ) : isRegistering ? (
+            <>
+              <div className="auth-form-heading"><span className="auth-eyebrow">YOUR NEXT CHAPTER STARTS HERE</span><h2>Create your account.</h2><p>Just the essentials. You can finish your profile later.</p></div>
+              <form className="auth-form" onSubmit={handleRegister}>
+                <label className="auth-field"><span>Mobile number</span><div className="auth-phone-control"><select aria-label="Country calling code" value={countryCode} onChange={(event) => setCountryCode(event.target.value)}>{COUNTRIES.map((country) => <option key={country.code} value={country.code}>{country.flag} {country.code} · {country.name}</option>)}</select><input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="712 345 678" value={phone} onChange={(event) => setPhone(event.target.value.replace(/[^\d\s()-]/g, ''))} required /></div><small>We use this number for secure account access.</small></label>
+                <label className="auth-field"><span>Email address</span><input type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} required /></label>
+                <label className="auth-field"><span>Password</span><div className="auth-password-control"><input type={showRegisterPassword ? 'text' : 'password'} autoComplete="new-password" minLength={8} maxLength={72} placeholder="At least 8 characters" value={registerPassword} onChange={(event) => setRegisterPassword(event.target.value)} required /><button type="button" aria-label={showRegisterPassword ? 'Hide password' : 'Show password'} onClick={() => setShowRegisterPassword((value) => !value)}>{showRegisterPassword ? 'Hide' : 'Show'}</button></div></label>
+                <label className="auth-field"><span>Referral code <small>Optional</small></span><input autoComplete="off" placeholder="Add a code if you have one" value={referralCode} onChange={(event) => setReferralCode(event.target.value)} /></label>
+                <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'Creating your space…' : 'Create my account'} <span>→</span></button>
+              </form>
+              <p className="auth-legal">By continuing, you agree to use your account responsibly and keep your sign-in details private.</p>
+            </>
+          ) : (
+            <>
+              <div className="auth-form-heading"><span className="auth-eyebrow">WELCOME BACK</span><h2>Pick up where<br />you left off.</h2><p>Sign in with the email or mobile number on your account.</p></div>
+              <form className="auth-form" onSubmit={handleLogin}>
+                <label className="auth-field"><span>Email or mobile number</span><input type="text" autoComplete="username" placeholder="Email or +254 712 345 678" value={identifier} onChange={(event) => setIdentifier(event.target.value)} required /></label>
+                <label className="auth-field"><span>Password</span><div className="auth-password-control"><input type={showLoginPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Your password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} required /><button type="button" aria-label={showLoginPassword ? 'Hide password' : 'Show password'} onClick={() => setShowLoginPassword((value) => !value)}>{showLoginPassword ? 'Hide' : 'Show'}</button></div></label>
+                <div className="auth-inline-actions"><span>Secure sign-in</span><button className="auth-text-button" type="button" onClick={() => { setRecoveryEmail(identifier.includes('@') ? identifier : ''); setRecoveryStage(1); setError(''); setNotice('') }}>Forgot password?</button></div>
+                <button className="auth-submit" type="submit" disabled={busy}>{busy ? 'Signing you in…' : 'Sign in'} <span>→</span></button>
+              </form>
+              <p className="auth-legal">New here? <button className="auth-inline-link" type="button" onClick={() => changeMode(true)}>Create a free account</button></p>
+            </>
+          )}
 
-              <button type="submit" style={loginBtnStyle} disabled={loading}>
-                {loading ? 'Signing in...' : 'Login'}
-              </button>
-            </form>
-            <button type="button" onClick={() => { setRecoveryStep(1); setRecoveryEmail(''); setError(''); setSuccessMessage('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Forgot password?</button>
-            </> : (
-              <>
-                <h2 style={{ color: 'var(--color-text-secondary)', fontSize: '21px', textAlign: 'center', margin: '0 0 10px' }}>{recoveryStep === 1 ? 'Reset your password' : 'Enter reset code'}</h2>
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '13px', lineHeight: 1.5, textAlign: 'center', margin: '0 0 20px' }}>{recoveryStep === 1 ? 'Enter the email linked to your account and we will send you a 6-digit code.' : `We sent a 6-digit code to ${recoveryEmail}. The code expires in 10 minutes.`}</p>
-                {recoveryStep === 1 ? (
-                  <form onSubmit={handleRequestPasswordReset}>
-                    <div style={inputWrapStyle}><span style={iconStyle}>✉️</span><input type="email" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} placeholder="Email address" style={inputStyle} autoComplete="email" required /></div>
-                    {error && <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>{error}</p>}
-                    <button type="submit" style={loginBtnStyle} disabled={loading}>{loading ? 'Sending code...' : 'Send reset code'}</button>
-                  </form>
-                ) : (
-                  <form onSubmit={handleConfirmPasswordReset}>
-                    <div style={inputWrapStyle}><span style={iconStyle}>🔢</span><input type="text" inputMode="numeric" maxLength={6} value={recoveryCode} onChange={(event) => setRecoveryCode(event.target.value.replace(/\D/g, ''))} placeholder="6-digit code" style={inputStyle} autoComplete="one-time-code" required /></div>
-                    <div style={inputWrapStyle}><span style={iconStyle}>🔒</span><input type={showRecoveryPassword ? 'text' : 'password'} value={recoveryPassword} onChange={(event) => setRecoveryPassword(event.target.value)} placeholder="New password" style={inputStyle} autoComplete="new-password" minLength={8} required /><button type="button" onClick={() => setShowRecoveryPassword((value) => !value)} aria-label={showRecoveryPassword ? 'Hide new password' : 'Show new password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showRecoveryPassword ? '🙈' : '👁️'}</button></div>
-                    <div style={inputWrapStyle}><span style={iconStyle}>🔒</span><input type={showRecoveryConfirmPassword ? 'text' : 'password'} value={recoveryConfirmPassword} onChange={(event) => setRecoveryConfirmPassword(event.target.value)} placeholder="Confirm new password" style={inputStyle} autoComplete="new-password" minLength={8} required /><button type="button" onClick={() => setShowRecoveryConfirmPassword((value) => !value)} aria-label={showRecoveryConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'} style={{ ...iconStyle, background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}>{showRecoveryConfirmPassword ? '🙈' : '👁️'}</button></div>
-                    {error && <p style={{ color: 'var(--color-danger)', fontSize: '13px', marginBottom: '10px', textAlign: 'center' }}>{error}</p>}
-                    <button type="submit" style={loginBtnStyle} disabled={loading}>{loading ? 'Updating password...' : 'Set new password'}</button>
-                  </form>
-                )}
-                <button type="button" onClick={() => { setRecoveryStep(0); setError(''); setSuccessMessage('') }} style={{ width: '100%', marginTop: '14px', border: 'none', background: 'transparent', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Back to login</button>
-              </>
-            )}
-
-            <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
-              Don't have an account?{' '}
-              <span
-                onClick={() => { setIsRegistering(true); setError('') }}
-                style={{ color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 600 }}
-              >
-                Register Now
-              </span>
-            </p>
-          </>
-        )}
-      </div>
-    </div>
+          {error && <div className="auth-feedback auth-feedback--error" role="alert">{error}</div>}
+          {notice && <div className="auth-feedback auth-feedback--success" role="status">{notice}</div>}
+        </div>
+        <Link className="auth-home-link" to="/">← Back to Kinetiq home</Link>
+      </section>
+    </main>
   )
 }

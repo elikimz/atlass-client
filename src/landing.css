@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
-:root{--k-ink:#202a25;--k-muted:#69736d;--k-paper:#f5f3ed;--k-white:#fffefa;--k-line:#dcded5;--k-orange:#e2603e;--k-lime:#d9ed74;--k-dark:#24352e;--k-serif:Georgia,'Times New Roman',serif;--k-mono:'DM Mono',monospace}
+:root{--k-ink:#211d3b;--k-muted:#77738f;--k-paper:#f3f2fa;--k-white:#fff;--k-line:#dfdced;--k-orange:#6847f5;--k-lime:#dfff5b;--k-dark:#241d55;--k-serif:Georgia,'Times New Roman',serif;--k-mono:ui-monospace,SFMono-Regular,Consolas,monospace}
 .kinetiq-landing{min-height:100vh;background:var(--k-paper);color:var(--k-ink);font-family:'DM Sans',Inter,system-ui,sans-serif;overflow:hidden}
 .kinetiq-landing *{box-sizing:border-box}.kinetiq-landing a{color:inherit}.kinetiq-skip{position:fixed;z-index:200;left:15px;top:12px;padding:10px 14px;background:var(--k-ink);color:white!important;transform:translateY(-150%);text-decoration:none}.kinetiq-skip:focus{transform:translateY(0)}
 .kinetiq-header{position:relative;z-index:30;width:min(1380px,calc(100% - 96px));height:92px;margin:auto;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--k-line)}

@@ -1,31 +1,26 @@
-# Kinetiq rebrand and frontend redesign — implementation report
+# Kinetiq interface refresh — implementation report
 
-## Brand and visual changes
+## What changed
 
-The frontend now presents **Kinetiq**, positioned as a practical workspace for skill-building, digital promotion tasks, account activity, and referrals. The new identity uses a custom geometric mark, a warm paper-and-forest palette, a persimmon accent, and a restrained editorial type/layout system. The former dark, lime-accented AdPulseAI styling is replaced on the marketing page and carried into member, admin, authentication, and PWA surfaces.
+The previous warm paper/forest/persimmon presentation has been replaced with a high-contrast ultraviolet, cyan, and citron identity. The landing page, sign-in/sign-up, member shell, dashboard, PWA icons, and global surfaces share the updated palette and orbit motif. External Google Fonts were removed so the first visit uses system fonts without waiting on a third-party font request.
 
-The public landing page has a new composition and copy. Shared styling refreshes the user/admin shells, navigation, forms, tables, auth card, responsive spacing, and focus surfaces. Browser title/metadata, favicon, PWA manifest, install prompt, route titles, and service-worker cache entries have been updated. New icon assets are in `public/assets/kinetiq-*`.
+The account creation screen is now a single concise flow: mobile number, email, password, and an optional referral code. It no longer asks users for a username, first/last name, CAPTCHA, or repeated password. The backend accepts this payload, creates a unique internal username, and supports sign-in by phone, while keeping existing username/email sign-in, old registration payloads, referral attribution, password reset, and session contracts compatible.
 
-## Scope and preserved behavior
+The member dashboard has a new responsive layout with account balances, an earnings chart based on the existing API history, activity breakdown, learning progress, and quick links to existing routes. Balance and earnings calculations remain server-derived; displayed recharge funds remain separate from earnings. Existing community gate, PWA installation, referral-network, and route behavior are retained. Page modules are split into route-level lazy-loaded chunks; the main JS bundle is approximately 362 kB raw / 114 kB gzip in the production build.
 
-The implementation changes frontend presentation, brand strings, metadata, route manifest titles, and the PWA shell cache. Existing frontend routes, login/register/referral query handling, auth/session services, API clients, mutation handlers, forms, validation, access gates, and endpoint contracts were not intentionally changed. The Android package ID and Digital Asset Links association files were left intact. No backend file was modified; no migrations, database writes, real payment operations, production configuration, push, or deployment were performed.
+## Validation
 
-The backend audit identified existing issues outside this visual rebrand, including a Vercel API/sitemap rewrite host mismatch with the frontend's configured Atlas API endpoint and a CORS settings/middleware mismatch. These have not been changed and should be reviewed separately before release.
+- `npm run build` passed, including TypeScript and Vite production output.
+- ESLint passed for all modified React components: `App.tsx`, `Layout.tsx`, `Login.tsx`, and `Dashboard.tsx`.
+- The complete backend suite passed: **35 passed, 1 skipped**, using in-memory SQLite and a disposable test signing key. No production database or payment operation was used. The skip is the existing PostgreSQL-only test.
+- Chromium end-to-end tests passed against the actual frontend and an isolated localhost mock API: public landing with referral query; registration sends only phone/email/password/referral; referral prefill survives; the new session opens the dashboard; independent phone-number sign-in works; live dashboard fixture/chart renders; no browser JavaScript exceptions or console errors; mobile 390px signup and dashboard fit without horizontal overflow.
+- The responsive screenshots from those tests show the landing page, dashboard, and compact signup flow. These are test-fixture previews, not live customer data.
+- No Google Font request remains. Icon, manifest theme, and service-worker cache version were refreshed.
 
-## Validation performed
+A previous full-project lint audit found 60 errors and 6 warnings that also reproduce on the original source branch; this update was linted at the changed React-file level. Dependency versions were not changed.
 
-- `npm ci` completed using the committed lockfile.
-- `npm run build` passed (TypeScript and Vite production build). Vite emitted its existing large-chunk advisory for the roughly 692 kB minified JS bundle.
-- Runtime smoke check: landing page, route manifest, and new SVG mark returned HTTP 200; Vite transformed the landing, user shell, admin shell, and login modules with HTTP 200.
-- Route-manifest static check: all 40 source route patterns in `src/App.tsx` are represented; no missing source routes were found. The five new brand/icon assets referenced by metadata exist.
-- Backend suite: `34 passed, 1 skipped` with `DATABASE_URL=sqlite+aiosqlite:///:memory:` and a local test-only `SECRET_KEY`. Tests ran against in-memory SQLite; no production/live database was contacted. The skip is the existing PostgreSQL-only concurrency check.
-- `npm run lint` remains failing with 60 errors and 6 warnings. A clean checkout of the original branch produces the same 60 errors and 6 warnings. The three findings in touched files (`PWAInstall.tsx`, `InvestmentPlans.tsx`, and `Training.tsx`) also exist in the original source; they concern existing React-export/type-lint patterns, not this visual work.
-- `npm ci` reported 14 dependency audit advisories (1 low, 2 moderate, 11 high); dependency versions were not changed as part of the rebrand.
+## Scope and release notes
 
-## Verification limits and release status
+Only the frontend presentation, component loading strategy, PWA branding/cache metadata, and backend auth request handling were changed. No database migration was added. Wallet formulas, plan eligibility, payment/withdrawal/M-Pesa operations, password hashing, and existing account records were not changed. Generated usernames are internal database identifiers and are not requested from the member.
 
-No authenticated browser session or payment credentials were available, so the complete frontend login/signup/reset, role-gated navigation, wallet/payment, M-Pesa, referral, and admin journeys were not exercised end-to-end against a live or staging API. No visual browser screenshots, keyboard/screen-reader audit, or physical-device responsive checks were performed. The redesign is **ready for code review and controlled staging validation, not production deployment**. In staging, exercise the actual authenticated flows and confirm the intended API host/rewrite before any release.
-
-## Repository state
-
-Changes are in the frontend checkout on branch `main`, based on the clean checked-out repository. They are uncommitted and unpushed. The backend checkout remains clean. See the working tree status for the exact modified and added files.
+Browser E2E used a local test API, not the production API, credentials, or accounts. The design is exercised at desktop and phone-sized browser viewports; admin styling follows the shared design system but was not part of the browser-authenticated E2E flow. Automated branch checks/deployment availability are controlled by the repositories and should be confirmed from their GitHub workflow/deployment status after the source push.

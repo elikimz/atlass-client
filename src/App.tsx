@@ -1,45 +1,49 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useCallback, useEffect, type ComponentType } from 'react'
+import { lazy, Suspense, useCallback, useEffect, type ComponentType } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Toaster, type ToasterProps } from 'react-hot-toast'
 
-import Login from './pages/Login'
-import LandingPage from './pages/LandingPage'
-import Dashboard from './pages/Dashboard'
-import Training from './pages/Training'
-import LearningHub from './pages/LearningHub'
-import Tasks from './pages/Tasks'
-import Referrals from './pages/Referrals'
-import Invite from './pages/Invite'
-import Payments from './pages/Payments'
-import Feedback from './pages/Feedback'
-import Settings from './pages/Settings'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminTasks from './pages/AdminTasks'
-import AdminTraining from './pages/AdminTraining'
-import AdminUsers from './pages/AdminUsers'
-import AdminPasswordManagement from './pages/AdminPasswordManagement'
-import AdminPayments from './pages/AdminPayments'
-import AdminPlans from './pages/AdminPlans'
-import AdminInvites from './pages/AdminInvites'
-import AdminNotifications from './pages/AdminNotifications'
-import TaskPlayer from './pages/TaskPlayer'
-import InvestmentPlans from './pages/InvestmentPlans'
-import WithdrawFunds from './pages/WithdrawFunds'
-import WithdrawalAccounts from './pages/WithdrawalAccounts'
-import Recharge from './pages/Recharge'
-import MpesaPayment from './pages/MpesaPayment'
-import PaymentMethodMaintenance from './pages/PaymentMethodMaintenance'
+const Login = lazy(() => import('./pages/Login'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Training = lazy(() => import('./pages/Training'))
+const LearningHub = lazy(() => import('./pages/LearningHub'))
+const Tasks = lazy(() => import('./pages/Tasks'))
+const Referrals = lazy(() => import('./pages/Referrals'))
+const Invite = lazy(() => import('./pages/Invite'))
+const Payments = lazy(() => import('./pages/Payments'))
+const Feedback = lazy(() => import('./pages/Feedback'))
+const Settings = lazy(() => import('./pages/Settings'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const AdminTasks = lazy(() => import('./pages/AdminTasks'))
+const AdminTraining = lazy(() => import('./pages/AdminTraining'))
+const AdminUsers = lazy(() => import('./pages/AdminUsers'))
+const AdminPasswordManagement = lazy(() => import('./pages/AdminPasswordManagement'))
+const AdminPayments = lazy(() => import('./pages/AdminPayments'))
+const AdminPlans = lazy(() => import('./pages/AdminPlans'))
+const AdminInvites = lazy(() => import('./pages/AdminInvites'))
+const AdminNotifications = lazy(() => import('./pages/AdminNotifications'))
+const TaskPlayer = lazy(() => import('./pages/TaskPlayer'))
+const InvestmentPlans = lazy(() => import('./pages/InvestmentPlans'))
+const WithdrawFunds = lazy(() => import('./pages/WithdrawFunds'))
+const WithdrawalAccounts = lazy(() => import('./pages/WithdrawalAccounts'))
+const Recharge = lazy(() => import('./pages/Recharge'))
+const MpesaPayment = lazy(() => import('./pages/MpesaPayment'))
+const PaymentMethodMaintenance = lazy(() => import('./pages/PaymentMethodMaintenance'))
+const Placeholder = lazy(() => import('./pages/Placeholder'))
+const PaymentHistory = lazy(() => import('./pages/PaymentHistory'))
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
-import Placeholder from './pages/Placeholder'
-import PaymentHistory from './pages/PaymentHistory'
 import { AppUpdatePrompt, OfflineStatus } from './components/PWAInstall'
 import api from './services/api'
 import { clearSession, hasSession, persistUser } from './services/session'
 import { queryKeys } from './services/queryClient'
 
 const ToastContainer = Toaster as unknown as ComponentType<ToasterProps>
+
+function RouteLoading() {
+  return <div className="orbit-state" role="status"><span className="orbit-loader" /><p>Opening your workspace…</p></div>
+}
 
 function TrainingRoute() {
   return <Training />
@@ -120,6 +124,7 @@ function AppContent() {
       <OfflineStatus />
       <AppUpdatePrompt />
       <ToastContainer position="top-center" reverseOrder={false} />
+      <Suspense fallback={<RouteLoading />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login setIsAuthenticated={checkAuth} />} />
@@ -191,6 +196,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/login" />} />
         )}
       </Routes>
+      </Suspense>
     </Router>
   )
 }

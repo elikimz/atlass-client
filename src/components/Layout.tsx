@@ -56,9 +56,11 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const firstName = user?.first_name || localStorage.getItem('user_first_name') || 'User'
-  const lastName = user?.last_name || localStorage.getItem('user_last_name') || ''
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
+  const emailName = userEmail.split('@')[0]?.split(/[._+-]/).filter(Boolean)[0] || ''
+  const fallbackName = emailName ? emailName.charAt(0).toUpperCase() + emailName.slice(1) : 'Member'
+  const firstName = user?.first_name?.trim() || localStorage.getItem('user_first_name') || fallbackName
+  const lastName = user?.last_name?.trim() || localStorage.getItem('user_last_name') || ''
   const isAdminUser = user?.is_admin || localStorage.getItem('user_is_admin') === 'true'
   const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
 
@@ -245,7 +247,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
               </div>
               {!isMobile && (
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>{firstName} {lastName}</span>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>{firstName}{lastName ? ` ${lastName}` : ''}</span>
                   <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{userEmail}</span>
                 </div>
               )}
