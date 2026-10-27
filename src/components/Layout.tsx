@@ -132,8 +132,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         }}>
           <div className="app-sidebar-header" style={{ padding: '20px 20px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
-              <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>AdPulseAI</span>
+              <img src="/assets/kinetiq-mark.svg" alt="Kinetiq Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
+              <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>Kinetiq</span>
             </div>
           </div>
 
@@ -224,8 +224,8 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/assets/logo.png" alt="AdPulseAI Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)' }}>AdPulseAI</span>
+                <img src="/assets/kinetiq-mark.svg" alt="Kinetiq Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
+                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)' }}>Kinetiq</span>
               </div>
             )}
             {!isMobile && (

@@ -456,9 +456,9 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       </div>
 
       {/* Logo */}
-      <Link to="/" aria-label="Return to AdPulseAI landing page" style={{ ...logoContainerStyle, textDecoration: 'none' }}>
+      <Link to="/" aria-label="Return to Kinetiq landing page" style={{ ...logoContainerStyle, textDecoration: 'none' }}>
         <div style={logoBoxStyle}>
-          <img src="/assets/logo.png" alt="AdPulseAI" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
+          <img src="/assets/kinetiq-mark.svg" alt="Kinetiq" style={{ width: '80px', height: '80px', objectFit: 'contain' }} />
         </div>
       </Link>
 
@@ -495,7 +495,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
         </div>
         <div className="auth-mode-heading">
           <h1>{isRegistering ? 'Create your account' : 'Welcome back'}</h1>
-          <p>{isRegistering ? 'Register to access the AdPulseAI workspace.' : 'Sign in to continue to your workspace.'}</p>
+          <p>{isRegistering ? 'Register to access the Kinetiq workspace.' : 'Sign in to continue to your workspace.'}</p>
         </div>
         {isRegistering ? (
           <>

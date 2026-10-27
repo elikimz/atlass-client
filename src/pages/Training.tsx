@@ -97,7 +97,7 @@ export default function Training() {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', 'AdPulseAI_Certificate.pdf')
+      link.setAttribute('download', 'Kinetiq_Certificate.pdf')
       document.body.appendChild(link)
       link.click()
       setTimeout(() => {

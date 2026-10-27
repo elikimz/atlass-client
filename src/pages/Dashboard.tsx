@@ -83,7 +83,7 @@ function WhatsAppJoinGate() {
         </div>
         <h2 id="whatsapp-join-title">Join Our <span>WhatsApp</span> Group</h2>
         <p className="whatsapp-gate-description">
-          Join the official AdPulseAI community for announcements, support, and important updates before continuing to your dashboard.
+          Join the official Kinetiq community for announcements, support, and important updates before continuing to your dashboard.
         </p>
         {hasGroupLink ? (
           <a

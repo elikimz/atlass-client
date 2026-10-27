@@ -70,8 +70,8 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
       <div className="admin-sidebar" style={{ position: isMobile ? 'fixed' : 'relative', top: 0, left: 0, bottom: 0, width: '248px', backgroundColor: '#1d2327', color: '#f0f0f1', display: (isMobile && !isMenuOpen) ? 'none' : 'flex', flexDirection: 'column', boxShadow: 'var(--sidebar-shadow)', zIndex: 1000, transition: 'transform 0.3s ease-in-out', transform: (isMobile && !isMenuOpen) ? 'translateX(-100%)' : 'translateX(0)' }}>
         <div className="admin-sidebar-header" style={{ padding: '20px', borderBottom: '1px solid #50575e', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/logo.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-            <div><div style={{ fontSize: '16px', fontWeight: 600 }}>AdPulseAI</div><div style={{ fontSize: '12px', color: '#a7aaad' }}>Admin Portal</div></div>
+            <img src="/assets/kinetiq-mark.svg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
+            <div><div style={{ fontSize: '16px', fontWeight: 600 }}>Kinetiq</div><div style={{ fontSize: '12px', color: '#a7aaad' }}>Admin Portal</div></div>
           </div>
           {isMobile && <button onClick={() => setIsMenuOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted-sidebar)', fontSize: '20px', cursor: 'pointer' }}>✕</button>}
         </div>

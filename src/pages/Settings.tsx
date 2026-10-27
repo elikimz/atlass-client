@@ -151,7 +151,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', 'AdPulseAI_Certificate.pdf')
+      link.setAttribute('download', 'Kinetiq_Certificate.pdf')
       document.body.appendChild(link)
       link.click()
       setTimeout(() => {
@@ -302,7 +302,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
           <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🎓</div>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Certifications</h2>
         </div>
-        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '0 0 20px' }}>Download your official AdPulseAI Training Certificate once you have completed all required training modules.</p>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '0 0 20px' }}>Download your official Kinetiq Training Certificate once you have completed all required training modules.</p>
         <button 
           onClick={handleDownloadCertificate}
           disabled={!isTrained || downloading}

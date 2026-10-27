@@ -106,17 +106,17 @@ export default function AndroidAppPrompt() {
         aria-describedby="android-app-prompt-description"
       >
         <div className="android-app-prompt-brand" aria-hidden="true">
-          <img src="/icons/icon-192.png" alt="" />
-          <span>AdPulse<span>AI</span></span>
+          <img src="/assets/kinetiq-icon-192.png" alt="" />
+          <span>Kinetiq</span>
         </div>
         <p className="android-app-prompt-overline">Choose how to continue</p>
-        <h2 id="android-app-prompt-title">Open AdPulseAI your way.</h2>
+        <h2 id="android-app-prompt-title">Open Kinetiq your way.</h2>
         <p id="android-app-prompt-description">
-          Use the AdPulseAI app for a focused mobile experience, or continue securely in your browser.
+          Use the Kinetiq app for a focused mobile experience, or continue securely in your browser.
         </p>
         <div className="android-app-prompt-actions">
           <button ref={openAppButtonRef} className="android-app-prompt-primary" type="button" onClick={openApp}>
-            Open AdPulseAI app <span aria-hidden="true">↗</span>
+            Open Kinetiq app <span aria-hidden="true">↗</span>
           </button>
           <button className="android-app-prompt-secondary" type="button" onClick={continueInBrowser}>
             Continue in browser

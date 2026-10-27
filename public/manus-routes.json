@@ -1,1 +1,164 @@
-{"routes":[{"path":"/","title":"AdPulseAI home"},{"path":"/login","title":"Log in"},{"path":"/dashboard","title":"Dashboard"},{"path":"/training","title":"Training"},{"path":"/training/hub","title":"Learning hub"},{"path":"/tasks","title":"My tasks"},{"path":"/tasks/:taskId","title":"Task"},{"path":"/plans","title":"Plans"},{"path":"/referrals","title":"Invite"},{"path":"/referrals-old","title":"Referrals"},{"path":"/payments","title":"Payments"},{"path":"/payments/history","title":"Payment history"},{"path":"/payments/recharge","title":"Recharge"},{"path":"/payments/mpesa","title":"M-Pesa payment"},{"path":"/payments/maintenance/:method","title":"Payment maintenance"},{"path":"/payments/payout","title":"Withdraw funds"},{"path":"/withdrawal-accounts","title":"Withdrawal accounts"},{"path":"/feedback","title":"Feedback"},{"path":"/settings","title":"Settings"},{"path":"/admin","title":"Admin dashboard"},{"path":"/admin/tasks","title":"Admin tasks"},{"path":"/admin/training","title":"Admin training"},{"path":"/admin/users","title":"Admin users"},{"path":"/admin/password-management","title":"Password management"},{"path":"/admin/payments","title":"Admin payments"},{"path":"/admin/plans","title":"Admin plans"},{"path":"/admin/invites","title":"Admin invites"},{"path":"/admin/notifications","title":"Admin notifications"}]}
+{
+  "routes": [
+    {
+      "path": "/",
+      "title": "Kinetiq home"
+    },
+    {
+      "path": "/login",
+      "title": "Sign in or create account"
+    },
+    {
+      "path": "/dashboard",
+      "title": "Dashboard"
+    },
+    {
+      "path": "/training",
+      "title": "Training"
+    },
+    {
+      "path": "/training/hub",
+      "title": "Learning hub"
+    },
+    {
+      "path": "/tasks",
+      "title": "My tasks"
+    },
+    {
+      "path": "/tasks/:taskId",
+      "title": "Task"
+    },
+    {
+      "path": "/plans",
+      "title": "Plans"
+    },
+    {
+      "path": "/referrals",
+      "title": "Invites"
+    },
+    {
+      "path": "/payments",
+      "title": "Payments"
+    },
+    {
+      "path": "/payments/history",
+      "title": "Payment history"
+    },
+    {
+      "path": "/payments/recharge",
+      "title": "Recharge"
+    },
+    {
+      "path": "/payments/mpesa",
+      "title": "M-Pesa payment"
+    },
+    {
+      "path": "/payments/maintenance/:method",
+      "title": "Payment method"
+    },
+    {
+      "path": "/payments/payout",
+      "title": "Withdraw funds"
+    },
+    {
+      "path": "/withdrawal-accounts",
+      "title": "Withdrawal accounts"
+    },
+    {
+      "path": "/settings",
+      "title": "Settings"
+    },
+    {
+      "path": "/admin",
+      "title": "Admin dashboard"
+    },
+    {
+      "path": "/admin/tasks",
+      "title": "Admin tasks"
+    },
+    {
+      "path": "/admin/training",
+      "title": "Admin training"
+    },
+    {
+      "path": "/admin/users",
+      "title": "Admin users"
+    },
+    {
+      "path": "/admin/password-management",
+      "title": "Password management"
+    },
+    {
+      "path": "/admin/payments",
+      "title": "Admin payments"
+    },
+    {
+      "path": "/admin/plans",
+      "title": "Admin plans"
+    },
+    {
+      "path": "/admin/invites",
+      "title": "Admin invites"
+    },
+    {
+      "path": "/admin/notifications",
+      "title": "Admin notifications"
+    },
+    {
+      "path": "*",
+      "title": ""
+    },
+    {
+      "path": "/product",
+      "title": "Product"
+    },
+    {
+      "path": "/customers",
+      "title": "Customers"
+    },
+    {
+      "path": "/income",
+      "title": "Income"
+    },
+    {
+      "path": "/promote",
+      "title": "Promote"
+    },
+    {
+      "path": "/help",
+      "title": "Help"
+    },
+    {
+      "path": "/referrals-old",
+      "title": "Referrals"
+    },
+    {
+      "path": "/payments/withdrawal",
+      "title": "Withdrawal accounts"
+    },
+    {
+      "path": "/payments/deposit",
+      "title": "Deposit wallet"
+    },
+    {
+      "path": "/payments/earnings",
+      "title": "Earnings"
+    },
+    {
+      "path": "/payments/referral",
+      "title": "Referral commission"
+    },
+    {
+      "path": "/payments/rebate",
+      "title": "Task rebate"
+    },
+    {
+      "path": "/payments/periods",
+      "title": "Earning periods"
+    },
+    {
+      "path": "/feedback",
+      "title": "Feedback"
+    }
+  ]
+}
