@@ -29,6 +29,6 @@ Task eligibility/session timing and reward idempotency are enforced server-side;
 
 ## Safety and scope
 
-All browser fixtures were local/mocked. No production signup, plan purchase, recharge, payout, or withdrawal-account mutation was attempted. Production behavior remains governed by existing backend checks; fixture tests prove the client journey and request shapes, not live API availability. Verify the latest frontend deployment after the authorized main-branch push; Azure API readiness was not established by these frontend-only checks.
+All browser fixtures were local/mocked. No production signup, plan purchase, recharge, payout, or withdrawal-account mutation was attempted. The Vercel production deployment for frontend commit `05fefe5` reported success. Read-only checks against the public `atlass-client.vercel.app` alias returned the 39-route manifest and the new dashboard chunk (earnings chart/recent activity copy) and slate CSS; Azure API readiness was not established by these frontend-only checks.
 
 Screenshots are in the task workspace: `kinetiq-redesign-signup-mobile.png`, `kinetiq-redesign-dashboard-desktop.png`, `kinetiq-redesign-dashboard-mobile.png`, `kinetiq-redesign-plans-after.png`, `kinetiq-redesign-referrals-desktop.png`, `kinetiq-recharge-pending-review.png`, `kinetiq-payout-under-review.png` and `kinetiq-admin-dashboard-mobile.png`.
