@@ -1,228 +1,39 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
-import toast from 'react-hot-toast'
+import { queryKeys } from '../services/queryClient'
 
-interface TrainingCourse {
-  id: number
-  name: string
-  description: string
-  duration: string
-  videoUrl: string
-  status: 'available' | 'in_progress' | 'completed'
-  icon?: string
-}
+type Course = { id: number; name: string; description?: string; estimated_time?: string; video_url?: string; status?: 'available' | 'in_progress' | 'completed'; is_active?: boolean }
+type User = { is_trained?: boolean }
 
 export default function Training() {
-  const navigate = useNavigate()
-  const [courses, setCourses] = useState<TrainingCourse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [watchingCourseId, setWatchingCourseId] = useState<number | null>(null)
-  const [videoWatched, setVideoWatched] = useState(false)
-  const [isTrained, setIsTrained] = useState(false)
-  const [downloading, setDownloading] = useState(false)
+  const client = useQueryClient()
+  const [courseView, setCourseView] = useState<Course | null>(null)
+  const [pending, setPending] = useState<number | null>(null)
+  const [actionError, setActionError] = useState('')
+  const user = useQuery({ queryKey: queryKeys.auth.currentUser, queryFn: async () => (await api.get<User>('/auth/me')).data, staleTime: 300000 })
+  const courses = useQuery({ queryKey: ['training', 'certifications'], queryFn: async () => (await api.get<Course[]>('/training/certifications')).data, staleTime: 60000 })
+  const activeCourses = (courses.data ?? []).filter((course) => course.is_active !== false)
+  useEffect(() => { if (user.data?.is_trained) localStorage.setItem('user_is_trained', 'true') }, [user.data?.is_trained])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userRes = await api.get('/auth/me')
-        const user = userRes.data
-        const trained = !!user.is_trained
-        localStorage.setItem('user_is_trained', trained ? 'true' : 'false')
-        setIsTrained(trained)
-
-        if (trained) {
-          setLoading(false)
-          return
-        }
-
-        const certsRes = await api.get('/training/certifications')
-        const certs = certsRes.data
-        const mappedCourses: TrainingCourse[] = certs.map((cert: any) => ({
-          id: cert.id,
-          name: cert.name || 'Video Reviewing Mastery',
-          description: cert.description || 'Master the essentials of video assessment in this focused module.',
-          duration: cert.estimated_time || '15 mins / 1 Video',
-          videoUrl: cert.video_url || '',
-          status: cert.status,
-          icon: '🎬'
-        }))
-        setCourses(mappedCourses)
-      } catch (err) {
-        console.error('Failed to fetch training data', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  const handleStartTraining = async (courseId: number) => {
-    const course = courses.find(c => c.id === courseId)
-    if (!course || course.status === 'completed' || isTrained) return
+  const runAction = async (course: Course, action: 'start' | 'complete') => {
+    setPending(course.id); setActionError('')
     try {
-      await api.post(`/training/certifications/${courseId}/start`)
-      setWatchingCourseId(courseId)
-    } catch (err) {
-      console.error('Failed to start training', err)
-      toast.error('Failed to start training. Please try again.')
-    }
+      await api.post(`/training/certifications/${course.id}/${action}`)
+      await Promise.all([client.invalidateQueries({ queryKey: ['training', 'certifications'] }), client.invalidateQueries({ queryKey: queryKeys.auth.currentUser })])
+      if (action === 'start') setCourseView(course)
+      else setCourseView(null)
+    } catch (error) {
+      const detail = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail
+      setActionError(detail || `Could not ${action} this course. Check your connection and try again.`)
+    } finally { setPending(null) }
   }
 
-  const handleVideoComplete = async (courseId: number) => {
-    const toastId = toast.loading('Completing training...')
-    try {
-      await api.post(`/training/certifications/${courseId}/complete`)
-      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'completed' } : c))
-      setVideoWatched(true)
-      setIsTrained(true)
-      localStorage.setItem('user_is_trained', 'true')
-      setWatchingCourseId(null)
-      setVideoWatched(false)
-      toast.success('Training completed successfully!', { id: toastId })
-      setTimeout(() => navigate('/plans', { replace: true }), 2000)
-    } catch (err) {
-      console.error('Failed to complete training', err)
-      toast.error('Failed to complete training. Please try again.', { id: toastId })
-    }
-  }
+  if (user.isLoading || courses.isLoading) return <section className="member-page-state" role="status"><span className="member-loading-indicator" />Loading your learning record…</section>
+  if (user.isError || courses.isError) return <section className="member-page-state member-page-state--error" role="alert"><h2>Learning data is unavailable.</h2><p>Your course progress was not changed.</p><button className="member-button member-button--primary" onClick={() => { void user.refetch(); void courses.refetch() }}>Try again</button></section>
 
-  const handleDownloadCertificate = async () => {
-    if (downloading) return
-    setDownloading(true)
-    const toastId = toast.loading('Generating certificate...')
-    try {
-      const response = await api.get('/training/certificate', { responseType: 'blob' })
-      const blob = new Blob([response.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', 'Kinetiq_Certificate.pdf')
-      document.body.appendChild(link)
-      link.click()
-      setTimeout(() => {
-        link.parentNode?.removeChild(link)
-        window.URL.revokeObjectURL(url)
-      }, 100)
-      toast.success('Certificate downloaded successfully!', { id: toastId })
-    } catch (err) {
-      console.error('Failed to download certificate', err)
-      toast.error('Failed to download certificate. Please ensure training is completed.', { id: toastId })
-    } finally {
-      setDownloading(false)
-    }
-  }
+  if (courseView) return <section className="learning-player"><Link to="/training">← Course list</Link><h2>{courseView.name}</h2><p>{courseView.description}</p>{courseView.video_url ? <video controls src={courseView.video_url} aria-label={`${courseView.name} course video`} /> : <p>No course video is currently configured.</p>}<p className="learning-note">Playback in this browser is not independently verified. Use the course completion action only when you have finished the materials.</p><button className="member-button member-button--primary" disabled={pending === courseView.id} onClick={() => void runAction(courseView, 'complete')}>{pending === courseView.id ? 'Saving…' : 'Mark course complete'}</button>{actionError && <p role="alert">{actionError}</p>}</section>
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
-        <div className="loading-container">
-          <div className="loading-bar-bg">
-            <div className="loading-bar-fill"></div>
-          </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500, margin: 0 }}>Preparing training courses...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (isTrained) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', backgroundColor: 'var(--bg-main)', minHeight: '100vh' }}>
-        <div style={{ padding: '24px 16px', backgroundColor: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-main)' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px' }}>Training Center</h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>You have successfully completed your training.</p>
-        </div>
-        <div style={{ flex: 1, padding: '24px 16px' }}>
-          <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-main)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: 'var(--card-shadow)' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-                <div style={{ width: '56px', height: '56px', backgroundColor: 'var(--bg-main)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', flexShrink: 0 }}>🎓</div>
-                <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px' }}>Video Reviewing Mastery</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>Training Completed</p>
-                </div>
-              </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 14px', backgroundColor: 'rgba(0, 172, 79, 0.1)', borderRadius: '8px', flexShrink: 0 }}>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#00AC4F', textTransform: 'uppercase' }}>✓ DONE</span>
-              </div>
-            </div>
-            <div style={{ padding: '12px', backgroundColor: 'rgba(0, 172, 79, 0.1)', borderRadius: '10px', textAlign: 'center' }}>
-              <p style={{ fontSize: '14px', fontWeight: 600, color: '#00AC4F', margin: 0 }}>✓ Training Completed Successfully</p>
-              <p style={{ fontSize: '12px', color: '#00AC4F', margin: '4px 0 0' }}>Your certificate is ready to download below.</p>
-            </div>
-            <button onClick={handleDownloadCertificate} disabled={downloading} style={{ width: '100%', padding: '16px', backgroundColor: 'var(--accent-primary)', color: 'white', fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'all 0.2s', opacity: downloading ? 0.7 : 1 }}>
-              {downloading ? <span>Downloading...</span> : <>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                DOWNLOAD CERTIFICATE
-              </>}
-            </button>
-            <button onClick={() => navigate('/plans')} style={{ width: '100%', padding: '14px', backgroundColor: 'transparent', color: 'var(--accent-primary)', fontSize: '14px', fontWeight: 600, border: '2px solid var(--accent-primary)', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s' }}>Go to Active Packages/Plans →</button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (watchingCourseId !== null) {
-    const course = courses.find(c => c.id === watchingCourseId)
-    const isYoutube = course?.videoUrl?.includes('youtube.com') || course?.videoUrl?.includes('youtu.be')
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', backgroundColor: 'var(--bg-main)', minHeight: '100vh' }}>
-        <div style={{ backgroundColor: 'black', width: '100%', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          {course?.videoUrl ? (
-            isYoutube ? (
-              <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <iframe style={{ width: '100%', height: '100%', border: 'none' }} src={course.videoUrl.replace('watch?v=', 'embed/').split('&')[0] + "?autoplay=1"} title="Training Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-                <button onClick={() => handleVideoComplete(watchingCourseId)} style={{ position: 'absolute', bottom: '20px', right: '20px', padding: '12px 24px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>COMPLETE TRAINING</button>
-              </div>
-            ) : (
-              <video key={course.videoUrl} style={{ width: '100%', height: '100%', objectFit: 'contain' }} controls autoPlay onEnded={() => handleVideoComplete(watchingCourseId)}><source src={course.videoUrl} type="video/mp4" />Your browser does not support the video tag.</video>
-            )
-          ) : (
-            <div style={{ color: 'white', textAlign: 'center' }}><p>No video available for this training.</p><button onClick={() => setWatchingCourseId(null)} style={{ color: 'var(--accent-primary)', background: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 600 }}>Go Back</button></div>
-          )}
-        </div>
-        <div style={{ padding: '24px 16px', backgroundColor: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-main)' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px' }}>{course?.name}</h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>{course?.duration}</p>
-        </div>
-        <div style={{ padding: '24px 16px', backgroundColor: 'var(--bg-card)' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 12px' }}>About This Course</h3>
-          <p style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: '1.6', margin: 0 }}>{course?.description}</p>
-        </div>
-        {videoWatched && (
-          <div style={{ padding: '16px', margin: '16px', backgroundColor: 'rgba(0, 172, 79, 0.1)', borderRadius: '12px', border: '1px solid rgba(0, 172, 79, 0.2)' }}>
-            <p style={{ fontSize: '13px', fontWeight: 600, color: '#00AC4F', margin: 0 }}>✓ Training completed! Redirecting to investment plans...</p>
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  const course = courses.length > 0 ? courses[0] : { id: 1, name: 'Video Reviewing Mastery', description: 'Master the essentials of video assessment in this focused module.', duration: '15 mins / 1 Video', status: 'available' as const, icon: '🎬' }
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', backgroundColor: 'var(--bg-main)', minHeight: '100vh' }}>
-      <div style={{ padding: '24px 16px', backgroundColor: 'var(--bg-sidebar)', borderBottom: '1px solid var(--border-main)' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px' }}>Training Center</h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>Complete video training to unlock high-earning tasks.</p>
-      </div>
-      <div style={{ flex: 1, padding: '24px 16px' }}>
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', border: '1px solid var(--border-main)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: 'var(--card-shadow)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '56px', height: '56px', backgroundColor: 'var(--bg-main)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>{course.icon}</div>
-            <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 4px' }}>{course.name}</h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>{course.duration}</p>
-            </div>
-          </div>
-          <p style={{ fontSize: '14px', color: 'var(--text-main)', lineHeight: '1.6', margin: 0 }}>{course.description}</p>
-          <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '10px' }}>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>Requirement: Watch the full review video to unlock tasks.</p>
-          </div>
-          <button onClick={() => handleStartTraining(course.id)} style={{ width: '100%', padding: '16px', backgroundColor: 'var(--accent-primary)', color: 'white', fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s' }}>START TRAINING</button>
-        </div>
-      </div>
-    </div>
-  )
+  return <div className="learning-hub"><header className="member-page-heading"><div><span className="member-eyebrow">02 / LEARNING RECORD</span><h2>Learn at your pace.</h2><p>Each course keeps its own status. Completion is recorded by the account service.</p></div></header>{actionError && <p role="alert" className="member-notice member-notice--error">{actionError}</p>}{activeCourses.length === 0 ? <section className="member-empty-state"><strong>No active courses are available.</strong><span>Check again later; no progress has been assumed.</span></section> : <div className="learning-course-list">{activeCourses.map((course) => <article className="learning-course" key={course.id}><span className="learning-course-index">{String(course.id).padStart(2, '0')}</span><div><h3>{course.name}</h3><p>{course.description || 'No description supplied.'}</p><small>{course.estimated_time || 'Duration not supplied'}</small></div><span className={`learning-status learning-status--${course.status || 'available'}`}>{course.status?.replace('_', ' ') || 'Status unavailable'}</span>{course.status === 'completed' ? <span className="learning-action">Recorded complete</span> : <button className="member-button member-button--primary" disabled={pending === course.id} onClick={() => void runAction(course, course.status === 'in_progress' ? 'complete' : 'start')}>{pending === course.id ? 'Saving…' : course.status === 'in_progress' ? 'Complete course' : 'Start course'}</button>}</article>)}</div>}{user.data?.is_trained && <p className="learning-note">Your legacy training record is marked complete. Individual course statuses above remain tied to their own records.</p>}</div>
 }

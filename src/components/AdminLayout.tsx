@@ -3,24 +3,25 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { endSession, persistUser } from '../services/session'
 
-interface AdminLayoutProps {
-  setIsAuthenticated: (value: boolean) => void
-}
+interface AdminLayoutProps { setIsAuthenticated: (value: boolean) => void }
 
 function isUnauthorizedError(error: unknown): boolean {
-  return typeof error === 'object'
-    && error !== null
-    && 'response' in error
-    && (error as { response?: { status?: number } }).response?.status === 401
+  return typeof error === 'object' && error !== null && 'response' in error && (error as { response?: { status?: number } }).response?.status === 401
 }
+
+type AdminNavItem = { label: string; path: string; code: string }
+const adminGroups: { title: string; items: AdminNavItem[] }[] = [
+  { title: 'OPERATIONS', items: [{ label: 'Dashboard', path: '/admin', code: '00' }, { label: 'Members', path: '/admin/users', code: '01' }, { label: 'Payments', path: '/admin/payments', code: '02' }] },
+  { title: 'PROGRAMS', items: [{ label: 'Task queue', path: '/admin/tasks', code: '03' }, { label: 'Training', path: '/admin/training', code: '04' }, { label: 'Plans', path: '/admin/plans', code: '05' }] },
+  { title: 'COMMUNITY & TRUST', items: [{ label: 'Invitations', path: '/admin/invites', code: '06' }, { label: 'Notifications', path: '/admin/notifications', code: '07' }, { label: 'Password support', path: '/admin/password-management', code: '08' }] },
+]
 
 export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
-  const [adminName, setAdminName] = useState('Admin')
+  const [adminName, setAdminName] = useState('Administrator')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-
   const handleSignOut = useCallback(async () => {
     await endSession()
     setIsAuthenticated(false)
@@ -36,77 +37,37 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
       try {
         const response = await api.get('/auth/me')
         persistUser(response.data)
-        setAdminName(response.data.first_name || 'Admin')
+        setAdminName(response.data.first_name || 'Administrator')
       } catch (error: unknown) {
         console.error('Failed to fetch admin data:', error)
-        if (isUnauthorizedError(error)) {
-          void handleSignOut()
-        }
+        if (isUnauthorizedError(error)) void handleSignOut()
       }
     }
-
     window.addEventListener('resize', handleResize)
     void fetchAdmin()
     return () => window.removeEventListener('resize', handleResize)
   }, [handleSignOut])
 
-  const adminNavItems = [
-    { label: 'Dashboard', path: '/admin', icon: '📊' },
-    { label: 'Video Tasks', path: '/admin/tasks', icon: '🎬' },
-    { label: 'Training', path: '/admin/training', icon: '📚' },
-    { label: 'Users', path: '/admin/users', icon: '👥' },
-    { label: 'Password Management', path: '/admin/password-management', icon: '🔑' },
-    { label: 'Payments', path: '/admin/payments', icon: '💳' },
-    { label: 'Plans', path: '/admin/plans', icon: '💎' },
-    { label: 'Invites', path: '/admin/invites', icon: '✉️' },
-    { label: 'Notifications', path: '/admin/notifications', icon: '🔔' },
-  ]
+  const activeItem = adminGroups.flatMap((group) => group.items).find((item) => item.path === location.pathname)
+  const activePath = (path: string) => location.pathname === path
+  const initials = adminName.trim().slice(0, 1).toUpperCase() || 'A'
 
-  const isActive = (path: string) => location.pathname === path
+  return <div className="admin-atlas-shell">
+    <a className="skip-link" href="#main-content">Skip to content</a>
+    {isMobile && isMenuOpen && <button className="admin-atlas-scrim" type="button" aria-label="Close administration navigation" onClick={() => setIsMenuOpen(false)} />}
+    <aside className={`admin-atlas-sidebar${isMobile ? ' is-mobile' : ''}${isMenuOpen ? ' is-open' : ''}`} aria-label="Administration navigation" aria-hidden={isMobile && !isMenuOpen}>
+      <Link className="admin-atlas-brand" to="/admin" aria-label="Kinetiq administration home" onClick={() => setIsMenuOpen(false)}><img src="/assets/kinetiq-mark.svg" alt="" /><span><strong>Kinetiq</strong><small>OPERATIONS ATLAS</small></span><i>ADMIN</i></Link>
+      <div className="admin-atlas-identity"><span>{initials}</span><div><strong>{adminName}</strong><small>Administrator access</small></div><b aria-label="Account active" /></div>
+      <nav className="admin-atlas-nav">{adminGroups.map((group) => <section key={group.title} aria-label={group.title}><h2>{group.title}</h2>{group.items.map((item) => <Link key={item.path} to={item.path} onClick={() => setIsMenuOpen(false)} aria-current={activePath(item.path) ? 'page' : undefined} className={`admin-atlas-link${activePath(item.path) ? ' is-active' : ''}`}><span>{item.code}</span><strong>{item.label}</strong>{activePath(item.path) && <i aria-hidden="true" />}</Link>)}</section>)}</nav>
+      <footer className="admin-atlas-footer"><span>CONTROL DESK / 01</span><button type="button" onClick={handleSignOut}>Sign out <b aria-hidden="true">↗</b></button></footer>
+    </aside>
 
-  return (
-    <div className="admin-shell" style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-main)', fontFamily: 'inherit', overflow: 'hidden' }}>
-      <a className="skip-link" href="#main-content">Skip to content</a>
-      <div className="admin-sidebar" style={{ position: isMobile ? 'fixed' : 'relative', top: 0, left: 0, bottom: 0, width: '248px', backgroundColor: '#1d2327', color: '#f0f0f1', display: (isMobile && !isMenuOpen) ? 'none' : 'flex', flexDirection: 'column', boxShadow: 'var(--sidebar-shadow)', zIndex: 1000, transition: 'transform 0.3s ease-in-out', transform: (isMobile && !isMenuOpen) ? 'translateX(-100%)' : 'translateX(0)' }}>
-        <div className="admin-sidebar-header" style={{ padding: '20px', borderBottom: '1px solid #50575e', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <img src="/assets/kinetiq-mark.svg" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px' }} />
-            <div><div style={{ fontSize: '16px', fontWeight: 600 }}>Kinetiq</div><div style={{ fontSize: '12px', color: '#a7aaad' }}>Admin Portal</div></div>
-          </div>
-          {isMobile && <button onClick={() => setIsMenuOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted-sidebar)', fontSize: '20px', cursor: 'pointer' }}>✕</button>}
-        </div>
-        <nav className="admin-sidebar-nav" aria-label="Admin navigation" style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
-          {adminNavItems.map((item) => (
-            <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} aria-current={isActive(item.path) ? 'page' : undefined} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '4px', marginBottom: '4px', textDecoration: 'none', color: isActive(item.path) ? 'white' : '#c3c4c7', backgroundColor: isActive(item.path) ? '#32373c' : 'transparent', transition: 'all 0.2s', fontSize: '14px', fontWeight: 500 }}><span style={{ fontSize: '16px' }}>{item.icon}</span><span>{item.label}</span></Link>
-          ))}
-        </nav>
-        <div className="admin-sidebar-footer" style={{ padding: '16px', borderTop: '1px solid #50575e' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '0 8px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#2271b1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 600, color: 'white' }}>{adminName.charAt(0).toUpperCase()}</div>
-            <div style={{ overflow: 'hidden' }}><div style={{ fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{adminName}</div><div style={{ fontSize: '11px', color: 'var(--text-muted-sidebar)' }}>Administrator</div></div>
-          </div>
-          <button onClick={handleSignOut} style={{ width: '100%', padding: '10px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>Sign Out</button>
-        </div>
-      </div>
-
-      {isMobile && isMenuOpen && <div onClick={() => setIsMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999 }} />}
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <header className="admin-topbar" style={{ height: '56px', backgroundColor: 'var(--bg-card)', borderBottom: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', zIndex: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {isMobile && <button onClick={() => setIsMenuOpen(true)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-heading)', padding: '4px' }}>☰</button>}
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{adminNavItems.find(i => isActive(i.path))?.label || 'Admin Portal'}</h2>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <button onClick={() => window.open('/dashboard', '_blank', 'noopener,noreferrer')} style={{ padding: '9px 14px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: '1px solid var(--accent-primary)', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, whiteSpace: 'nowrap' }}>View User Site</button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {!isMobile && <div style={{ textAlign: 'right' }}><div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-heading)' }}>{adminName}</div><div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Admin Account</div></div>}
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', fontWeight: 700 }}>{adminName.charAt(0).toUpperCase()}</div>
-            </div>
-          </div>
-        </header>
-        <main className="admin-content" id="main-content" style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '20px' : '32px' }}><Outlet /></main>
-      </div>
+    <div className="admin-atlas-main">
+      <header className="admin-atlas-topbar">
+        <div className="admin-atlas-topbar-start">{isMobile && <button type="button" className="admin-atlas-menu-button" onClick={() => setIsMenuOpen(true)} aria-label="Open administration navigation" aria-expanded={isMenuOpen}>☰</button>}<div><span>CONTROL ROOM / KINETIQ</span><h1>{activeItem?.label || 'Operations'}</h1></div></div>
+        <div className="admin-atlas-topbar-end"><span className="admin-atlas-live"><i /> ADMIN SESSION</span><button type="button" onClick={() => window.open('/dashboard', '_blank', 'noopener,noreferrer')}>Open member workspace <b aria-hidden="true">↗</b></button><span className="admin-atlas-avatar" aria-label={`${adminName} administrator`}>{initials}</span></div>
+      </header>
+      <main className="admin-atlas-content" id="main-content"><Outlet /></main>
     </div>
-  )
+  </div>
 }

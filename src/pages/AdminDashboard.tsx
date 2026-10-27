@@ -64,6 +64,8 @@ export default function AdminDashboard() {
   }
 
   const configValue = (key: string) => configs.find((config) => config.key === key)?.value ?? ''
+  const supportGroupUrl = configValue('whatsapp_link')
+  const safeSupportGroupUrl = supportGroupUrl.startsWith('https://') ? supportGroupUrl : ''
 
   if (loading) {
     return (
@@ -74,37 +76,35 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { label: 'Total Users', value: stats.total_users, icon: '👥', color: '#3B82F6' },
-    { label: 'Pending Payments', value: stats.pending_payments, icon: '⏳', color: '#F59E0B' },
-    { label: 'Total Payouts', value: `$${stats.total_payouts.toLocaleString()}`, icon: '💸', color: '#EF4444' },
-    { label: 'Total Deposits', value: `$${stats.total_deposits.toLocaleString()}`, icon: '💰', color: '#10B981' },
+    { label: 'Total members', value: stats.total_users, code: '01' },
+    { label: 'Payments awaiting review', value: stats.pending_payments, code: '02' },
+    { label: 'Payouts recorded', value: `$${stats.total_payouts.toLocaleString()}`, code: '03' },
+    { label: 'Deposits recorded', value: `$${stats.total_deposits.toLocaleString()}`, code: '04' },
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <div>
-        <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-heading)', margin: '0 0 8px' }}>Admin Dashboard</h1>
-        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Monitor system performance and manage global configurations.</p>
+      <div className="admin-dashboard-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="admin-dashboard-heading">
+        <span className="admin-dashboard-kicker">SYSTEM REGISTER / LIVE SNAPSHOT</span>
+        <h1 style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-heading)', margin: '0 0 8px' }}>Operations at a glance.</h1>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>Server-reported totals and controlled configuration, in one place.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-        {statCards.map((card, idx) => (
-          <div key={idx} style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: `1px solid var(--border-main)` }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div style={{ fontSize: '32px' }}>{card.icon}</div>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: `${card.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: card.color }}>📈</div>
-            </div>
-            <p style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', margin: '0 0 4px', textTransform: 'uppercase' }}>{card.label}</p>
-            <p style={{ fontSize: '28px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>{card.value}</p>
-          </div>
+      <div className="admin-dashboard-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+        {statCards.map((card) => (
+          <article key={card.code} className="admin-stat-card">
+            <span className="admin-stat-code">RECORD / {card.code}</span>
+            <p>{card.label}</p>
+            <strong>{card.value}</strong>
+          </article>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
+      <div className="admin-dashboard-panels" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '14px' }}>
         {/* App Configuration Section */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
+        <section className="admin-config-panel" style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>⚙️</div>
+            <div className="admin-panel-mark" aria-hidden="true">01</div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>App Configuration</h2>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -161,37 +161,30 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Quick Actions Section */}
-        <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
+        <section className="admin-quick-panel" style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>⚡</div>
+            <div className="admin-panel-mark admin-panel-mark--persimmon" aria-hidden="true">02</div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Quick Actions</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             {[
-              { label: 'Video Tasks', icon: '🎬', color: '#3B82F6', path: '/admin/tasks' },
-              { label: 'Training', icon: '📚', color: '#F59E0B', path: '/admin/training' },
-              { label: 'User Base', icon: '👥', color: '#22C55E', path: '/admin/users' },
-              { label: 'Payments', icon: '💳', color: '#8B5CF6', path: '/admin/payments' },
-              { label: 'Plans', icon: '💎', color: '#EF4444', path: '/admin/plans' },
-              { label: 'WhatsApp Group', icon: '📱', color: '#25D366', path: configs.find(c => c.key === 'whatsapp_link')?.value || '#', external: true }
-            ].map((action, i) => (
-              action.external ? (
-                <a key={i} href={action.path} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-heading)', border: '1px solid var(--border-main)', transition: 'all 0.2s' }}>
-                  <span style={{ fontSize: '20px' }}>{action.icon}</span>
-                  <span style={{ fontSize: '13px', fontWeight: 700 }}>{action.label}</span>
-                </a>
-              ) : (
-              <a key={i} href={action.path} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-heading)', border: '1px solid var(--border-main)', transition: 'all 0.2s' }}>
-                <span style={{ fontSize: '20px' }}>{action.icon}</span>
-                <span style={{ fontSize: '13px', fontWeight: 700 }}>{action.label}</span>
+              { label: 'Video Tasks', code: '03', path: '/admin/tasks' },
+              { label: 'Training', code: '04', path: '/admin/training' },
+              { label: 'Member base', code: '01', path: '/admin/users' },
+              { label: 'Payments', code: '02', path: '/admin/payments' },
+              { label: 'Plans', code: '05', path: '/admin/plans' },
+            ].map((action) => (
+              <a key={action.code} href={action.path} className="admin-quick-link">
+                <span className="admin-quick-code">{action.code}</span>
+                <span>{action.label}</span>
               </a>
-              )
             ))}
+            {safeSupportGroupUrl && <a href={safeSupportGroupUrl} target="_blank" rel="noreferrer" className="admin-quick-link"><span className="admin-quick-code">09</span><span>Configured support group</span></a>}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   )

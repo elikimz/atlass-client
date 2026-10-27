@@ -1,91 +1,82 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 
-interface TaskData {
+type TaskData = {
   id: number
   title: string
   description?: string
   video_url: string
   reward_amount: number
-  status?: string
 }
 
-interface DashboardSummary {
-  active_tasks: number
-  completed_tasks: number
-  pending_videos: number
+type Session = {
+  task_id: number
+  started_at: string
+  server_time: string
+  required_session_seconds: number
+  message: string
+}
+
+function detailFrom(error: unknown, fallback: string) {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return fallback
+  const data = (error as { response?: { data?: { detail?: unknown } } }).response?.data
+  return typeof data?.detail === 'string' ? data.detail : fallback
 }
 
 export default function TaskPlayer() {
   const { taskId } = useParams<{ taskId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [completed, setCompleted] = useState(false)
-  const [error, setError] = useState('')
-  const [videoWatched, setVideoWatched] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(20)
-  const taskIdNumber = Number(taskId || 0)
+  const [secondsLeft, setSecondsLeft] = useState(0)
+  const [sessionReady, setSessionReady] = useState(false)
+  const [sessionError, setSessionError] = useState('')
+  const [memberAttestation, setMemberAttestation] = useState(false)
+  const [completeError, setCompleteError] = useState('')
+  const [accepted, setAccepted] = useState(false)
+  const startedFor = useRef<number | null>(null)
+  const id = Number(taskId || 0)
 
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [timeLeft])
-  const tasksQuery = useQuery({
+  const taskQuery = useQuery({
     queryKey: queryKeys.tasks.all,
     queryFn: async () => (await api.get<TaskData[]>('/tasks/all')).data,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 30_000,
   })
-  const task = tasksQuery.data?.find((candidate) => candidate.id === taskIdNumber) ?? null
-  const isYouTube = Boolean(task?.video_url.includes('youtube.com') || task?.video_url.includes('youtu.be'))
+  const task = taskQuery.data?.find((item) => item.id === id) ?? null
 
-  const completionMutation = useMutation({
-    mutationFn: async (videoTaskId: number) => api.post('/tasks/complete', { video_task_id: videoTaskId }),
-    onMutate: async (videoTaskId) => {
-      setError('')
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: queryKeys.tasks.available }),
-        queryClient.cancelQueries({ queryKey: queryKeys.dashboard.summary }),
-      ])
-      const previousAvailable = queryClient.getQueryData<TaskData[]>(queryKeys.tasks.available)
-      const previousDashboard = queryClient.getQueryData<DashboardSummary>(queryKeys.dashboard.summary)
+  const startSession = useMutation({
+    mutationFn: async (taskIdValue: number) => (await api.post<Session>(`/tasks/${taskIdValue}/start`)).data,
+    onSuccess: (session) => {
+      const startMs = Date.parse(session.started_at)
+      const serverMs = Date.parse(session.server_time)
+      const elapsed = Number.isFinite(startMs) && Number.isFinite(serverMs) ? Math.max(0, (serverMs - startMs) / 1000) : 0
+      setSecondsLeft(Math.max(0, Math.ceil(session.required_session_seconds - elapsed)))
+      setSessionReady(true)
+      setSessionError('')
+    },
+    onError: (error) => setSessionError(detailFrom(error, 'The task session could not be started. Check your connection and try again.')),
+  })
 
-      queryClient.setQueryData<TaskData[]>(queryKeys.tasks.available, (old) =>
-        old?.filter((candidate) => candidate.id !== videoTaskId),
-      )
-      queryClient.setQueryData<DashboardSummary>(queryKeys.dashboard.summary, (old) =>
-        old
-          ? {
-              ...old,
-              active_tasks: Math.max(0, old.active_tasks - 1),
-              completed_tasks: old.completed_tasks + 1,
-              pending_videos: Math.max(0, old.pending_videos - 1),
-            }
-          : old,
-      )
-      return { previousAvailable, previousDashboard }
-    },
-    onError: (requestError, _videoTaskId, context) => {
-      if (context?.previousAvailable) {
-        queryClient.setQueryData(queryKeys.tasks.available, context.previousAvailable)
-      }
-      if (context?.previousDashboard) {
-        queryClient.setQueryData(queryKeys.dashboard.summary, context.previousDashboard)
-      }
-      const message = (requestError as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-      // Use the exact backend error message so the correct plan name and limit are shown.
-      // Previously this was hardcoded to "Intern plan (2 tasks)" which was wrong after an upgrade.
-      setError(message || 'Failed to complete task')
-    },
-    onSuccess: () => {
-      setCompleted(true)
-      window.setTimeout(() => navigate('/tasks'), 2000)
-    },
-    onSettled: async () => {
+  useEffect(() => {
+    if (task && startedFor.current !== task.id) {
+      startedFor.current = task.id
+      startSession.mutate(task.id)
+    }
+  }, [task?.id])
+
+  useEffect(() => {
+    if (!sessionReady || secondsLeft <= 0) return
+    const timeout = window.setTimeout(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000)
+    return () => window.clearTimeout(timeout)
+  }, [sessionReady, secondsLeft])
+
+  const completeTask = useMutation({
+    mutationFn: async () => api.post<{ message: string; reward_amount: number }>('/tasks/complete', { video_task_id: id }),
+    onMutate: () => setCompleteError(''),
+    onSuccess: async () => {
+      setAccepted(true)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.available }),
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
@@ -96,198 +87,51 @@ export default function TaskPlayer() {
         queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
       ])
     },
+    onError: (error) => setCompleteError(detailFrom(error, 'The server did not accept this submission. Your reward has not been confirmed.')),
   })
 
-  const handleVideoEnded = () => {
-    setVideoWatched(true)
-  }
+  useEffect(() => {
+    if (!accepted) return
+    const timeout = window.setTimeout(() => navigate('/tasks'), 2200)
+    return () => window.clearTimeout(timeout)
+  }, [accepted, navigate])
 
-  /* 
-  // Disabled start button functionality as requested
-  const handleWatchOnYouTube = () => {
-    if (task) {
-      window.open(task.video_url, '_blank')
-      setVideoWatched(true)
-    }
-  }
-  */
+  if (taskQuery.isLoading) return <section className="member-page-state" role="status"><span className="member-loading-indicator" />Loading task details…</section>
+  if (taskQuery.isError) return <section className="member-page-state member-page-state--error" role="alert"><h2>Task details are unavailable.</h2><p>No completion or reward was submitted.</p><button className="member-button member-button--primary" onClick={() => void taskQuery.refetch()}>Retry</button><Link className="member-inline-route" to="/tasks">Back to queue</Link></section>
+  if (!task) return <section className="member-page-state" role="status"><h2>Task not found in your current queue.</h2><p>The task may no longer be eligible for your account.</p><Link className="member-button member-button--primary" to="/tasks">Return to task queue</Link></section>
 
-  const handleCompleteTask = () => {
-    if (!task) return
-    if (timeLeft > 0) {
-      setError(`Please wait ${timeLeft} more seconds before submitting`)
-      return
-    }
-    if (!videoWatched) {
-      setError('Please watch the video first')
-      return
-    }
-    completionMutation.mutate(task.id)
-  }
-
-  const loading = tasksQuery.isLoading
-  const completing = completionMutation.isPending
-  const loadError = tasksQuery.isError ? 'Failed to load task' : (!loading && !task ? 'Task not found' : '')
-
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Loading task...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if ((error || loadError) && !task) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '16px', color: '#DC2626', marginBottom: '16px' }}>{error || loadError}</p>
-          <button className="task-secondary-button"
-            onClick={() => navigate('/tasks')}
-            style={{ backgroundColor: 'var(--accent-primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}
-          >
-            Back to Tasks
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!task) return null
+  const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(task.video_url || '')
+  const canSubmit = sessionReady && secondsLeft === 0 && memberAttestation && !completeTask.isPending && !accepted
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1000px', margin: '0 auto', width: '100%', padding: '24px' }}>
-      
-      {/* Header */}
-      <div>
-        <button className="task-back-button"
-          onClick={() => navigate('/tasks')}
-          style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '14px', fontWeight: 600, marginBottom: '16px', padding: 0 }}
-        >
-          ← Back to Tasks
-        </button>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-heading)', margin: '0 0 8px' }}>{task.title}</h1>
-        {task.description && <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>{task.description}</p>}
+    <main className="task-session-page">
+      <nav className="task-session-breadcrumb"><Link to="/tasks">← Work queue</Link><span>FIELD NOTE / TASK {String(task.id).padStart(3, '0')}</span></nav>
+      <header className="task-session-heading"><span className="member-eyebrow">WORK / REVIEW BEFORE SUBMISSION</span><h1>{task.title}</h1><p>{task.description || 'The task service supplied no additional written criteria.'}</p></header>
+
+      <div className="task-session-layout">
+        <section className="task-session-main" aria-label="Task media and criteria">
+          <div className="task-media-frame">
+            {task.video_url ? isYouTube ? (
+              <div className="task-media-external"><span className="task-media-stamp">EXTERNAL MEDIA</span><h2>Open the task reference</h2><p>We cannot verify playback or viewing on another site.</p><a href={task.video_url} target="_blank" rel="noreferrer" className="member-button member-button--primary">Open media in a new tab ↗</a></div>
+            ) : (
+              <video controls src={task.video_url} aria-label={`${task.title} media`} />
+            ) : <div className="task-media-external"><span className="task-media-stamp">NO MEDIA LINK</span><h2>Review the written criteria</h2><p>No media URL was supplied by the task service.</p></div>}
+          </div>
+          <section className="task-criteria-panel"><span className="member-eyebrow">SUBMISSION BASIS</span><h2>What the service will record</h2><p>Submitting asks the account service to accept this task. The service checks your plan, task eligibility, daily limit, duplicate state and session elapsed time before posting any reward.</p><p className="task-candid-note">An elapsed session is not proof that a person watched the media. Only submit after you have reviewed the available task materials.</p></section>
+        </section>
+
+        <aside className="task-session-rail" aria-label="Task session status">
+          <span className="member-eyebrow">SESSION / SERVER TIMED</span>
+          <div className={`task-session-clock${sessionReady && secondsLeft === 0 ? ' is-ready' : ''}`} role="status">{!sessionReady ? '—:—' : `00:${String(secondsLeft).padStart(2, '0')}`}</div>
+          <p>{startSession.isPending ? 'Recording your session start…' : !sessionReady ? 'Waiting for the task service' : secondsLeft > 0 ? 'Minimum elapsed session in progress' : 'Minimum elapsed time reached'}</p>
+          {sessionError && <div className="member-notice member-notice--error" role="alert">{sessionError}<button type="button" className="task-session-retry" onClick={() => task && startSession.mutate(task.id)} disabled={startSession.isPending}>Retry session start</button></div>}
+          <div className="task-session-reward"><small>CATALOG REWARD</small><strong>${Number(task.reward_amount).toFixed(2)}</strong><span>Credited only if accepted by the server.</span></div>
+          <label className="task-attestation"><input type="checkbox" checked={memberAttestation} onChange={(event) => setMemberAttestation(event.target.checked)} disabled={!sessionReady || accepted} /><span>I have reviewed the task criteria and available media.</span></label>
+          {completeError && <p className="member-notice member-notice--error" role="alert">{completeError}</p>}
+          {accepted ? <div className="member-notice member-notice--success" role="status">Task accepted by the service. Wallet and activity records are refreshing.</div> : <button className="member-button member-button--primary task-submit-button" type="button" disabled={!canSubmit} onClick={() => completeTask.mutate()}>{completeTask.isPending ? 'Submitting…' : secondsLeft > 0 ? `Wait ${secondsLeft}s` : 'Submit for server acceptance'}</button>}
+          <span className="task-session-disclaimer">No reward is shown as paid until confirmed by your account record.</span>
+        </aside>
       </div>
-
-      {/* Video Player */}
-      <div style={{ backgroundColor: 'black', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-main)' }}>
-        {isYouTube ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="#FF0000" style={{ marginBottom: '16px' }}>
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-            <h3 style={{ color: 'white', marginBottom: '20px' }}>This video is on YouTube</h3>
-            <button className="task-watch-button"
-              onClick={() => {
-                window.open(task.video_url, '_blank')
-                setVideoWatched(true)
-              }}
-              style={{ backgroundColor: '#FF0000', color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', margin: '0 auto', transition: 'background-color 0.2s' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#CC0000')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FF0000')}
-            >
-              Watch on YouTube
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </button>
-          </div>
-        ) : (
-          <video
-            src={task.video_url}
-            controls
-            onEnded={handleVideoEnded}
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-          />
-        )}
-      </div>
-
-      {/* Task Info and Completion */}
-      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Reward Amount</p>
-            <p style={{ fontSize: '24px', fontWeight: 700, color: '#00AC4F', margin: 0 }}>${task.reward_amount.toFixed(2)}</p>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ fontSize: '12px', color: (videoWatched && timeLeft === 0) ? '#00AC4F' : '#F59E0B', margin: '0 0 4px' }}>
-              {timeLeft > 0 
-                ? `⏱ Wait ${timeLeft}s to finish` 
-                : (videoWatched ? '✓ Ready to submit' : '⏱ Finish watching video')}
-            </p>
-          </div>
-        </div>
-
-        {error && (
-          <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.2)', color: '#DC2626', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
-            {error}
-            {error.includes('Daily task limit reached') && (
-              <div style={{ marginTop: '10px' }}>
-                <button className="task-upgrade-button"
-                  onClick={() => navigate('/plans')}
-                  style={{ backgroundColor: '#DC2626', color: 'white', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
-                >
-                  Upgrade Plan to Unlock More Tasks →
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {completed && (
-          <div style={{ backgroundColor: 'rgba(21, 128, 61, 0.1)', border: '1px solid rgba(21, 128, 61, 0.2)', color: '#15803D', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px' }}>
-            ✓ Task completed successfully! Reward added to your withdrawal wallet. Redirecting...
-          </div>
-        )}
-
-        <button className="task-complete-button"
-          onClick={handleCompleteTask}
-          disabled={timeLeft > 0 || !videoWatched || completing || completed}
-          style={{
-            width: '100%',
-            backgroundColor: (videoWatched && timeLeft === 0 && !completed) ? 'var(--accent-primary)' : 'var(--border-main)',
-            color: (videoWatched && timeLeft === 0 && !completed) ? 'white' : 'var(--text-muted)',
-            padding: '14px 24px',
-            borderRadius: '8px',
-            border: 'none',
-            cursor: (videoWatched && timeLeft === 0 && !completed) ? 'pointer' : 'not-allowed',
-            fontSize: '16px',
-            fontWeight: 600,
-            transition: 'background-color 0.2s',
-          }}
-        >
-          {completing 
-            ? 'Completing...' 
-            : completed 
-              ? 'Task Completed ✓' 
-              : timeLeft > 0 
-                ? `Wait ${timeLeft}s to Finish` 
-                : 'Complete Task & Earn Reward'}
-        </button>
-      </div>
-
-      {/* Task Details */}
-      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '16px', padding: '24px', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-heading)', margin: '0 0 16px' }}>Task Details</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Task ID</p>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)', margin: 0 }}>{task.id}</p>
-          </div>
-          <div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Reward</p>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: '#00AC4F', margin: 0 }}>${task.reward_amount.toFixed(2)}</p>
-          </div>
-          <div style={{ gridColumn: '1 / -1' }}>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 4px' }}>Status</p>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: videoWatched ? '#00AC4F' : '#F59E0B', margin: 0 }}>
-              {completed ? 'Completed ✓' : (videoWatched ? 'Ready to Submit' : 'In Progress')}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </main>
   )
 }

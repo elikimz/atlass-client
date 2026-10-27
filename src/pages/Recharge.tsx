@@ -4,607 +4,171 @@ import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 
+type RechargeMethod = 'crypto' | 'mpesa' | 'paypal' | 'wise' | 'payoneer'
+type Payment = { id: number; amount: number; type: string; status: string; payment_method: string | null; created_at: string | null; period: string }
+type CurrentUser = { deposit_wallet_balance?: number }
 const USDT_ADDRESS = '0xcfed1cdcce064dc27f60bbf2292fc5c15082fc86'
 const USDT_NETWORK = 'BEP20 (BNB Smart Chain)'
-
-// Cloudinary configuration (unsigned upload preset)
-const CLOUDINARY_UPLOAD_PRESET = "task_images"
-const CLOUDINARY_CLOUD_NAME = "doste1wr0"
-
-type RechargeMethod = 'crypto' | 'mpesa' | 'paypal' | 'wise' | 'payoneer'
-
-const maintenanceMessage = 'The payment method is currently under maintenance and is temporarily unavailable. Our technical team is working on the necessary updates to restore the service.'
+const CLOUDINARY_UPLOAD_PRESET = 'task_images'
+const CLOUDINARY_CLOUD_NAME = 'doste1wr0'
 const MIN_CRYPTO_DEPOSIT_USD = 3
 const MIN_OTHER_DEPOSIT_USD = 20
+const AMOUNTS = [20, 50, 100, 150, 200]
+const COMING_SOON: Record<'paypal' | 'wise' | 'payoneer', string> = { paypal: 'PayPal', wise: 'Wise', payoneer: 'Payoneer' }
 
-const comingSoonLabels: Record<'paypal' | 'wise' | 'payoneer', string> = {
-  paypal: 'PayPal',
-  wise: 'Wise',
-  payoneer: 'Payoneer',
+function depositStatus(status: string) {
+  if (status === 'pending') return 'Awaiting admin review'
+  if (status === 'under_review') return 'Admin review in progress'
+  if (status === 'paid') return 'Approved · credited'
+  if (status === 'rejected') return 'Rejected'
+  if (status === 'cancelled') return 'Cancelled'
+  return status ? `Service status: ${status}` : 'Status unavailable'
+}
+
+function errorDetail(error: unknown, fallback: string) {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return fallback
+  const detail = (error as { response?: { data?: { detail?: unknown } } }).response?.data?.detail
+  return typeof detail === 'string' ? detail : fallback
 }
 
 export default function Recharge() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const userQuery = useQuery({
-    queryKey: queryKeys.auth.currentUser,
-    queryFn: async () => (await api.get<{ deposit_wallet_balance?: number; current_plan_id?: number | null; has_purchased_first_package?: boolean }>('/auth/me')).data,
-    staleTime: 5 * 60 * 1000,
-  })
-  const paymentHistoryQuery = useQuery({
-    queryKey: queryKeys.payments.history(1, 50),
-    queryFn: async () => (await api.get<any[]>('/payments/history', { params: { page: 1, limit: 50 } })).data ?? [],
-    staleTime: 2 * 60 * 1000,
-  })
-  const balance = userQuery.data?.deposit_wallet_balance ?? 0
+  const userQuery = useQuery({ queryKey: queryKeys.auth.currentUser, queryFn: async () => (await api.get<CurrentUser>('/auth/me')).data, staleTime: 0 })
+  const historyQuery = useQuery({ queryKey: queryKeys.payments.history(1, 50), queryFn: async () => (await api.get<Payment[]>('/payments/history', { params: { page: 1, limit: 50 } })).data ?? [], staleTime: 0 })
   const [selectedAmount, setSelectedAmount] = useState<number | null>(20)
   const [customAmount, setCustomAmount] = useState('')
   const [method, setMethod] = useState<RechargeMethod>('crypto')
+  const [step, setStep] = useState<'amount' | 'crypto' | 'success'>('amount')
   const [copied, setCopied] = useState(false)
-  const [showCryptoDetails, setShowCryptoDetails] = useState(false)
   const [proofFile, setProofFile] = useState<File | null>(null)
   const [proofPreview, setProofPreview] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
   const [uploadedProofUrl, setUploadedProofUrl] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-  const amounts = [20, 50, 100, 150, 200]
-  const depositHistory = (paymentHistoryQuery.data ?? []).filter((payment: any) => payment.type === 'deposit')
-  const loadingHistory = paymentHistoryQuery.isLoading
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [error, setError] = useState('')
+  const [copiedError, setCopiedError] = useState('')
 
-  const finalAmount = customAmount ? parseFloat(customAmount) : (selectedAmount || 0)
-  const isComingSoon = method === 'paypal' || method === 'wise' || method === 'payoneer'
-  const minimumDeposit = method === 'crypto' ? MIN_CRYPTO_DEPOSIT_USD : MIN_OTHER_DEPOSIT_USD
-  const isValidDepositAmount = Number.isFinite(finalAmount) && finalAmount >= minimumDeposit
+  const balance = userQuery.isError ? undefined : userQuery.data?.deposit_wallet_balance
+  const payments = (Array.isArray(historyQuery.data) ? historyQuery.data : []).filter((payment) => payment.type === 'deposit').slice(0, 5)
+  const amount = customAmount.trim() ? Number(customAmount) : selectedAmount ?? 0
+  const minimum = method === 'crypto' ? MIN_CRYPTO_DEPOSIT_USD : MIN_OTHER_DEPOSIT_USD
+  const validAmount = Number.isFinite(amount) && amount >= minimum
+  const comingSoon = method === 'paypal' || method === 'wise' || method === 'payoneer'
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(USDT_ADDRESS)}&bgcolor=ffffff&color=1746e8&margin=10`
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(USDT_ADDRESS).then(() => {
+  const selectMethod = (next: RechargeMethod) => {
+    setMethod(next)
+    setError('')
+  }
+  const proceed = () => {
+    setError('')
+    if (!validAmount) return setError(`The minimum for this method is $${minimum.toFixed(2)} USD.`)
+    if (method === 'paypal' || method === 'wise' || method === 'payoneer') return setError(`${COMING_SOON[method]} is not available for deposits yet.`)
+    if (method === 'mpesa') return navigate('/payments/mpesa', { state: { rechargeAmount: amount } })
+    setStep('crypto')
+  }
+  const copyAddress = async () => {
+    setCopiedError('')
+    try {
+      await navigator.clipboard.writeText(USDT_ADDRESS)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    })
-  }
-
-  const handleProceed = () => {
-    if (!isValidDepositAmount) return
-    if (isComingSoon) {
-      setError(maintenanceMessage)
-      return
-    }
-
-    if (method === 'mpesa') {
-      // Navigate to M-Pesa payment page with the selected recharge amount
-      navigate('/payments/mpesa', { state: { rechargeAmount: finalAmount } })
-      return
-    }
-
-    // Crypto flow
-    setShowCryptoDetails(true)
-  }
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setProofFile(file)
-      setError(null)
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setProofPreview(event.target?.result as string)
-      }
-      reader.readAsDataURL(file)
+      window.setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopiedError('Clipboard access is unavailable. Select and copy the address manually.')
     }
   }
-
-  const handleUploadProof = async () => {
-    if (!proofFile) {
-      setError('Please select an image')
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('Choose an image file for payment proof.')
+      event.target.value = ''
       return
     }
-
+    setProofFile(file)
+    setUploadedProofUrl(null)
+    setError('')
+    const reader = new FileReader()
+    reader.onload = (loadEvent) => setProofPreview(typeof loadEvent.target?.result === 'string' ? loadEvent.target.result : null)
+    reader.onerror = () => setError('The selected image could not be previewed. Choose it again.')
+    reader.readAsDataURL(file)
+  }
+  const uploadProof = async () => {
+    if (!proofFile) return setError('Select an image before uploading proof.')
     setUploading(true)
-    setError(null)
-
+    setError('')
     try {
       const formData = new FormData()
       formData.append('file', proofFile)
       formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Upload failed')
-      }
-
-      const data = await response.json()
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData })
+      if (!response.ok) throw new Error('Proof upload did not complete. Check your connection and retry.')
+      const data = await response.json() as { secure_url?: string }
+      if (!data.secure_url || !data.secure_url.startsWith('https://')) throw new Error('The upload service did not return a secure proof URL.')
       setUploadedProofUrl(data.secure_url)
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload proof')
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Proof upload failed.')
     } finally {
       setUploading(false)
     }
   }
-
-  const handleSubmitDeposit = async () => {
-    if (!uploadedProofUrl) {
-      setError('Please upload a payment proof')
-      return
-    }
-
+  const submitDeposit = async () => {
+    if (!uploadedProofUrl || submitting) return
     setSubmitting(true)
-    setError(null)
-
+    setError('')
     try {
-      await api.post('/payments/deposit', {
-        amount: finalAmount,
-        payment_method: 'USDT',
-        network: 'BEP20',
-        proof_url: uploadedProofUrl
-      })
+      await api.post('/payments/deposit', { amount, payment_method: 'USDT', network: 'BEP20', proof_url: uploadedProofUrl })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
         queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.summary }),
         queryClient.invalidateQueries({ queryKey: queryKeys.payments.overview }),
         queryClient.invalidateQueries({ queryKey: queryKeys.payments.historyBase }),
       ])
-
-      // Show success state
-      setSubmitSuccess(true)
-
-      // Navigate to payments page after 3 seconds
-      setTimeout(() => {
-        navigate('/payments')
-      }, 3000)
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to submit deposit')
+      setReviewOpen(false)
+      setStep('success')
+    } catch (submitError) {
+      setError(errorDetail(submitError, 'The deposit request could not be submitted. Check the details and try again.'))
     } finally {
       setSubmitting(false)
     }
   }
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${USDT_ADDRESS}&bgcolor=ffffff&color=319795&margin=10`
+  return <main className="recharge-page">
+    <header className="recharge-header"><button type="button" onClick={() => navigate(-1)} aria-label="Go back">←</button><div><span className="member-eyebrow">WALLET / ADD FUNDS</span><h1>{step === 'success' ? 'Request received' : step === 'crypto' ? 'Payment instructions' : 'Recharge wallet'}</h1></div><button type="button" onClick={() => navigate('/payments/history')}>Activity</button></header>
 
-  return (
-    <div style={{
-      minHeight: '100vh', backgroundColor: 'var(--bg-main)', padding: '16px',
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-heading)' }}>←</button>
-        <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>Recharge Account</h1>
-        <button onClick={() => navigate('/payments/history')} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-heading)' }}>🕒</button>
-      </div>
+    <section className="recharge-balance"><span className="member-eyebrow">DEPOSIT WALLET · SERVER BALANCE</span><strong>{balance === undefined ? '—' : `$${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</strong><small>{userQuery.isError ? 'Balance unavailable; retry your account request.' : userQuery.isFetching ? 'Refreshing account response…' : 'Deposit funds are separate from cashable earnings.'}</small>{userQuery.isError && <button type="button" onClick={() => void userQuery.refetch()}>Retry balance</button>}</section>
 
-      {/* Current Balance Card */}
-      <div style={{
-        backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '24px', textAlign: 'center',
-        boxShadow: 'var(--card-shadow)', marginBottom: '24px', border: '1px solid var(--border-main)'
-      }}>
-        <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 500 }}>Current Balance</div>
-        <div style={{ fontSize: '38px', fontWeight: 800, color: 'var(--text-heading)' }}>${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', fontWeight: 600 }}>USD</div>
-      </div>
-
-      {!showCryptoDetails && !submitSuccess ? (
-        <>
-          {/* Select Amount Section */}
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>Select Recharge Amount</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '16px' }}>
-              {amounts.map(amt => (
-                <button
-                  key={amt}
-                  onClick={() => {
-                    setSelectedAmount(amt)
-                    setCustomAmount('')
-                  }}
-                  style={{
-                    height: '52px', borderRadius: '12px',
-                    border: (selectedAmount === amt && !customAmount) ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
-                    backgroundColor: 'var(--bg-card)',
-                    color: 'var(--text-main)',
-                    fontSize: '18px', fontWeight: 700, cursor: 'pointer',
-                    transition: 'all 0.2s', position: 'relative'
-                  }}
-                >
-                  ${amt}
-                  {selectedAmount === amt && !customAmount && (
-                    <div style={{
-                      position: 'absolute', top: '-6px', right: '-6px', backgroundColor: '#4fd1c5',
-                      borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
-                      border: '2px solid white', fontWeight: 800
-                    }}>✓</div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div style={{ marginBottom: '24px' }}>
-              <p style={{ fontSize: '14px', color: 'var(--text-heading)', marginBottom: '8px', fontWeight: 600 }}>Or enter custom amount</p>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                <span style={{ position: 'absolute', left: '16px', color: 'var(--text-muted)', fontWeight: 600 }}>$</span>
-                <input
-                  type="number"
-                  value={customAmount}
-                  min={minimumDeposit}
-                  onChange={(e) => {
-                    setCustomAmount(e.target.value)
-                    setSelectedAmount(null)
-                  }}
-                  placeholder="Enter amount"
-                  style={{
-                    width: '100%', padding: '14px 40px 14px 32px', borderRadius: '12px',
-                    border: '1px solid var(--border-main)', fontSize: '16px', outline: 'none',
-                    fontWeight: 500, backgroundColor: 'var(--bg-card)', color: 'var(--text-main)'
-                  }}
-                />
-                {customAmount && (
-                  <button
-                    onClick={() => setCustomAmount('')}
-                    style={{ position: 'absolute', right: '16px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}
-                  >✕</button>
-                )}
-              </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '8px', fontWeight: 500 }}>Minimum deposit is ${minimumDeposit.toFixed(2)}</p>
-            </div>
-          </div>
-
-          {/* Choose Payment Method Section */}
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>Choose Payment Method</h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {/* Crypto Option */}
-              <div
-                onClick={() => setMethod('crypto')}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '16px', borderRadius: '16px',
-                  border: `2px solid ${method === 'crypto' ? 'var(--accent-primary)' : 'transparent'}`,
-                  backgroundColor: 'var(--bg-card)', cursor: 'pointer',
-                  boxShadow: method === 'crypto' ? '0 0 0 3px rgba(49,151,149,0.12)' : 'none',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{
-                    width: '40px', height: '40px', backgroundColor: 'var(--accent-primary)', borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '22px', color: 'white', fontWeight: 800
-                  }}>₮</div>
-                  <div>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>Crypto (USDT - BEP20)</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Tether on BNB Smart Chain</div>
-                  </div>
-                </div>
-                <div style={{
-                  width: '22px', height: '22px', borderRadius: '50%',
-                  border: `2px solid ${method === 'crypto' ? 'var(--accent-primary)' : 'var(--border-main)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  {method === 'crypto' && (
-                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: 'var(--accent-primary)' }} />
-                  )}
-                </div>
-              </div>
-
-              {/* M-Pesa Option */}
-              <div
-                onClick={() => setMethod('mpesa')}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '16px', borderRadius: '16px',
-                  border: `2px solid ${method === 'mpesa' ? '#00AC4F' : 'transparent'}`,
-                  backgroundColor: 'var(--bg-card)', cursor: 'pointer',
-                  boxShadow: method === 'mpesa' ? '0 0 0 3px rgba(0,172,79,0.12)' : 'none',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{
-                    width: '40px', height: '40px', backgroundColor: '#00AC4F', borderRadius: '8px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '18px', fontWeight: 900, color: 'white', flexShrink: 0
-                  }}>M</div>
-                  <div>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>M-PESA (Instant KES)</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Pay via M-Pesa — admin verifies every deposit</div>
-                  </div>
-                </div>
-                <div style={{
-                  width: '22px', height: '22px', borderRadius: '50%',
-                  border: `2px solid ${method === 'mpesa' ? '#00AC4F' : 'var(--border-main)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  {method === 'mpesa' && (
-                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#00AC4F' }} />
-                  )}
-                </div>
-              </div>
-              {(['paypal', 'wise', 'payoneer'] as const).map((soonMethod) => {
-                const brand = comingSoonLabels[soonMethod]
-                const logoColor = soonMethod === 'paypal' ? '#003087' : soonMethod === 'wise' ? '#163300' : '#ff4800'
-                const logoUrl = soonMethod === 'paypal' ? 'https://cdn.simpleicons.org/paypal/003087' : soonMethod === 'wise' ? 'https://cdn.simpleicons.org/wise/163300' : 'https://cdn.simpleicons.org/payoneer/ff4800'
-                return (
-                  <div key={soonMethod} onClick={() => navigate(`/payments/maintenance/${soonMethod}`)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '16px', border: `2px solid ${method === soonMethod ? logoColor : 'transparent'}`, backgroundColor: 'var(--bg-card)', cursor: 'pointer', boxShadow: method === soonMethod ? `0 0 0 3px ${logoColor}20` : 'none', transition: 'all 0.2s' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: 'white', display: 'grid', placeItems: 'center', flexShrink: 0, border: '1px solid var(--border-main)' }}><img src={logoUrl} alt={`${brand} logo`} style={{ width: '27px', height: '27px' }} /></div>
-                      <div><div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-heading)' }}>{brand}</div></div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            {isComingSoon && <div style={{ marginTop: '12px', padding: '12px 14px', borderRadius: '12px', backgroundColor: '#fff7ed', color: '#9a3412', fontSize: '13px', lineHeight: 1.5, fontWeight: 700 }}>{maintenanceMessage}</div>}
-          </div>
-
-          {/* Summary and Proceed */}
-          <div style={{ marginBottom: '24px', padding: '0 8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '14px' }}>
-              <span style={{ color: 'var(--text-heading)', fontWeight: 500 }}>Method:</span>
-              <span style={{ fontWeight: 700, color: 'var(--text-heading)' }}>
-                {method === 'mpesa' ? 'M-PESA (KES)' : method === 'crypto' ? 'Crypto (USDT-BEP20)' : comingSoonLabels[method]}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontSize: '14px' }}>
-              <span style={{ color: 'var(--text-heading)', fontWeight: 500 }}>Total:</span>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: method === 'mpesa' ? '#00AC4F' : 'var(--accent-primary)' }}>
-                {method === 'mpesa'
-                  ? `KES ${(finalAmount * 130).toLocaleString(undefined, { maximumFractionDigits: 0 })} ≈ $${finalAmount.toFixed(2)}`
-                  : `$${finalAmount.toFixed(2)}`
-                }
-              </span>
-            </div>
-
-            <button
-              onClick={handleProceed}
-              disabled={!isValidDepositAmount || isComingSoon}
-              style={{
-                width: '100%', height: '56px', borderRadius: '16px',
-                  backgroundColor: !isValidDepositAmount || isComingSoon
-                  ? 'var(--text-muted)'
-                  : method === 'mpesa' ? '#00AC4F' : 'var(--accent-primary)',
-                color: 'white', fontSize: '16px', fontWeight: 700, border: 'none',
-                cursor: !isValidDepositAmount || isComingSoon ? 'not-allowed' : 'pointer',
-                boxShadow: finalAmount < minimumDeposit ? 'none' : '0 4px 12px rgba(49, 151, 149, 0.2)',
-                transition: 'all 0.2s'
-              }}
-            >
-              {method === 'mpesa'
-                ? `📱 Pay with M-Pesa`
-                : 'Proceed to Deposit'
-              }
-            </button>
-          </div>
-        </>
-      ) : showCryptoDetails && !submitSuccess ? (
-        <div style={{
-          backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '24px',
-          boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)'
-        }}>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '8px' }}>Send exactly</p>
-            <h2 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>${finalAmount.toFixed(2)} USDT</h2>
-            <p style={{ fontSize: '12px', color: 'var(--accent-primary)', marginTop: '4px', fontWeight: 600 }}>
-              Network: {USDT_NETWORK}
-            </p>
-          </div>
-
-          <div style={{
-            display: 'flex', justifyContent: 'center', marginBottom: '24px',
-            padding: '12px', backgroundColor: 'white', borderRadius: '16px', width: 'fit-content', margin: '0 auto 24px'
-          }}>
-            <img src={qrUrl} alt="QR Code" style={{ width: '180px', height: '180px' }} />
-          </div>
-
-          <div style={{
-            backgroundColor: 'var(--bg-main)', borderRadius: '16px', padding: '16px',
-            border: '1px solid var(--border-main)', marginBottom: '24px'
-          }}>
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase' }}>USDT Address ({USDT_NETWORK})</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <code style={{
-                flex: 1, fontSize: '13px', color: 'var(--text-main)', fontWeight: 700,
-                wordBreak: 'break-all', lineHeight: 1.4
-              }}>{USDT_ADDRESS}</code>
-              <button
-                onClick={handleCopy}
-                style={{
-                  padding: '8px 16px', borderRadius: '8px', backgroundColor: copied ? '#059669' : 'var(--accent-primary)',
-                  color: 'white', border: 'none', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-                  minWidth: '70px', transition: 'all 0.2s'
-                }}
-              >
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '24px' }}>
-            <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '12px' }}>Upload Payment Proof</p>
-            <div style={{
-              border: '2px dashed var(--border-main)', borderRadius: '16px', padding: '20px',
-              textAlign: 'center', cursor: 'pointer', position: 'relative',
-              backgroundColor: proofPreview ? 'transparent' : 'var(--bg-main)'
-            }}>
-              {proofPreview ? (
-                <div style={{ position: 'relative' }}>
-                  <img src={proofPreview} alt="Proof Preview" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }} />
-                  <button
-                    onClick={() => { setProofFile(null); setProofPreview(null); setUploadedProofUrl(null); }}
-                    style={{
-                      position: 'absolute', top: '-10px', right: '-10px', backgroundColor: '#ef4444',
-                      color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px',
-                      cursor: 'pointer', fontWeight: 800
-                    }}
-                  >✕</button>
-                </div>
-              ) : (
-                <label style={{ cursor: 'pointer', display: 'block' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>📸</div>
-                  <p style={{ fontSize: '13px', color: 'var(--text-main)', fontWeight: 600, margin: '0 0 4px' }}>Click to upload screenshot</p>
-                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>JPG, PNG or PDF (Max 5MB)</p>
-                  <input type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} />
-                </label>
-              )}
-            </div>
-            {error && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '8px', fontWeight: 600 }}>{error}</p>}
-          </div>
-
-          {!uploadedProofUrl ? (
-            <button
-              onClick={handleUploadProof}
-              disabled={uploading || !proofFile}
-              style={{
-                width: '100%', height: '52px', borderRadius: '16px',
-                backgroundColor: (uploading || !proofFile) ? 'var(--text-muted)' : 'var(--text-heading)',
-                color: 'white', fontSize: '15px', fontWeight: 700, border: 'none',
-                cursor: (uploading || !proofFile) ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {uploading ? 'Uploading...' : 'Verify Payment Proof'}
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmitDeposit}
-              disabled={submitting}
-              style={{
-                width: '100%', height: '52px', borderRadius: '16px',
-                backgroundColor: '#059669', color: 'white', fontSize: '15px',
-                fontWeight: 700, border: 'none', cursor: submitting ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {submitting ? 'Submitting...' : 'Confirm Deposit'}
-            </button>
-          )}
-
-          <button
-            onClick={() => { setShowCryptoDetails(false); setProofFile(null); setProofPreview(null); setUploadedProofUrl(null); }}
-            style={{
-              width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)',
-              fontSize: '13px', fontWeight: 600, marginTop: '16px', cursor: 'pointer'
-            }}
-          >
-            ← Change amount or method
-          </button>
+    {step === 'amount' && <>
+      <div className="recharge-columns"><section className="recharge-card"><div className="recharge-step">01 / AMOUNT & ROUTE</div><h2>Choose deposit amount</h2><p className="recharge-copy">Select a supported amount or enter a custom USD amount. The server applies its final minimum check.</p>
+        <div className="recharge-amounts">{AMOUNTS.map((value) => <button type="button" key={value} className={selectedAmount === value && !customAmount ? 'is-selected' : ''} onClick={() => { setSelectedAmount(value); setCustomAmount(''); setError('') }}>${value}</button>)}</div>
+        <label className="recharge-field" htmlFor="recharge-custom-amount"><span>Custom amount (USD)</span><input id="recharge-custom-amount" type="number" min={minimum} step="0.01" inputMode="decimal" value={customAmount} placeholder="Enter amount" onChange={(event) => { setCustomAmount(event.target.value); setSelectedAmount(null); setError('') }} /></label>
+        <p className="recharge-minimum">Minimum: ${minimum.toFixed(2)} USD for {method === 'crypto' ? 'crypto' : 'this route'}.</p>
+        <div className="recharge-methods" role="group" aria-label="Deposit method">
+          <button type="button" className={method === 'crypto' ? 'is-selected' : ''} onClick={() => selectMethod('crypto')}><span className="recharge-method-mark">₮</span><span><strong>USDT · BEP20</strong><small>BNB Smart Chain · proof reviewed by staff</small></span><span className="recharge-radio" aria-hidden="true" /></button>
+          <button type="button" className={method === 'mpesa' ? 'is-selected' : ''} onClick={() => selectMethod('mpesa')}><span className="recharge-method-mark is-persimmon">M</span><span><strong>M-Pesa</strong><small>Payment attempt is submitted to admin review</small></span><span className="recharge-radio" aria-hidden="true" /></button>
+          {(['paypal', 'wise', 'payoneer'] as const).map((value) => <button type="button" key={value} className="is-unavailable" onClick={() => selectMethod(value)}><span className="recharge-method-mark is-muted">—</span><span><strong>{COMING_SOON[value]}</strong><small>Not currently available</small></span><span className="recharge-unavailable">Unavailable</span></button>)}
         </div>
-      ) : (
-        <div style={{
-          backgroundColor: 'var(--bg-card)', borderRadius: '24px', padding: '40px 24px',
-          textAlign: 'center', boxShadow: 'var(--card-shadow)', border: '1px solid var(--border-main)'
-        }}>
-          <div style={{
-            width: '72px', height: '72px', backgroundColor: '#ecfdf5', borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '32px', margin: '0 auto 24px', color: '#059669'
-          }}>✓</div>
-          <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-heading)', marginBottom: '12px' }}>Deposit Submitted!</h2>
-          <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '32px' }}>
-            Your deposit of <strong>${finalAmount.toFixed(2)}</strong> has been received. Our team will verify the payment and credit your wallet within 1-2 hours.
-          </p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              width: '100%', height: '52px', borderRadius: '16px',
-              backgroundColor: 'var(--accent-primary)', color: 'white',
-              fontSize: '15px', fontWeight: 700, border: 'none', cursor: 'pointer'
-            }}
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      )}
+        {error && <p className="recharge-error" role="alert">{error}</p>}
+        <button type="button" className="member-button member-button--primary recharge-proceed" disabled={!validAmount || comingSoon} onClick={proceed}>{method === 'mpesa' ? 'Continue to M-Pesa' : 'Proceed to deposit instructions'} <span aria-hidden="true">→</span></button>
+      </section>
+      <aside className="recharge-card recharge-review-note"><div className="recharge-step">PAYMENT POLICY</div><h2>Request first. Credit after review.</h2><p>Submitting proof creates a deposit request. The deposit wallet is not credited until the payment is verified and an administrator approves the record.</p><button className="recharge-history-link" type="button" onClick={() => navigate('/payments/history')}>View payment activity →</button></aside></div>
 
-      <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-heading)', fontWeight: 600, marginTop: '4px' }}>
-        * Funds will be credited after admin approval and payment confirmation.
-      </p>
+      <section className="recharge-card recharge-history"><div className="recharge-history-head"><div><span className="member-eyebrow">LATEST SERVICE RECORDS</span><h2>Recent deposits</h2></div><button type="button" onClick={() => navigate('/payments/history')}>Full activity</button></div>
+        {historyQuery.isLoading ? <p role="status">Loading deposit records…</p> : historyQuery.isError ? <p className="recharge-error" role="alert">Deposit history is unavailable. <button type="button" onClick={() => void historyQuery.refetch()}>Retry</button></p> : payments.length ? <div className="recharge-history-list">{payments.map((payment) => <div className="recharge-history-row" key={payment.id}><span><strong>${Number(payment.amount).toFixed(2)}</strong><small>{payment.created_at ? new Date(payment.created_at).toLocaleString() : payment.period || 'Date unavailable'}</small></span><span>{payment.payment_method || 'Deposit'}<small className={`recharge-status${payment.status === 'paid' ? ' is-paid' : payment.status === 'rejected' ? ' is-rejected' : ''}`}>{depositStatus(payment.status)}</small></span></div>)}</div> : <p className="recharge-copy">No deposit records have been returned for this account yet.</p>}
+      </section>
+    </>}
 
-      {/* Deposit History Section */}
-      {!showCryptoDetails && !submitSuccess && (
-        <div style={{ marginTop: '32px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '16px' }}>Your Deposit History</h3>
-          {loadingHistory ? (
-            <div style={{ textAlign: 'center', padding: '24px' }}>
-              <div style={{ width: '32px', height: '32px', border: '3px solid var(--border-main)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-              <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Loading history...</p>
-            </div>
-          ) : depositHistory.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-main)', backgroundColor: 'var(--bg-card)' }}>
-              {/* Header Row */}
-              <div style={{
-                backgroundColor: 'var(--bg-main)', padding: '12px 16px',
-                display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px',
-                borderBottom: '1px solid var(--border-main)'
-              }}>
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Amount</p>
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Date</p>
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Method</p>
-                <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>Status</p>
-              </div>
-              {/* Data Rows */}
-              {depositHistory.slice(0, 5).map((payment, index) => {
-                const statusColors: { [key: string]: { bg: string; text: string; icon: string } } = {
-                  pending: { bg: '#fef3c7', text: '#92400e', icon: '⏳' },
-                  under_review: { bg: '#fffbeb', text: '#92400e', icon: '🔎' },
-                  paid: { bg: '#ecfdf5', text: '#065f46', icon: '✓' },
-                  rejected: { bg: '#fef2f2', text: '#991b1b', icon: '✕' },
-                  cancelled: { bg: '#f3f4f6', text: '#374151', icon: '−' },
-                }
-                const statusColor = statusColors[payment.status] || statusColors.pending
-                const displayStatus = payment.status === 'pending' ? 'Processing' : payment.status === 'under_review' ? 'Under Review' : (payment.status.charAt(0).toUpperCase() + payment.status.slice(1))
-                const formattedDate = payment.created_at
-                  ? new Date(payment.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })
-                  : payment.period
-                return (
-                  <div
-                    key={payment.id}
-                    style={{
-                      padding: '14px 16px',
-                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px',
-                      alignItems: 'center', borderBottom: index < depositHistory.length - 1 ? '1px solid var(--border-main)' : 'none'
-                    }}
-                  >
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)', margin: 0 }}>${payment.amount.toFixed(2)}</p>
-                    <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>{formattedDate}</p>
-                    <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main)', margin: 0 }}>{payment.payment_method || 'N/A'}</p>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '4px',
-                      backgroundColor: statusColor.bg, color: statusColor.text,
-                      padding: '4px 10px', borderRadius: '16px',
-                      fontSize: '11px', fontWeight: 700, whiteSpace: 'nowrap',
-                      width: 'fit-content'
-                    }}>
-                      <span>{statusColor.icon}</span>
-                      {displayStatus}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div style={{
-              backgroundColor: 'var(--bg-main)', borderRadius: '12px', padding: '20px',
-              textAlign: 'center', border: '1px solid var(--border-main)'
-            }}>
-              <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>No deposit history yet</p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
+    {step === 'crypto' && <section className="recharge-card recharge-crypto"><div className="recharge-step">02 / SEND & UPLOAD</div><div className="recharge-crypto-summary"><div><span className="member-eyebrow">REQUESTED AMOUNT</span><h2>${amount.toFixed(2)} <small>USDT</small></h2><p>Network: {USDT_NETWORK}</p></div><img src={qrUrl} alt="QR code for the USDT payment address" width="132" height="132" /></div>
+      <div className="recharge-address"><span className="member-eyebrow">DESTINATION ADDRESS · BEP20</span><div><code>{USDT_ADDRESS}</code><button type="button" onClick={() => void copyAddress()}>{copied ? 'Copied' : 'Copy'}</button></div>{copiedError && <p role="alert">{copiedError}</p>}</div>
+      <div className="recharge-upload"><label htmlFor="recharge-proof">Payment proof image</label><p>Upload a screenshot of the transfer. This is stored with your request for administrator review; upload does not verify payment.</p>{proofPreview ? <div className="recharge-preview"><img src={proofPreview} alt="Preview of selected payment proof" /><button type="button" onClick={() => { setProofFile(null); setProofPreview(null); setUploadedProofUrl(null); setError('') }}>Remove image</button></div> : <input id="recharge-proof" type="file" accept="image/*" onChange={handleFileSelect} />}{error && <p className="recharge-error" role="alert">{error}</p>}{proofFile && <button className="member-button member-button--outline" type="button" onClick={() => void uploadProof()} disabled={uploading || Boolean(uploadedProofUrl)}>{uploading ? 'Uploading proof…' : uploadedProofUrl ? 'Proof uploaded securely' : 'Upload payment proof'}</button>}</div>
+      {uploadedProofUrl && <div className="recharge-uploaded" role="status">Secure proof URL received. The service will review this request after submission.</div>}
+      <div className="recharge-crypto-actions"><button className="member-button member-button--outline" type="button" onClick={() => { setStep('amount'); setError(''); setProofFile(null); setProofPreview(null); setUploadedProofUrl(null) }}>Back to amount</button><button className="member-button member-button--primary" type="button" disabled={!uploadedProofUrl} onClick={() => setReviewOpen(true)}>Review deposit request</button></div>
+    </section>}
+
+    {step === 'success' && <section className="recharge-card recharge-success" role="status"><span className="recharge-success-mark" aria-hidden="true">✓</span><span className="member-eyebrow">REQUEST SUBMITTED · PENDING REVIEW</span><h2>Deposit request received</h2><p>Your ${amount.toFixed(2)} USDT request was submitted. It is pending administrator review; the deposit wallet is not credited until the payment proof is verified and the request is approved.</p><div><button className="member-button member-button--primary" type="button" onClick={() => navigate('/payments/history')}>View payment status</button><button className="member-button member-button--outline" type="button" onClick={() => navigate('/dashboard')}>Back to workspace</button></div></section>}
+
+    {reviewOpen && <div className="recharge-review-backdrop"><section className="recharge-review-dialog" role="dialog" aria-modal="true" aria-labelledby="recharge-review-title"><span className="recharge-step">03 / FINAL REVIEW</span><h2 id="recharge-review-title">Submit deposit for review?</h2><dl><div><dt>Amount</dt><dd>${amount.toFixed(2)} USDT</dd></div><div><dt>Network</dt><dd>{USDT_NETWORK}</dd></div><div><dt>Destination</dt><dd>{USDT_ADDRESS}</dd></div><div><dt>Proof</dt><dd>{proofFile?.name || 'Uploaded image'}</dd></div></dl><p>This creates a pending deposit request. No wallet credit occurs until an administrator verifies the payment and approves it.</p>{error && <p className="recharge-error" role="alert">{error}</p>}<div className="recharge-review-actions"><button className="member-button member-button--outline" type="button" disabled={submitting} onClick={() => setReviewOpen(false)}>Back</button><button className="member-button member-button--primary" type="button" disabled={!uploadedProofUrl || submitting} onClick={() => void submitDeposit()}>{submitting ? 'Submitting…' : 'Submit for admin review'}</button></div></section></div>}
+  </main>
 }

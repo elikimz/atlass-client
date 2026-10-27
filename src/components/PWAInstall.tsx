@@ -46,7 +46,7 @@ if (typeof window !== 'undefined') {
   bindPwaEvents()
 }
 
-export function usePwaInstall() {
+function usePwaInstall() {
   const [, rerender] = useState(0)
   const [helpOpen, setHelpOpen] = useState(false)
 

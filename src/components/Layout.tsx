@@ -74,11 +74,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const user = userQuery.data ?? null
   const unreadCount = (notificationsQuery.data ?? []).filter((notification) => !notification.is_read).length
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
-  const emailName = userEmail.split('@')[0]?.split(/[._+-]/).filter(Boolean)[0] || ''
-  const fallbackName = emailName ? emailName.charAt(0).toUpperCase() + emailName.slice(1) : 'Member'
-  const firstName = user?.first_name?.trim() || localStorage.getItem('user_first_name') || fallbackName
-  const lastName = user?.last_name?.trim() || localStorage.getItem('user_last_name') || ''
-  const isAdminUser = Boolean(user?.is_admin || user?.role === 'admin' || localStorage.getItem('user_is_admin') === 'true')
+  const firstName = user?.first_name?.trim() || 'Member'
+  const lastName = user?.last_name?.trim() || ''
+  const isAdminUser = Boolean(user?.is_admin || user?.role === 'admin')
   const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase() || 'M'
   const pageTitle = titleForPath(location.pathname)
 

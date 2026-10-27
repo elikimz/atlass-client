@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 import ReferralNetwork from '../components/ReferralNetwork'
@@ -51,6 +51,7 @@ function dateLabel(value?: string) {
 }
 
 export default function Invite() {
+  const queryClient = useQueryClient()
   const [copied, setCopied] = useState<'link' | 'code' | null>(null)
   const [copyError, setCopyError] = useState('')
   const [currentInvitePage, setCurrentInvitePage] = useState(1)
@@ -61,7 +62,7 @@ export default function Invite() {
   })
   const referralCodesQuery = useQuery({
     queryKey: queryKeys.referrals.codes,
-    queryFn: async () => (await api.get<ReferralCodeData[]>('/referrals/codes')).data ?? [],
+    queryFn: async () => (await api.get<ReferralCodeData[]>('/referrals/codes', { params: { provision: false } })).data ?? [],
     staleTime: 10 * 60 * 1000,
   })
   const summaryQuery = useQuery({
@@ -83,6 +84,10 @@ export default function Invite() {
   const safeInvitePage = Math.min(currentInvitePage, invitePageCount)
   const visibleInvites = activeInvites.slice((safeInvitePage - 1) * INVITES_PER_PAGE, safeInvitePage * INVITES_PER_PAGE)
   const inviteCode = referralCodes[0]?.code || ''
+  const provisionCode = useMutation({
+    mutationFn: async () => (await api.post<ReferralCodeData>('/referrals/codes/provision')).data,
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: queryKeys.referrals.codes }) },
+  })
   const inviteLink = inviteCode ? `${window.location.origin}/?ref=${encodeURIComponent(inviteCode)}` : ''
 
   const handleCopy = async (text: string, type: 'link' | 'code') => {
@@ -128,7 +133,8 @@ export default function Invite() {
           <label className="referral-share-field"><span>REFERRAL CODE</span><div className="referral-share-input-row"><input aria-label="Your referral code" value={inviteCode} readOnly placeholder="Code not available yet" /><button className="referral-copy-button referral-copy-button--light" type="button" onClick={() => void handleCopy(inviteCode, 'code')} disabled={!inviteCode}>{copied === 'code' ? 'Copied' : 'Copy code'}</button></div></label>
           {copyError && <p className="referral-copy-error" role="alert">{copyError}</p>}
           {copied && <p className="referral-copy-success" role="status">{copied === 'link' ? 'Invite link copied.' : 'Referral code copied.'}</p>}
-          {inviteCode && <small className="referral-share-note">The invite link uses the first referral code currently returned for your account.</small>}
+          {!inviteCode && !referralCodesQuery.isError && <div className="referral-provision"><p>No invite code is set up yet. Create one when you are ready to share it.</p><button className="member-button member-button--primary" type="button" onClick={() => provisionCode.mutate()} disabled={provisionCode.isPending}>{provisionCode.isPending ? 'Creating code…' : 'Create referral code'}</button>{provisionCode.isError && <p role="alert">Could not create a code. Try again.</p>}</div>}
+          {inviteCode && <small className="referral-share-note">The invite link uses the first referral code returned for your account.</small>}
         </div>
       </section>
 

@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 
+const pageOpenedAt = Date.now()
+
 interface Plan {
   id: number
   name: string
@@ -61,6 +63,7 @@ function dateLabel(value?: string) {
 
 export default function InvestmentPlans() {
   const queryClient = useQueryClient()
+  const [reviewPlan, setReviewPlan] = useState<Plan | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const plansQuery = useQuery({
     queryKey: queryKeys.plans.all,
@@ -83,7 +86,7 @@ export default function InvestmentPlans() {
       return { response, plan, isUpgrade }
     },
     onMutate: () => setMessage(null),
-    onSuccess: ({ response, plan, isUpgrade }) => {
+      onSuccess: ({ response, plan, isUpgrade }) => {
       if (response.data?.user) {
         queryClient.setQueryData(queryKeys.auth.currentUser, (current: UserData | undefined) => ({ ...current, ...response.data.user }))
       }
@@ -93,6 +96,7 @@ export default function InvestmentPlans() {
           ? 'Free Intern trial activated successfully!'
           : isUpgrade ? `Successfully upgraded to ${plan.name}!` : `Successfully purchased ${plan.name}!`,
       })
+      setReviewPlan(null)
     },
     onError: (error: unknown) => setMessage({ type: 'error', text: apiErrorText(error) }),
     onSettled: async () => {
@@ -122,6 +126,8 @@ export default function InvestmentPlans() {
   }
 
   const hasCurrentPlan = user.current_plan_id !== null && user.current_plan_id !== undefined
+  const parsedExpiry = parseDate(user.plan_expiry_date)
+  const planExpired = Boolean(parsedExpiry && parsedExpiry.getTime() < pageOpenedAt)
   const currentPlan = user.current_plan ?? plans.find((plan) => plan.id === user.current_plan_id)
   const currentPlanName = currentPlan?.name || (hasCurrentPlan ? 'Current plan' : 'No active plan')
   const actionLoading = purchaseMutation.isPending ? purchaseMutation.variables?.id ?? null : null
@@ -134,7 +140,7 @@ export default function InvestmentPlans() {
       </header>
 
       <section className="plan-account-strip" aria-label="Current membership and balances">
-        <div className="plan-account-current"><span className="plan-account-index">CURRENT MEMBERSHIP</span><strong>{currentPlanName}</strong><small>{hasCurrentPlan ? `Recorded expiry · ${dateLabel(user.plan_expiry_date)}` : 'Choose a plan to get started'}</small></div>
+        <div className="plan-account-current"><span className="plan-account-index">ACCOUNT STATE</span><strong>{planExpired ? `${currentPlanName} · expired` : hasCurrentPlan ? currentPlanName : 'No current plan'}</strong><small>{hasCurrentPlan ? `Recorded expiry · ${dateLabel(user.plan_expiry_date)}` : 'Choose a plan to get started'}</small></div>
         <div className="plan-account-balance"><span>DEPOSIT WALLET</span><strong>{money(user.deposit_wallet_balance)}</strong><Link to="/payments">Add funds →</Link></div>
         <div className="plan-account-balance plan-account-balance--bonus"><span>PERFORMANCE BONUS</span><strong>{money(user.performance_bonus_balance)}</strong><small>Shown separately from deposit funds</small></div>
       </section>
@@ -145,19 +151,20 @@ export default function InvestmentPlans() {
         <div className="member-section-heading"><div><span className="member-eyebrow">AVAILABLE OPTIONS / {String(plans.length).padStart(2, '0')}</span><h3 id="plan-comparison-title">Compare plans</h3><p>Values below come from the current plan catalogue.</p></div></div>
         {plans.length === 0 ? <div className="member-empty-state"><strong>No plans are available right now.</strong><span>Check again later or contact support.</span></div> : (
           <div className="plan-comparison-list">
-            <div className="plan-comparison-head" aria-hidden="true"><span>PROGRAM</span><span>PRICE</span><span>DAILY ACTIVITY</span><span>TERM</span><span>RETURN / PROFIT</span><span>ACCESS</span></div>
+            <div className="plan-comparison-head" aria-hidden="true"><span>PROGRAM</span><span>PRICE</span><span>DAILY ACTIVITY</span><span>TERM</span><span>ACCESS</span></div>
             {plans.map((plan, index) => {
               const isActive = user.current_plan_id === plan.id
-              const isLowerTier = Boolean(currentPlan && plan.price <= currentPlan.price)
+              const isLowerTier = Boolean(hasCurrentPlan && !planExpired && currentPlan && plan.price <= currentPlan.price)
               const missingCurrentPlanDetails = hasCurrentPlan && !currentPlan
               // The backend requires the FULL new plan price for upgrades, not only the difference.
               const requiredBalance = plan.price
               const hasEnoughBalance = plan.name === 'Intern' || (user.deposit_wallet_balance || 0) >= requiredBalance
-              const canPurchase = !isActive && !missingCurrentPlanDetails && hasEnoughBalance && (!hasCurrentPlan || !isLowerTier)
+              const canPurchase = !isActive && !missingCurrentPlanDetails && hasEnoughBalance && (!plan.is_upgrade_only || (hasCurrentPlan && !planExpired && !isLowerTier)) && (!hasCurrentPlan || planExpired || !isLowerTier)
               const shortfall = Math.max(0, requiredBalance - (user.deposit_wallet_balance || 0))
               const actionLabel = actionLoading === plan.id ? 'Processing…'
                 : isActive ? 'Current plan'
                   : missingCurrentPlanDetails ? 'Current plan unavailable'
+                  : plan.is_upgrade_only && (!hasCurrentPlan || planExpired) ? 'Upgrade-only plan'
                     : isLowerTier ? 'Higher tier required'
                     : !hasEnoughBalance ? `Need ${money(shortfall)} more`
                       : plan.name === 'Intern' ? 'Activate free trial'
@@ -168,14 +175,14 @@ export default function InvestmentPlans() {
                   <div className="plan-cell" data-label="Price"><strong>{money(plan.price)}</strong><small>USD</small></div>
                   <div className="plan-cell" data-label="Daily activity"><strong>{money(plan.daily_earnings)}</strong><small>{plan.daily_tasks_limit} tasks / day</small></div>
                   <div className="plan-cell" data-label="Term"><strong>{plan.validity_days}</strong><small>days</small></div>
-                  <div className="plan-cell plan-return-cell" data-label="Return / profit"><strong>{money(plan.total_return)}</strong><small>{money(plan.profit)} profit</small></div>
-                  <div className="plan-cell plan-action-cell" data-label="Access"><button className="member-button member-button--primary plan-action-button" type="button" onClick={() => purchaseMutation.mutate(plan)} disabled={!canPurchase || actionLoading !== null}>{actionLabel}</button>{!isActive && !isLowerTier && !hasEnoughBalance && <small className="plan-action-note">Deposit wallet is short by {money(shortfall)}.</small>}{hasCurrentPlan && canPurchase && plan.name !== 'Intern' && <small className="plan-action-note">Full plan price is required. Upgrade refunds the prior price to Withdrawal Wallet.</small>}</div>
+                  <div className="plan-cell plan-action-cell" data-label="Access"><button className="member-button member-button--primary plan-action-button" type="button" onClick={() => setReviewPlan(plan)} disabled={!canPurchase || actionLoading !== null}>{actionLabel}</button>{!isActive && !isLowerTier && !hasEnoughBalance && <small className="plan-action-note">Deposit Wallet is short by {money(shortfall)}.</small>}{plan.is_upgrade_only && <small className="plan-action-note">Upgrade-only eligibility is set by the catalogue.</small>}</div>
                 </article>
               )
             })}
           </div>
         )}
       </section>
+      {reviewPlan && <div className="plan-review-backdrop" role="presentation"><section className="plan-review-dialog" role="dialog" aria-modal="true" aria-labelledby="plan-review-title"><span className="member-eyebrow">FINAL REVIEW / NO CHARGE YET</span><h3 id="plan-review-title">Review {reviewPlan.name}</h3><p>Price to charge Deposit Wallet: <strong>{money(reviewPlan.price)}</strong></p><p>Term: <strong>{reviewPlan.validity_days} days</strong></p><p>Daily task limit: <strong>{reviewPlan.daily_tasks_limit}</strong></p><p>These are catalogue terms only; no return or profit estimate is provided. The server will make the final eligibility decision.</p>{message?.type === 'error' && <p role="alert">{message.text}</p>}<div><button className="member-button member-button--outline" type="button" onClick={() => setReviewPlan(null)} disabled={purchaseMutation.isPending}>Go back</button><button className="member-button member-button--primary" type="button" onClick={() => purchaseMutation.mutate(reviewPlan)} disabled={purchaseMutation.isPending}>{purchaseMutation.isPending ? 'Submitting…' : `Confirm ${money(reviewPlan.price)}`}</button></div></section></div>}
 
       <details className="plan-policy-panel">
         <summary><span><small>BEFORE YOU CHOOSE</small><strong>Plan and upgrade rules</strong></span><span className="plan-policy-toggle" aria-hidden="true">＋</span></summary>

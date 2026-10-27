@@ -183,16 +183,15 @@ export default function ReferralNetwork() {
           </div>
 
           <div className="network-table-wrap">
-            <table className="network-table"><thead><tr><th>Member</th><th>Level</th><th>Investment</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead><tbody>
+            <table className="network-table"><thead><tr><th>Member</th><th>Level</th><th>Investment</th><th>Joined</th><th>Status</th></tr></thead><tbody>
               {visibleMembers.map((member) => <tr key={member.id}>
                 <td><div className="network-member"><span>{member.name.charAt(0).toUpperCase()}</span><div><strong>{member.name}</strong><small>@{member.username} · {member.member_id}</small>{member.sponsor_username && <em>Sponsor: @{member.sponsor_username}</em>}</div></div></td>
                 <td><strong>{member.membership_level}</strong><small>{member.plan_name || 'No plan'}</small></td>
                 <td><strong className={member.investment_status === 'Invested' ? 'network-invested' : 'network-not-invested'}>{member.investment_status}</strong><small>{member.amount_invested > 0 ? money(member.amount_invested) : '—'}{member.has_upgraded ? ' · upgraded' : ''}</small></td>
                 <td>{date(member.registration_date)}</td>
                 <td><span className={`network-status network-status-${member.account_status.toLowerCase()}`}>{member.account_status}</span></td>
-                <td><span className="network-private">Private view</span></td>
               </tr>)}
-              {visibleMembers.length === 0 && <tr><td colSpan={6}><div className="network-empty">No members match these filters.</div></td></tr>}
+              {visibleMembers.length === 0 && <tr><td colSpan={5}><div className="network-empty">No members match these filters.</div></td></tr>}
             </tbody></table>
           </div>
           <div className="network-pagination"><span>Showing {visibleMembers.length ? (page - 1) * PAGE_SIZE + 1 : 0}–{Math.min(page * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length}</span><div><button type="button" disabled={page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</button><strong>Page {page} of {pageCount}</strong><button type="button" disabled={page >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))}>Next</button></div></div>

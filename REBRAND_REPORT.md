@@ -2,31 +2,33 @@
 
 **Updated:** 27 October 2026
 
-## What changed
+## Identity and design
 
-The member experience now uses a distinct deep-ocean, sea-glass teal and coral visual system rather than the earlier violet/lime treatment. The shared authenticated frame has been rebuilt with grouped navigation, a compact account header, a desktop install action, and a phone-width bottom bar with an accessible “More” sheet. Shared styles carry the new system across member pages, while preserving their existing data routes and actions.
+Kinetiq now uses the approved **Cobalt Field Atlas** system: ink navy, cobalt, warm field-paper surfaces and persimmon accents, with an editorial/operational register motif. The new Kinetiq mark, public/authentication experience, member shell and mobile navigation replace the previous brand treatment. Authenticated routes are lazy-loaded; the 39-page route manifest now matches the React Router page declarations and excludes catch-all routes.
 
-The main product screens have new structures rather than palette-only changes:
+## Experience and behavior
 
-- **Dashboard:** a task-first welcome area, account balance strip, API-history earnings chart, income-source breakdown, learning metrics, next-step links and referral summary. Deposit funds, withdrawable funds, earnings and pending refunds remain separate and server-derived. The small weekly bars are computed from the returned earnings history.
-- **Plans:** a decision-oriented plan comparison with current account balances, term, activity and returns, plus expandable rules. Purchase and upgrade continue to call the existing endpoints. Equal/lower tiers are disabled consistently with backend eligibility; the UI does not imply an expired account may buy an ineligible tier.
-- **Referrals:** a sharing studio, returned referral code, summary metrics, network invitees, tier summary, existing network explorer and commission ledger showing the API-returned rate and eligible base. The legacy referral URL forwards to this single studio.
-- **Authentication:** the one-screen phone, email, password and optional referral-code registration remains intact, with a new onboarding story and visual treatment. Phone normalization, referral prefill, detailed API errors and the corrected bearer-token/profile-fetch order remain preserved.
-- **Branding/performance:** new Kinetiq mark and PWA icons, updated theme colors and service-worker cache version, no external font dependency, and route-level lazy loading remain in place.
+- **Registration and sign-in:** phone, email and password are the account credentials; a referral code is optional. Referral prefill, server-side phone normalization, exact API errors, and token persistence before `/auth/me` are preserved.
+- **Member workspace:** the dashboard presents task-first next actions, separate server-sourced wallet balances and account/earnings snapshots. Tasks, task review, training, learning, plans, referral sharing, payment history, recharge, payout, withdrawal destinations and settings use the Atlas shell and responsive design system.
+- **Plans and referrals:** plan comparison and final confirmation retain the existing purchase/upgrade contracts and server eligibility; referral code provisioning, network totals and commission ledger remain API-backed.
+- **Recharge and payout:** recharge preserves M-Pesa/crypto and proof-upload routes, adds explicit final review, and reports deposits as pending administrator review rather than credited. Payout review presents the configured server window, calls out the administrator-review stage, and never reports payment as complete before a server completion status. `under_review` payouts count as in-flight and block another request.
+- **Administration:** the control-room shell and dashboard use the Atlas system, grouped navigation and responsive menu. The existing admin-management route APIs and actions are retained under this shell; individual tables/forms were not rewritten to new business contracts.
+- **Performance and install:** route-level lazy loading remains enabled. At 1024px, the install action is visible and usable; mobile layouts were checked at 390px. Icons and email branding use Kinetiq artwork; support links are shown only when a real configured URL exists.
 
-The other member feature pages keep their established API behaviors and interactions, but use the new shared shell, colors, typography, controls and responsive navigation rather than a separate older application frame.
+## Backend integrity
 
-## Validation
+Task eligibility/session timing and reward idempotency are enforced server-side; migrations add duplicate guards without deleting/reconciling existing rows, and per-member read/dismiss state is added for shared notifications. Withdrawal schedule and deposit/payout review labels reflect server configuration/statuses. Email and certificate branding were updated without changing token lifecycles, authorization gates or API route signatures. The uniqueness migration deliberately stops if duplicate progress rows exist; any reconciliation must be handled explicitly rather than silently removing financial/progress history.
 
-- `npm run build` passed, including TypeScript checking and the production Vite build.
-- ESLint passed for the modified React components (`Layout.tsx`, `Dashboard.tsx`, `InvestmentPlans.tsx`, `Invite.tsx`, `Referrals.tsx` and `Login.tsx`). `git diff --check` passed.
-- Chromium tests against a **local dummy API only** passed: minimal registration and referral-prefill payload, dashboard fixture/chart, plan activation and upgrade through the existing endpoint shapes, referral share/copy outcomes, network and commission rendering, and the mobile “More” menu.
-- At 390px, registration, dashboard, plans and referrals had no document or app-content horizontal overflow. Desktop and mobile screenshots were reviewed. The fixture screenshots are test data, not customer information.
-- The main JavaScript output is 356.34 kB raw / 113.14 kB gzip in the latest build. Route-specific dashboard, plan and referral code remains split into lazy-loaded chunks; no dependencies were added.
-- Earlier backend-auth regression tests passed **35 tests with 1 existing PostgreSQL-only test skipped**, using in-memory SQLite and a disposable test signing key. This frontend pass did not change backend source or schema.
+## Verification
+
+- `npm run build` passed (TypeScript plus Vite production build). The main JavaScript chunk is **349.52 kB raw / 111.68 kB gzip**; the frontend dependencies were not expanded.
+- Focused ESLint passed for the revised shell, dashboard, auth-adjacent/PWA and payment/account routes. `git diff --check` passed.
+- Backend regression suite: **39 passed, 1 skipped**, using in-memory SQLite and a disposable signing secret; 28 existing deprecation warnings were emitted.
+- The Chromium suite passed against intercepted fixtures: registration/referral prefill, dashboard, plan activation/upgrade, referral network/ledger, mobile menu, tablet install, proof upload/final recharge review, payment-history status, duplicate-payout blocking for `under_review`, and withdrawal-account dialog. **55 API requests were intercepted; no live account or financial write was sent.** A separate admin smoke test passed at 390px.
+- At 390px, dashboard, plans, referrals, payment history and admin had no horizontal overflow. The tablet install control at 1024px measured 154 × 44 CSS pixels. The static route manifest returned HTTP 200 and matched all 39 current page routes.
 
 ## Safety and scope
 
-The final browser tests used a disposable localhost API and dummy account data. They did not contact production, access customer credentials, or submit live plan, payment, withdrawal or wallet operations. Existing purchase/upgrade routes and server-returned values are retained; there is no database migration. The worktree changes in this pass are frontend-only plus this report.
+All browser fixtures were local/mocked. No production signup, plan purchase, recharge, payout, or withdrawal-account mutation was attempted. Production behavior is still governed by the existing backend checks; fixture tests prove the client journey and request shapes, not live API availability. Production deployment/readiness must be checked separately after the authorized main-branch push.
 
-The updated preview captures are available at `kinetiq-redesign-dashboard-desktop.png`, `kinetiq-redesign-dashboard-mobile.png`, `kinetiq-redesign-plans-after.png`, `kinetiq-redesign-referrals-desktop.png`, and `kinetiq-redesign-signup-mobile.png` in the task workspace.
+Screenshots are in the task workspace: `kinetiq-redesign-signup-mobile.png`, `kinetiq-redesign-dashboard-desktop.png`, `kinetiq-redesign-dashboard-mobile.png`, `kinetiq-redesign-plans-after.png`, `kinetiq-redesign-referrals-desktop.png`, `kinetiq-recharge-pending-review.png`, `kinetiq-payout-under-review.png` and `kinetiq-admin-dashboard-mobile.png`.
