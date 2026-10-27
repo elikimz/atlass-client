@@ -129,11 +129,11 @@ export function PWAInstallCard() {
         <div className="pwa-install-card__copy">
           <div className="pwa-install-card__icon" aria-hidden="true">↓</div>
           <div>
-            <h2 id="pwa-card-title">Install Kinetiq App</h2>
-            <p>Get faster access to Kinetiq directly from your device.</p>
+            <h2 id="pwa-card-title">Keep Kinetiq close</h2>
+            <p>Add the workspace to your home screen for quick, direct access.</p>
           </div>
         </div>
-        <button type="button" className="pwa-install-button" onClick={() => void installApp()}>Install App</button>
+        <button type="button" className="pwa-install-button" onClick={() => void installApp()}>Add to home screen</button>
       </section>
       {helpOpen && (
         <div className="pwa-modal-backdrop" role="presentation" onMouseDown={closeHelp}>

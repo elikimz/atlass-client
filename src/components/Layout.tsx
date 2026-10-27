@@ -5,7 +5,6 @@ import api from '../services/api'
 import { endSession } from '../services/session'
 import { queryKeys } from '../services/queryClient'
 import NotificationBell from './NotificationBell'
-import { PWAInstallButton } from './PWAInstall'
 
 interface LayoutProps {
   setIsAuthenticated: (value: boolean) => void
@@ -136,7 +135,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           ))}
         </nav>
         <div className="member-sidebar-footer">
-          <div className="member-install-slot"><PWAInstallButton compact /></div>
           <button className="member-signout" type="button" onClick={handleSignOut}><span aria-hidden="true">↪</span> Sign out</button>
           <small className="member-sidebar-footnote">A clear path to your next step.</small>
         </div>
@@ -162,8 +160,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
           <div className="member-page-container"><Outlet /></div>
         </main>
       </div>
-
-      <div className="pwa-mobile-install-bar"><PWAInstallButton /></div>
 
       <nav className="app-mobile-nav" aria-label="Primary mobile navigation">
         {mobileItems.map((item) => renderNavLink(item, true))}
