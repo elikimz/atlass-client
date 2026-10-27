@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 
@@ -29,10 +29,39 @@ interface UserData {
   current_plan?: Plan
 }
 
+const money = (amount: number | null | undefined) => `$${(Number.isFinite(amount) ? Number(amount) : 0).toFixed(2)}`
+
+function apiErrorText(error: unknown) {
+  if (typeof error !== 'object' || error === null || !('response' in error)) return 'The request could not reach the service. Check your connection and try again.'
+  const response = (error as { response?: { data?: unknown; status?: number } }).response
+  const data = response?.data
+  if (typeof data === 'object' && data !== null && 'detail' in data) {
+    const detail = data.detail
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail)) {
+      const messages = detail.map((item) => typeof item === 'object' && item !== null && 'msg' in item && typeof item.msg === 'string' ? item.msg : '').filter(Boolean)
+      if (messages.length) return messages.join(' ')
+    }
+  }
+  return response?.status && response.status >= 500 ? 'The plan service is temporarily unavailable. Try again shortly.' : 'The request could not be completed. Check the plan and wallet details, then try again.'
+}
+
+function parseDate(value?: string) {
+  if (!value) return null
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T')
+  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized)
+  const parsed = new Date(hasTimezone ? normalized : `${normalized}Z`)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+function dateLabel(value?: string) {
+  const parsed = parseDate(value)
+  return parsed ? new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' }).format(parsed) : 'Date not available'
+}
+
 export default function InvestmentPlans() {
   const queryClient = useQueryClient()
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const plansQuery = useQuery({
     queryKey: queryKeys.plans.all,
     queryFn: async () => (await api.get<Plan[]>('/plans')).data ?? [],
@@ -56,26 +85,16 @@ export default function InvestmentPlans() {
     onMutate: () => setMessage(null),
     onSuccess: ({ response, plan, isUpgrade }) => {
       if (response.data?.user) {
-        queryClient.setQueryData(queryKeys.auth.currentUser, (current: UserData | undefined) => ({
-          ...current,
-          ...response.data.user,
-        }))
+        queryClient.setQueryData(queryKeys.auth.currentUser, (current: UserData | undefined) => ({ ...current, ...response.data.user }))
       }
       setMessage({
         type: 'success',
         text: plan.name === 'Intern'
           ? 'Free Intern trial activated successfully!'
-          : isUpgrade
-            ? `Successfully upgraded to ${plan.name}!`
-            : `Successfully purchased ${plan.name}!`,
+          : isUpgrade ? `Successfully upgraded to ${plan.name}!` : `Successfully purchased ${plan.name}!`,
       })
     },
-    onError: (error: any) => {
-      setMessage({
-        type: 'error',
-        text: error.response?.data?.detail || 'Transaction failed. Please check your balance.',
-      })
-    },
+    onError: (error: unknown) => setMessage({ type: 'error', text: apiErrorText(error) }),
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser }),
@@ -90,212 +109,84 @@ export default function InvestmentPlans() {
     },
   })
 
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const handleAction = (plan: Plan) => {
-    if (user?.current_plan_id === plan.id) return
-    purchaseMutation.mutate(plan)
+  const retryQueries = () => {
+    void plansQuery.refetch()
+    void userQuery.refetch()
   }
 
-  const loading = plansQuery.isLoading || userQuery.isLoading
+  if (plansQuery.isLoading || userQuery.isLoading) {
+    return <section className="member-page-state" role="status"><span className="member-loading-indicator" /><span>Loading plan options…</span></section>
+  }
+  if (plansQuery.isError || userQuery.isError || !user) {
+    return <section className="member-page-state member-page-state--error" role="alert"><span className="member-state-code">02 / PLANS</span><h2>Plan details are unavailable.</h2><p>Your current wallet and plan have not been changed.</p><button className="member-button member-button--primary" type="button" onClick={retryQueries}>Try again</button></section>
+  }
+
+  const hasCurrentPlan = user.current_plan_id !== null && user.current_plan_id !== undefined
+  const currentPlan = user.current_plan ?? plans.find((plan) => plan.id === user.current_plan_id)
+  const currentPlanName = currentPlan?.name || (hasCurrentPlan ? 'Current plan' : 'No active plan')
   const actionLoading = purchaseMutation.isPending ? purchaseMutation.variables?.id ?? null : null
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
-        <div style={{ width: '40px', height: '40px', border: '4px solid var(--border-main)', borderTop: '4px solid var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-      </div>
-    )
-  }
-
-  const isMobile = windowWidth < 768
-
-  const getPlanColors = (name: string) => {
-    if (name.includes('Intern')) return { bg: '#28A745', header: '#218838', btn: '#218838' };
-    if (name.includes('LV1')) return { bg: '#3F51B5', header: '#303F9F', btn: '#303F9F' };
-    if (name.includes('LV2')) return { bg: '#1976D2', header: '#1565C0', btn: '#1565C0' };
-    if (name.includes('LV3')) return { bg: '#F59E0B', header: '#D97706', btn: '#1D4ED8' }; // LV3 has blue button in mockup
-    if (name.includes('LV4')) return { bg: '#EAB308', header: '#CA8A04', btn: '#B45309' };
-    return { bg: '#64748B', header: '#475569', btn: '#475569' };
-  }
-
-  const getFinancials = (plan: Plan) => ({
-    daily_earnings: plan.daily_earnings || 0,
-    total_return: plan.total_return || 0,
-    profit: plan.profit || 0,
-    icon: plan.name.includes('Intern') ? '💻' : plan.name.includes('LV1') || plan.name.includes('LV2') ? '💎' : '👑',
-  })
-
-  // Handle both timezone-aware and timezone-naive datetime strings from backend
-  const isExpired = user?.plan_expiry_date && new Date(user.plan_expiry_date.replace(' ', 'T') + 'Z') < new Date()
-
   return (
-    <div style={{ 
-      maxWidth: '100%', margin: '0 auto', padding: isMobile ? '12px' : '24px', 
-      fontFamily: 'Inter, system-ui, sans-serif', backgroundColor: 'var(--bg-main)', minHeight: '100vh' 
-    }}>
-      
-      {/* Top Header Mockup Style */}
-      <div style={{ backgroundColor: '#003399', color: 'white', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '8px 8px 0 0' }}>
-        <div style={{ fontWeight: 800, fontSize: '14px' }}>Kinetiq</div>
-        <div style={{ fontSize: '18px' }}>🔍</div>
-      </div>
+    <div className="member-plans">
+      <header className="member-page-heading member-plans-heading">
+        <div><span className="member-eyebrow">GROWTH / MEMBERSHIP</span><h2>Choose your next level.</h2><p>Compare the current plan options and see how each one fits your account.</p></div>
+        <Link className="member-inline-route" to="/payments">Open wallet <span aria-hidden="true">↗</span></Link>
+      </header>
 
-      {/* User Status Section */}
-      <div style={{ backgroundColor: 'var(--bg-card)', padding: '16px', borderBottom: '1px solid var(--border-main)' }}>
-        <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-heading)' }}>My Status</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-main)' }}>
-             <img src="/assets/plan-icon.jpg" alt="user" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <section className="plan-account-strip" aria-label="Current membership and balances">
+        <div className="plan-account-current"><span className="plan-account-index">CURRENT MEMBERSHIP</span><strong>{currentPlanName}</strong><small>{hasCurrentPlan ? `Recorded expiry · ${dateLabel(user.plan_expiry_date)}` : 'Choose a plan to get started'}</small></div>
+        <div className="plan-account-balance"><span>DEPOSIT WALLET</span><strong>{money(user.deposit_wallet_balance)}</strong><Link to="/payments">Add funds →</Link></div>
+        <div className="plan-account-balance plan-account-balance--bonus"><span>PERFORMANCE BONUS</span><strong>{money(user.performance_bonus_balance)}</strong><small>Shown separately from deposit funds</small></div>
+      </section>
+
+      {message && <div className={`member-notice member-notice--${message.type}`} role={message.type === 'error' ? 'alert' : 'status'}>{message.text}</div>}
+
+      <section className="plan-comparison-section" aria-labelledby="plan-comparison-title">
+        <div className="member-section-heading"><div><span className="member-eyebrow">AVAILABLE OPTIONS / {String(plans.length).padStart(2, '0')}</span><h3 id="plan-comparison-title">Compare plans</h3><p>Values below come from the current plan catalogue.</p></div></div>
+        {plans.length === 0 ? <div className="member-empty-state"><strong>No plans are available right now.</strong><span>Check again later or contact support.</span></div> : (
+          <div className="plan-comparison-list">
+            <div className="plan-comparison-head" aria-hidden="true"><span>PROGRAM</span><span>PRICE</span><span>DAILY ACTIVITY</span><span>TERM</span><span>RETURN / PROFIT</span><span>ACCESS</span></div>
+            {plans.map((plan, index) => {
+              const isActive = user.current_plan_id === plan.id
+              const isLowerTier = Boolean(currentPlan && plan.price <= currentPlan.price)
+              const missingCurrentPlanDetails = hasCurrentPlan && !currentPlan
+              // The backend requires the FULL new plan price for upgrades, not only the difference.
+              const requiredBalance = plan.price
+              const hasEnoughBalance = plan.name === 'Intern' || (user.deposit_wallet_balance || 0) >= requiredBalance
+              const canPurchase = !isActive && !missingCurrentPlanDetails && hasEnoughBalance && (!hasCurrentPlan || !isLowerTier)
+              const shortfall = Math.max(0, requiredBalance - (user.deposit_wallet_balance || 0))
+              const actionLabel = actionLoading === plan.id ? 'Processing…'
+                : isActive ? 'Current plan'
+                  : missingCurrentPlanDetails ? 'Current plan unavailable'
+                    : isLowerTier ? 'Higher tier required'
+                    : !hasEnoughBalance ? `Need ${money(shortfall)} more`
+                      : plan.name === 'Intern' ? 'Activate free trial'
+                        : hasCurrentPlan ? `Upgrade to ${plan.name}` : `Choose ${plan.name}`
+              return (
+                <article className={`plan-comparison-row${isActive ? ' is-current' : ''}${!canPurchase && !isActive ? ' is-unavailable' : ''}`} key={plan.id}>
+                  <div className="plan-cell plan-program-cell" data-label="Program"><span className="plan-row-number">{String(index + 1).padStart(2, '0')}</span><div><div className="plan-program-title"><h4>{plan.name}</h4>{isActive && <span className="plan-state-badge">ACTIVE</span>}{plan.name === 'Intern' && !isActive && <span className="plan-trial-badge">FREE TRIAL</span>}</div><p>{plan.description || 'Plan details were not supplied.'}</p></div></div>
+                  <div className="plan-cell" data-label="Price"><strong>{money(plan.price)}</strong><small>USD</small></div>
+                  <div className="plan-cell" data-label="Daily activity"><strong>{money(plan.daily_earnings)}</strong><small>{plan.daily_tasks_limit} tasks / day</small></div>
+                  <div className="plan-cell" data-label="Term"><strong>{plan.validity_days}</strong><small>days</small></div>
+                  <div className="plan-cell plan-return-cell" data-label="Return / profit"><strong>{money(plan.total_return)}</strong><small>{money(plan.profit)} profit</small></div>
+                  <div className="plan-cell plan-action-cell" data-label="Access"><button className="member-button member-button--primary plan-action-button" type="button" onClick={() => purchaseMutation.mutate(plan)} disabled={!canPurchase || actionLoading !== null}>{actionLabel}</button>{!isActive && !isLowerTier && !hasEnoughBalance && <small className="plan-action-note">Deposit wallet is short by {money(shortfall)}.</small>}{hasCurrentPlan && canPurchase && plan.name !== 'Intern' && <small className="plan-action-note">Full plan price is required. Upgrade refunds the prior price to Withdrawal Wallet.</small>}</div>
+                </article>
+              )
+            })}
           </div>
-          <div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)' }}>User_{user?.id || '1234'}</div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>DEPOSIT: {user?.deposit_wallet_balance?.toFixed(2) || '0.00'} USD</div>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#0EA5E9' }}>BONUS: {user?.performance_bonus_balance?.toFixed(2) || '0.00'} USD</div>
-          </div>
-        </div>
-        
-        <div style={{ backgroundColor: 'var(--bg-card)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-main)', fontSize: '12px', fontWeight: 600, color: 'var(--text-main)' }}>
-          ACTIVE PLAN: <span style={{ color: '#1D4ED8' }}>{user?.current_plan?.name || 'None'}</span> | VALIDITY: {isExpired ? '⚠️ EXPIRED' : (user?.current_plan?.validity_days || 0) + ' Days'}
-        </div>
-      </div>
+        )}
+      </section>
 
-      {message && (
-        <div style={{ 
-          padding: '12px', borderRadius: '8px', margin: '16px 0',
-          backgroundColor: message.type === 'success' ? '#DCFCE7' : '#FEE2E2',
-          color: message.type === 'success' ? '#166534' : '#991B1B',
-          fontSize: '13px', fontWeight: 600, textAlign: 'center'
-        }}>
-          {message.text}
+      <details className="plan-policy-panel">
+        <summary><span><small>BEFORE YOU CHOOSE</small><strong>Plan and upgrade rules</strong></span><span className="plan-policy-toggle" aria-hidden="true">＋</span></summary>
+        <div className="plan-policy-grid">
+          <article><span>01</span><div><strong>One active plan</strong><p>You may have only one active plan at a time. A purchase changes your current plan.</p></div></article>
+          <article><span>02</span><div><strong>Expiry and eligibility</strong><p>After a plan expires, use an eligible upgrade to continue. Lower-tier repeats remain locked while a plan is active.</p></div></article>
+          <article><span>03</span><div><strong>Upgrade funds</strong><p>The full new plan price is taken from Deposit Wallet. The prior plan price is returned immediately to Withdrawal Wallet.</p></div></article>
+          <article><span>04</span><div><strong>Referral commissions</strong><p>Upgrades do not generate invite commissions for your upline; first-time purchases are treated differently.</p></div></article>
         </div>
-      )}
-
-      {/* Plans Grid - 2 columns on mobile */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', 
-        gap: '10px', marginTop: '16px', marginBottom: '24px' 
-      }}>
-        {plans.map((plan) => {
-          const colors = getPlanColors(plan.name);
-          const financials = getFinancials(plan);
-          const isActive = user?.current_plan_id === plan.id;
-          const isLowerTier = user?.current_plan && plan.price < user.current_plan.price;
-          // Backend requires the FULL plan price in deposit wallet for upgrades (not just the difference)
-          const requiredBalance = plan.price;
-          const hasEnoughBalance = plan.name === 'Intern' || (user?.deposit_wallet_balance || 0) >= requiredBalance;
-          const canPurchase = !isActive && hasEnoughBalance && (!user?.current_plan_id || isExpired || !isLowerTier);
-          
-          return (
-            <div key={plan.id} style={{ 
-              backgroundColor: 'var(--bg-card)', borderRadius: '8px', overflow: 'hidden', 
-              boxShadow: 'var(--card-shadow)', border: isActive ? `2px solid ${colors.bg}` : '1px solid var(--border-main)',
-              display: 'flex', flexDirection: 'column'
-            }}>
-              <div style={{ backgroundColor: colors.bg, padding: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'white', fontWeight: 700, fontSize: '12px' }}>{plan.name}</span>
-                {isActive ? (
-                  <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>Active</span>
-                ) : plan.name === 'Intern' ? (
-                  <span style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>Free Trial</span>
-                ) : null}
-              </div>
-              
-              <div style={{ padding: '12px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>{financials.icon}</div>
-                
-                <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-heading)', marginBottom: '2px' }}>{plan.price} USD</div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '12px' }}>(Approx. {(plan.price * 130).toLocaleString()} KSH)</div>
-                
-                <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: 'var(--text-main)', marginBottom: '16px', flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Daily:</span>
-                    <span style={{ fontWeight: 700 }}>{financials.daily_earnings.toFixed(1)} USD ({plan.daily_tasks_limit} Tasks)</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Validity:</span>
-                    <span style={{ fontWeight: 700 }}>{plan.validity_days} Days</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Total Return:</span>
-                    <span style={{ fontWeight: 700 }}>{financials.total_return.toFixed(1) || '0.0'} USD</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Profit:</span>
-                    <span style={{ fontWeight: 700 }}>{financials.profit.toFixed(1) || '0.0'} USD</span>
-                  </div>
-                  
-                </div>
-
-                <button
-                  onClick={() => handleAction(plan)}
-                  disabled={!canPurchase || actionLoading !== null}
-                  style={{
-                    width: '100%', padding: '8px', borderRadius: '4px', border: 'none',
-                    backgroundColor: isActive ? 'var(--bg-main)' : isLowerTier ? 'var(--bg-main)' : colors.btn,
-                    color: isActive ? 'var(--text-muted)' : isLowerTier ? 'var(--text-muted)' : 'white',
-                    fontSize: '11px', fontWeight: 800, cursor: !canPurchase ? 'not-allowed' : 'pointer',
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  {actionLoading === plan.id ? '...' : 
-                   isActive ? 'ACTIVE' : 
-                   isLowerTier ? 'LOCKED' :
-                   !hasEnoughBalance ? 'INSUFFICIENT BALANCE' :
-                   plan.name === 'Intern' ? 'ACTIVATE FREE TRIAL' :
-                   user?.current_plan_id ? `UPGRADE TO ${plan.name} ($${plan.price.toFixed(2)})` : `PURCHASE ${plan.name} ($${plan.price.toFixed(2)})`}
-                </button>
-                {user?.current_plan_id && !isActive && !isLowerTier && plan.name !== 'Intern' && (
-                  <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '8px', lineHeight: '1.4', fontStyle: 'italic', textAlign: 'center' }}>
-                    Full plan amount will be deducted from Deposit Wallet. Previous plan price is refunded immediately to Withdrawal Wallet.
-                  </div>
-                )}
-
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Guidelines Section */}
-      <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '8px', padding: '16px', border: '1px solid var(--border-main)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid var(--border-main)', paddingBottom: '8px' }}>
-          <h3 style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-heading)', margin: 0 }}>
-            PLAN INFORMATION & PLATFORM GUIDELINES
-          </h3>
-          <span style={{ color: 'var(--text-heading)' }}>▲</span>
-        </div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12px', color: 'var(--text-main)', lineHeight: '1.4' }}>
-          <div>
-            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Single Package Restriction:</div>
-            <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>
-              <li>You may only have one active plan at any time. Purchases overwrite.</li>
-            </ul>
-          </div>
-          
-          <div>
-            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Important Note:</div>
-            <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>
-              <li>After your plan's validity expires, you are required to upgrade to continue earning and unlock higher tiers. Lower-tier repeats are locked.</li>
-            </ul>
-          </div>
-          
-          <div>
-            <div style={{ fontWeight: 800, color: 'var(--text-heading)' }}>Upgrade Refund:</div>
-            <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>
-              <li>When you upgrade, the full price of the new plan is deducted from your Deposit Wallet. Your previous plan's price is refunded immediately to your Withdrawal Wallet and is available for cash out.</li>
-              <li>Plan upgrades do NOT generate invite commissions for your upline — only first-time purchases do.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      </details>
+      <p className="plan-footer-note">Plan activation is applied immediately by the account service. Values and eligibility are based on the current catalogue and your account state.</p>
     </div>
   )
 }

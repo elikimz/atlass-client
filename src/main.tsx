@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import './pwa.css'
 import './landing.css'
+import './member-redesign.css'
 import App from './App.tsx'
 import { queryClient } from './services/queryClient'
 

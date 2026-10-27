@@ -253,15 +253,10 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
           <span className="auth-kicker"><span className="auth-kicker-dot" /> A workspace built around your momentum</span>
           <h1>Make room<br />for your next<br /><em>big move.</em></h1>
           <p>Learn a skill. Take on meaningful tasks. See your progress add up—all from one focused workspace.</p>
-          <div className="auth-orbit-art" aria-hidden="true">
-            <div className="auth-orbit-orbit auth-orbit-orbit--one" />
-            <div className="auth-orbit-orbit auth-orbit-orbit--two" />
-            <div className="auth-orbit-core"><BrandMark /></div>
-            <span className="auth-orbit-chip auth-orbit-chip--one">LEARN <b>↗</b></span>
-            <span className="auth-orbit-chip auth-orbit-chip--two">MAKE <b>✳</b></span>
-            <span className="auth-orbit-chip auth-orbit-chip--three">GROW <b>+</b></span>
-            <span className="auth-orbit-spark auth-orbit-spark--one">✳</span>
-            <span className="auth-orbit-spark auth-orbit-spark--two">✦</span>
+          <div className="auth-journey-steps" aria-label="How Kinetiq works">
+            <div className="auth-journey-step"><span>01</span><strong>Learn a skill</strong><small>Practice with a clear path.</small></div>
+            <div className="auth-journey-step"><span>02</span><strong>Choose real work</strong><small>Browse tasks when ready.</small></div>
+            <div className="auth-journey-step"><span>03</span><strong>Track your progress</strong><small>Keep activity and earnings visible.</small></div>
           </div>
         </div>
         <div className="auth-showcase-foot"><span>Learn by doing.</span><span>Move at your pace.</span><span>Keep the momentum.</span></div>

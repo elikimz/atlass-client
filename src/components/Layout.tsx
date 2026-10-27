@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -12,23 +12,55 @@ interface LayoutProps {
 }
 
 interface UserData {
-  first_name: string
-  last_name: string
-  email: string
-  username: string
-  role: string
-  is_admin: boolean
-  is_trained: boolean
+  first_name?: string | null
+  last_name?: string | null
+  email?: string | null
+  username?: string | null
+  role?: string | null
+  is_admin?: boolean
+  is_trained?: boolean
 }
 
 interface NotificationSummary {
   is_read: boolean
 }
 
+type NavItem = { label: string; path: string; glyph: string }
+
+const homeItem: NavItem = { label: 'Overview', path: '/dashboard', glyph: '⌂' }
+const tasksItem: NavItem = { label: 'Task queue', path: '/tasks', glyph: '▤' }
+const trainingItem: NavItem = { label: 'Learning', path: '/training', glyph: '△' }
+const plansItem: NavItem = { label: 'Plans', path: '/plans', glyph: '◫' }
+const inviteItem: NavItem = { label: 'Referrals', path: '/referrals', glyph: '↗' }
+const walletItem: NavItem = { label: 'Wallet', path: '/payments', glyph: '◈' }
+const settingsItem: NavItem = { label: 'Settings', path: '/settings', glyph: '⚙' }
+const adminItem: NavItem = { label: 'Admin', path: '/admin', glyph: '⋯' }
+
+function isItemActive(pathname: string, path: string) {
+  return pathname === path || (path !== '/dashboard' && pathname.startsWith(`${path}/`))
+}
+
+function titleForPath(pathname: string) {
+  if (pathname.startsWith('/payments/recharge')) return 'Add funds'
+  if (pathname.startsWith('/payments/history')) return 'Payment activity'
+  if (pathname.startsWith('/payments/payout') || pathname.startsWith('/withdrawal-accounts')) return 'Withdraw earnings'
+  if (pathname.startsWith('/payments/mpesa')) return 'M-Pesa'
+  if (pathname.startsWith('/payments/maintenance')) return 'Payment method'
+  if (pathname.startsWith('/tasks/')) return 'Task workspace'
+  if (pathname.startsWith('/tasks')) return 'Task queue'
+  if (pathname.startsWith('/training')) return 'Learning studio'
+  if (pathname.startsWith('/plans')) return 'Plans'
+  if (pathname.startsWith('/referrals')) return 'Referral network'
+  if (pathname.startsWith('/settings')) return 'Account settings'
+  if (pathname.startsWith('/admin')) return 'Administration'
+  return 'Member overview'
+}
+
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024)
+  const [moreMenuPath, setMoreMenuPath] = useState<string | null>(null)
+  const isMoreOpen = moreMenuPath === location.pathname
   const userQuery = useQuery({
     queryKey: queryKeys.auth.currentUser,
     queryFn: async () => (await api.get<UserData>('/auth/me')).data,
@@ -41,6 +73,14 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
   })
   const user = userQuery.data ?? null
   const unreadCount = (notificationsQuery.data ?? []).filter((notification) => !notification.is_read).length
+  const userEmail = user?.email || localStorage.getItem('user_email') || ''
+  const emailName = userEmail.split('@')[0]?.split(/[._+-]/).filter(Boolean)[0] || ''
+  const fallbackName = emailName ? emailName.charAt(0).toUpperCase() + emailName.slice(1) : 'Member'
+  const firstName = user?.first_name?.trim() || localStorage.getItem('user_first_name') || fallbackName
+  const lastName = user?.last_name?.trim() || localStorage.getItem('user_last_name') || ''
+  const isAdminUser = Boolean(user?.is_admin || user?.role === 'admin' || localStorage.getItem('user_is_admin') === 'true')
+  const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase() || 'M'
+  const pageTitle = titleForPath(location.pathname)
 
   const handleSignOut = useCallback(async () => {
     await endSession()
@@ -48,291 +88,101 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     navigate('/login')
   }, [navigate, setIsAuthenticated])
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const userEmail = user?.email || localStorage.getItem('user_email') || ''
-  const emailName = userEmail.split('@')[0]?.split(/[._+-]/).filter(Boolean)[0] || ''
-  const fallbackName = emailName ? emailName.charAt(0).toUpperCase() + emailName.slice(1) : 'Member'
-  const firstName = user?.first_name?.trim() || localStorage.getItem('user_first_name') || fallbackName
-  const lastName = user?.last_name?.trim() || localStorage.getItem('user_last_name') || ''
-  const isAdminUser = user?.is_admin || localStorage.getItem('user_is_admin') === 'true'
-  const initials = `${firstName.charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase()
-
-  const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-      </svg>
-    )},
-    { label: 'My Tasks', path: '/tasks', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 11l3 3L22 4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-    )},
-    { label: 'Plans', path: '/plans', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-      </svg>
-    )},
-    { label: 'Invite', path: '/referrals', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-      </svg>
-    )},
-    { label: 'Training', path: '/training', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-      </svg>
-    )},
-    { label: 'Payments', path: '/payments', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
-    )},
-    { label: 'Settings', path: '/settings', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    )},
-    { label: 'Admin', path: '/admin', icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
-      </svg>
-    )},
+  const groups: { title: string; items: NavItem[] }[] = [
+    { title: 'Workspace', items: [homeItem, tasksItem, trainingItem] },
+    { title: 'Grow', items: [plansItem, inviteItem] },
+    { title: 'Money', items: [walletItem] },
+    { title: 'Account', items: isAdminUser ? [settingsItem, adminItem] : [settingsItem] },
   ]
+  const mobileItems = [homeItem, tasksItem, plansItem, inviteItem, walletItem]
+  const moreItems = [trainingItem, settingsItem, ...(isAdminUser ? [adminItem] : [])]
 
-  const isActive = (path: string) => location.pathname === path
-
-  const mobileNavItems = navItems.filter(item => (item.label !== 'Admin' || isAdminUser) && item.label !== 'Settings')
+  const renderNavLink = (item: NavItem, mobile = false) => {
+    const active = isItemActive(location.pathname, item.path)
+    const label = item.path === '/payments' && mobile ? 'Wallet' : item.label
+    return (
+      <Link
+        key={item.path}
+        to={item.path}
+        aria-current={active ? 'page' : undefined}
+        className={`member-nav-link${active ? ' is-active' : ''}${mobile ? ' member-nav-link--mobile' : ''}`}
+        onClick={() => setMoreMenuPath(null)}
+      >
+        <span className="member-nav-glyph" aria-hidden="true">{item.glyph}</span>
+        <span className="member-nav-label">{label}</span>
+        {item.path === '/dashboard' && unreadCount > 0 && <span className="member-unread-count" aria-label={`${unreadCount} unread notifications`}>{unreadCount > 9 ? '9+' : unreadCount}</span>}
+        {active && !mobile && <span className="member-nav-active-mark" aria-hidden="true" />}
+      </Link>
+    )
+  }
 
   return (
-    <div className="site-shell" style={{
-      display: 'flex',
-      height: '100vh',
-      backgroundColor: 'var(--bg-main)',
-      fontFamily: 'Poppins, Inter, system-ui, sans-serif',
-      overflow: 'hidden',
-    }}>
+    <div className="site-shell member-app-frame">
       <a className="skip-link" href="#main-content">Skip to content</a>
-      {/* Sidebar (Desktop Only) */}
-      {!isMobile && (
-        <div className="app-sidebar" style={{
-          width: '248px',
-          minWidth: '248px',
-          backgroundColor: 'var(--bg-card)',
-          display: 'flex',
-          flexDirection: 'column',
-          boxShadow: 'var(--sidebar-shadow)',
-          zIndex: 20,
-        }}>
-          <div className="app-sidebar-header" style={{ padding: '20px 20px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img src="/assets/kinetiq-mark.svg" alt="Kinetiq Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} />
-              <span style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-heading)' }}>Kinetiq</span>
-            </div>
-          </div>
+      <aside className="member-sidebar" aria-label="Main navigation">
+        <Link className="member-brand" to="/dashboard" aria-label="Kinetiq home">
+          <img src="/assets/kinetiq-mark.svg" alt="" />
+          <span><strong>Kinetiq</strong><small>MEMBER WORKSPACE</small></span>
+        </Link>
+        <div className="member-sidebar-user">
+          <span className="member-sidebar-avatar" aria-hidden="true">{initials}</span>
+          <span className="member-sidebar-user-copy"><strong>{firstName}{lastName ? ` ${lastName}` : ''}</strong><small>{userEmail || 'Your account'}</small></span>
+          <span className="member-online-dot" aria-label="Account active" />
+        </div>
+        <nav className="member-sidebar-nav">
+          {groups.map((group) => (
+            <section className="member-nav-group" key={group.title} aria-label={group.title}>
+              <h2>{group.title}</h2>
+              {group.items.map((item) => renderNavLink(item))}
+            </section>
+          ))}
+        </nav>
+        <div className="member-sidebar-footer">
+          <div className="member-install-slot"><PWAInstallButton compact /></div>
+          <button className="member-signout" type="button" onClick={handleSignOut}><span aria-hidden="true">↪</span> Sign out</button>
+          <small className="member-sidebar-footnote">A clear path to your next step.</small>
+        </div>
+      </aside>
 
-          <div className="app-sidebar-nav" style={{ flex: 1, padding: '0 16px', overflowY: 'auto' }}>
-            {navItems.filter(item => item.label !== 'Admin' || isAdminUser).map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                aria-current={isActive(item.path) ? 'page' : undefined}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  borderRadius: '4px',
-                  marginBottom: '4px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: isActive(item.path) ? 'white' : 'var(--text-muted)',
-                  backgroundColor: isActive(item.path) ? 'var(--accent-primary)' : 'transparent',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <div style={{ color: 'inherit', position: 'relative' }}>
-                  {item.icon}
-                  {item.label === 'Dashboard' && unreadCount > 0 && (
-                    <span style={{
-                      position: 'absolute',
-                      top: '-5px',
-                      right: '-5px',
-                      backgroundColor: '#EF4444',
-                      color: 'white',
-                      borderRadius: '50%',
-                      minWidth: '16px',
-                      height: '16px',
-                      fontSize: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid var(--bg-card)',
-                      fontWeight: 'bold',
-                      padding: '0 2px'
-                    }}>
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-                <span>{item.label}</span>
-                </Link>
-            ))}
-            <div className="pwa-sidebar-item">
-              <PWAInstallButton compact />
-            </div>
+      <div className="member-main-column">
+        <header className="member-topbar">
+          <div className="member-topbar-heading">
+            <span className="member-topbar-kicker">YOUR WORKSPACE</span>
+            <h1>{pageTitle}</h1>
           </div>
-
-          <div className="app-sidebar-footer" style={{ padding: '24px', borderTop: '1px solid var(--border-main)' }}>
-            <button 
-              onClick={handleSignOut}
-              style={{
-                width: '100%', padding: '12px', borderRadius: '12px',
-                backgroundColor: 'rgba(208, 0, 75, 0.1)', border: 'none', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                fontSize: '14px', fontWeight: 600, color: '#D0004B',
-              }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Sign Out
+          <div className="member-topbar-actions">
+            <NotificationBell />
+            <button className="member-profile-button" type="button" onClick={() => navigate('/settings')} aria-label={`Open account settings for ${firstName}`}>
+              <span className="member-profile-avatar" aria-hidden="true">{initials}</span>
+              <span className="member-profile-copy"><strong>{firstName}{lastName ? ` ${lastName}` : ''}</strong><small>{userEmail || 'Member account'}</small></span>
+              <span className="member-profile-arrow" aria-hidden="true">↗</span>
             </button>
           </div>
-        </div>
-      )}
+        </header>
 
-      {/* Main Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Top Bar */}
-        <div className="app-topbar" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-            padding: isMobile ? '12px 16px' : '12px 24px',
-          backgroundColor: 'var(--bg-card)',
-            boxShadow: '0 1px 0 var(--border-main)',
-          zIndex: 10,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {isMobile && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/assets/kinetiq-mark.svg" alt="Kinetiq Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', objectFit: 'cover' }} />
-                <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-heading)' }}>Kinetiq</span>
-              </div>
-            )}
-            {!isMobile && (
-              <div style={{ fontSize: '18px', fontWeight: 500, color: 'var(--text-main)' }}>Overview</div>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <NotificationBell />
-
-            <div 
-              onClick={() => navigate('/settings')}
-              style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-            >
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 600, color: 'var(--accent-primary)' }}>
-                {initials}
-              </div>
-              {!isMobile && (
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-heading)' }}>{firstName}{lastName ? ` ${lastName}` : ''}</span>
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{userEmail}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="app-content" id="main-content" role="main" style={{ flex: 1, overflowY: 'auto', paddingBottom: isMobile ? '148px' : '0' }}>
-          <div style={{ padding: isMobile ? '20px' : '40px' }}>
-            <Outlet />
-          </div>
-        </div>
+        <main className="app-content" id="main-content">
+          <div className="member-page-container"><Outlet /></div>
+        </main>
       </div>
 
-      {isMobile && (
-        <div className="pwa-mobile-install-bar">
-          <PWAInstallButton />
-        </div>
-      )}
+      <div className="pwa-mobile-install-bar"><PWAInstallButton /></div>
 
-      {/* Mobile Bottom Nav */}
-      {isMobile && (
-        <div className="app-mobile-nav" style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0,
-          display: 'flex', alignItems: 'center',
-          backgroundColor: 'var(--bg-card)', borderTop: '1px solid var(--border-main)', height: '75px', zIndex: 100,
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          padding: '0 5px'
-        }}>
-          <div style={{
-            display: 'flex',
-            width: '100%',
-            justifyContent: 'space-between',
-            height: '100%',
-            alignItems: 'center'
-          }}>
-            {mobileNavItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                aria-current={isActive(item.path) ? 'page' : undefined}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                  textDecoration: 'none', color: isActive(item.path) ? 'var(--accent-primary)' : 'var(--text-muted)',
-                  fontSize: '10px', fontWeight: 500,
-                  flexShrink: 0,
-                  flex: 1,
-                  height: '100%',
-                  minWidth: '60px'
-                }}
-              >
-                <div style={{ color: 'inherit', transform: 'scale(0.85)', position: 'relative' }}>
-                  {item.icon}
-                  {item.label === 'Dashboard' && unreadCount > 0 && (
-                    <span style={{
-                      position: 'absolute',
-                      top: '-2px',
-                      right: '-8px',
-                      backgroundColor: '#EF4444',
-                      color: 'white',
-                      borderRadius: '50%',
-                      minWidth: '16px',
-                      height: '16px',
-                      fontSize: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '2px solid var(--bg-card)',
-                      fontWeight: 'bold',
-                      padding: '0 2px'
-                    }}>
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-                <span style={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
-                  {item.label === 'Payments' ? 'Pay' : item.label}
-                </span>
-              </Link>
-            ))}
-          </div>
+      <nav className="app-mobile-nav" aria-label="Primary mobile navigation">
+        {mobileItems.map((item) => renderNavLink(item, true))}
+        <button className={`member-nav-link member-nav-link--mobile member-more-button${isMoreOpen ? ' is-active' : ''}`} type="button" onClick={() => setMoreMenuPath((path) => path === location.pathname ? null : location.pathname)} aria-expanded={isMoreOpen} aria-controls="member-more-menu">
+          <span className="member-nav-glyph" aria-hidden="true">···</span><span className="member-nav-label">More</span>
+        </button>
+      </nav>
+
+      {isMoreOpen && (
+        <div className="member-more-overlay">
+          <button className="member-more-scrim" type="button" aria-label="Close more menu" onClick={() => setMoreMenuPath(null)} />
+          <section className="member-more-sheet" id="member-more-menu" role="dialog" aria-modal="true" aria-labelledby="member-more-title">
+            <div className="member-more-grip" aria-hidden="true" />
+            <div className="member-more-heading"><div><span>MORE DESTINATIONS</span><h2 id="member-more-title">Keep moving.</h2></div><button type="button" aria-label="Close menu" onClick={() => setMoreMenuPath(null)}>×</button></div>
+            <div className="member-more-links">{moreItems.map((item) => renderNavLink(item))}</div>
+            <button className="member-signout member-signout--mobile" type="button" onClick={handleSignOut}><span aria-hidden="true">↪</span> Sign out</button>
+          </section>
         </div>
       )}
     </div>
