@@ -44,6 +44,35 @@ function RouteLoading() {
   return <div className="orbit-state" role="status"><span className="orbit-loader" /><p>Opening your workspace…</p></div>
 }
 
+function WorkspaceLoading() {
+  return (
+    <main className="workspace-loading" role="status" aria-live="polite" aria-label="Loading Pacecraft workspace">
+      <div className="workspace-loading__ambient workspace-loading__ambient--one" />
+      <div className="workspace-loading__ambient workspace-loading__ambient--two" />
+      <div className="workspace-loading__grid" aria-hidden="true" />
+      <section className="workspace-loading__content">
+        <div className="workspace-loading__brand">
+          <span className="workspace-loading__mark"><img src="/assets/pacecraft-mark-neon.png" alt="" /></span>
+          <span className="workspace-loading__wordmark">Pacecraft<small>MEMBER WORKSPACE</small></span>
+        </div>
+        <div className="workspace-loading__signal" aria-hidden="true">
+          <span className="workspace-loading__signal-ring workspace-loading__signal-ring--outer" />
+          <span className="workspace-loading__signal-ring workspace-loading__signal-ring--inner" />
+          <span className="workspace-loading__signal-core" />
+        </div>
+        <div className="workspace-loading__copy">
+          <p className="workspace-loading__eyebrow"><i /> SECURE SESSION / READYING</p>
+          <h1>Making space for<br /><em>your next move.</em></h1>
+          <p className="workspace-loading__message">Syncing your workspace, tasks and progress.</p>
+        </div>
+        <div className="workspace-loading__progress" aria-hidden="true"><span /></div>
+        <div className="workspace-loading__skeleton" aria-hidden="true"><span /><span /><span /></div>
+      </section>
+      <p className="workspace-loading__footer">A clear path to your next step <span>·</span> Pacecraft</p>
+    </main>
+  )
+}
+
 function TrainingRoute() {
   return <Training />
 }
@@ -102,20 +131,7 @@ function AppContent() {
   }, [checkAuth, queryClient])
 
   if (sessionPresent && currentUserQuery.isLoading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
-        <div className="loading-container">
-          <div className="pulse-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <img src="/assets/pacecraft-mark-neon.png" alt="" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
-            <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)' }}>Pacecraft</span>
-          </div>
-          <div className="loading-bar-bg">
-            <div className="loading-bar-fill"></div>
-          </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: 500, margin: 0 }}>Initializing your workspace...</p>
-        </div>
-      </div>
-    )
+    return <WorkspaceLoading />
   }
 
   return (
