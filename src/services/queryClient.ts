@@ -49,7 +49,8 @@ export const queryKeys = {
     commissions: ['referrals', 'commissions'] as const,
   },
   notifications: {
-    list: (page = 1, limit = 50) => ['notifications', 'list', page, limit] as const,
+    summary: ['notifications', 'summary'] as const,
+    list: (page = 1, limit = 20) => ['notifications', 'list', page, limit] as const,
   },
   payments: {
     overview: ['payments', 'overview'] as const,

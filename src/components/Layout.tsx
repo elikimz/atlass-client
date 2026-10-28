@@ -20,9 +20,7 @@ interface UserData {
   is_trained?: boolean
 }
 
-interface NotificationSummary {
-  is_read: boolean
-}
+interface NotificationSummary { unread_count: number }
 
 type NavItem = { label: string; path: string; glyph: string }
 
@@ -68,12 +66,13 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     staleTime: 5 * 60 * 1000,
   })
   const notificationsQuery = useQuery({
-    queryKey: queryKeys.notifications.list(),
-    queryFn: async () => (await api.get<NotificationSummary[]>('/notifications')).data ?? [],
-    staleTime: 30 * 1000,
+    queryKey: queryKeys.notifications.summary,
+    queryFn: async () => (await api.get<NotificationSummary>('/notifications/summary')).data,
+    staleTime: 15 * 1000,
+    refetchInterval: 30 * 1000,
   })
   const user = userQuery.data ?? null
-  const unreadCount = (notificationsQuery.data ?? []).filter((notification) => !notification.is_read).length
+  const unreadCount = notificationsQuery.data?.unread_count ?? 0
   const userEmail = user?.email || localStorage.getItem('user_email') || ''
   const firstName = user?.first_name?.trim() || 'Member'
   const lastName = user?.last_name?.trim() || ''

@@ -70,7 +70,7 @@ export default function AdminNotifications() {
     setNotifLoading(true)
     try {
       // Fetch all notifications the admin can manage
-      const res = await api.get(`/notifications?page=${notifPage}&limit=${notifLimit}`)
+      const res = await api.get(`/admin/notifications?page=${notifPage}&limit=${notifLimit}`)
       const data = res.data
       let items: Notification[] = data
       if (Array.isArray(data)) {
