@@ -23,19 +23,19 @@ const guidelinesPages = [
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#dc2626', margin: '0 0 4px' }}>Important</p>
-              <p style={{ fontSize: '13px', color: '#dc2626', margin: 0, lineHeight: 1.5 }}>Do not skip events or label them incorrectly. Every segment must be labeled with precision.</p>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#FF8196', margin: '0 0 4px' }}>Important</p>
+              <p style={{ fontSize: '13px', color: '#FF8196', margin: 0, lineHeight: 1.5 }}>Do not skip events or label them incorrectly. Every segment must be labeled with precision.</p>
             </div>
           </div>
         </div>
-        <div style={{ backgroundColor: 'rgba(232, 214, 194, 0.1)', border: '1px solid rgba(232, 214, 194, 0.2)', borderRadius: '8px', padding: '14px 16px' }}>
+        <div style={{ backgroundColor: 'rgba(24, 210, 197, 0.10)', border: '1px solid rgba(24, 210, 197, 0.24)', borderRadius: '8px', padding: '14px 16px' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8D6C2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15E5C9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '1px' }}>
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: '#E8D6C2', margin: '0 0 4px' }}>Tip</p>
-              <p style={{ fontSize: '13px', color: '#E8D6C2', margin: 0, lineHeight: 1.5 }}>Watch the full event before selecting a label. Context matters for accurate labeling.</p>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#18D2C5', margin: '0 0 4px' }}>Tip</p>
+              <p style={{ fontSize: '13px', color: '#18D2C5', margin: 0, lineHeight: 1.5 }}>Watch the full event before selecting a label. Context matters for accurate labeling.</p>
             </div>
           </div>
         </div>

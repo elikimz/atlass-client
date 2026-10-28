@@ -1,0 +1,442 @@
+/* Shared visual layer for the user's dark glassmorphism reference. */
+:root {
+  --neon-navy: #05121B;
+  --neon-midnight: #0F1D38;
+  --neon-cyan: #18D2C5;
+  --neon-turquoise: #15E5C9;
+  --neon-blue: #4372DE;
+  --neon-indigo: #4B52D5;
+  --neon-violet: #9959E4;
+  --neon-magenta: #C24FD4;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: var(--neon-navy);
+}
+
+body {
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse at 8% 28%, rgba(24, 210, 197, 0.11), transparent 32rem),
+    radial-gradient(ellipse at 82% 12%, rgba(75, 82, 213, 0.15), transparent 34rem),
+    radial-gradient(ellipse at 94% 78%, rgba(153, 89, 228, 0.10), transparent 30rem),
+    var(--neon-navy) !important;
+  background-attachment: fixed;
+  color: var(--color-text);
+}
+
+#root {
+  position: relative;
+  isolation: isolate;
+}
+
+#root::before,
+#root::after {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+/* Soft luminous spheres sit behind the working surfaces. */
+#root::before {
+  background:
+    radial-gradient(circle at 5% 31%, rgba(21, 229, 201, 0.88) 0 1.1rem, rgba(24, 210, 197, 0.20) 2.3rem, transparent 8.2rem),
+    radial-gradient(circle at 79% 10%, rgba(153, 89, 228, 0.74) 0 0.9rem, rgba(75, 82, 213, 0.20) 3rem, transparent 9rem),
+    radial-gradient(circle at 97% 62%, rgba(24, 210, 197, 0.72) 0 1rem, rgba(67, 114, 222, 0.18) 3.4rem, transparent 9rem),
+    radial-gradient(circle at 41% 99%, rgba(67, 114, 222, 0.58) 0 1rem, rgba(153, 89, 228, 0.15) 3.5rem, transparent 8.5rem);
+  opacity: 0.78;
+  animation: neon-ambient-breathe 28s ease-in-out infinite alternate;
+}
+
+/* Fine glowing rings echo the floating geometry in the reference. */
+#root::after {
+  background:
+    radial-gradient(circle, transparent 56%, rgba(24, 210, 197, 0.36) 58%, rgba(24, 210, 197, 0.18) 59%, transparent 62%) 1% 35% / 270px 270px no-repeat,
+    radial-gradient(circle, transparent 57%, rgba(75, 82, 213, 0.40) 59%, rgba(153, 89, 228, 0.22) 60%, transparent 63%) 97% 12% / 218px 218px no-repeat,
+    radial-gradient(circle, transparent 58%, rgba(67, 114, 222, 0.30) 60%, transparent 63%) 87% 92% / 310px 310px no-repeat;
+  opacity: 0.62;
+}
+
+@keyframes neon-ambient-breathe {
+  from { opacity: 0.60; transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0.90; transform: translate3d(0, -0.4%, 0) scale(1.015); }
+}
+
+:focus-visible {
+  outline: 2px solid var(--neon-cyan) !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(24, 210, 197, 0.18), 0 0 18px rgba(24, 210, 197, 0.26);
+}
+
+::selection {
+  color: #04121B;
+  background: var(--neon-turquoise);
+}
+
+/* Public access keeps its split layout but adopts the night-glass atmosphere. */
+.auth-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: transparent !important;
+  color: var(--color-text) !important;
+}
+
+.auth-showcase {
+  background:
+    radial-gradient(ellipse at 7% 43%, rgba(24, 210, 197, 0.22), transparent 38%),
+    radial-gradient(ellipse at 88% 9%, rgba(153, 89, 228, 0.31), transparent 42%),
+    radial-gradient(ellipse at 74% 92%, rgba(67, 114, 222, 0.20), transparent 38%),
+    linear-gradient(145deg, rgba(4, 16, 30, 0.97), rgba(10, 29, 53, 0.88)) !important;
+  color: #F7FAFF !important;
+}
+
+.auth-showcase::after {
+  position: absolute;
+  right: -84px;
+  bottom: 12%;
+  width: 230px;
+  height: 230px;
+  border: 1px solid rgba(24, 210, 197, 0.38);
+  border-radius: 50%;
+  box-shadow: 0 0 34px rgba(24, 210, 197, 0.12), inset 0 0 36px rgba(67, 114, 222, 0.10);
+  content: "";
+  pointer-events: none;
+}
+
+.auth-workspace {
+  position: relative;
+  background:
+    radial-gradient(ellipse at 88% 4%, rgba(75, 82, 213, 0.14), transparent 36%),
+    radial-gradient(ellipse at 6% 95%, rgba(24, 210, 197, 0.10), transparent 32%),
+    rgba(5, 18, 27, 0.34) !important;
+}
+
+.auth-form-card {
+  border: 1px solid var(--glass-border) !important;
+  background: linear-gradient(145deg, rgba(18, 36, 62, 0.78), rgba(8, 21, 37, 0.88)) !important;
+  box-shadow: 0 24px 70px rgba(0, 5, 16, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  backdrop-filter: blur(22px) saturate(1.22);
+  -webkit-backdrop-filter: blur(22px) saturate(1.22);
+}
+
+.auth-mode-switch {
+  border-color: rgba(172, 190, 221, 0.22) !important;
+  background: rgba(4, 16, 30, 0.54) !important;
+}
+
+.auth-mode-switch button.is-active {
+  border: 1px solid rgba(24, 210, 197, 0.25);
+  background: linear-gradient(120deg, rgba(24, 210, 197, 0.18), rgba(67, 114, 222, 0.22), rgba(153, 89, 228, 0.20)) !important;
+  color: #F7FAFF !important;
+  box-shadow: 0 0 20px rgba(67, 114, 222, 0.14) !important;
+}
+
+.auth-submit,
+.member-button--primary,
+.member-button--coral,
+.member-button--primary:hover:not(:disabled),
+.member-button--coral:hover:not(:disabled),
+:is(.app-content, .admin-atlas-content) button[class*="primary"],
+:is(.app-content, .admin-atlas-content) a[class*="primary"],
+:is(.app-content, .admin-atlas-content) [class*="primary-action"],
+:is(.app-content, .admin-atlas-content) [class*="PrimaryAction"] {
+  border-color: rgba(192, 218, 255, 0.30) !important;
+  background: var(--gradient-primary) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 8px 24px rgba(24, 210, 197, 0.16), 0 0 22px rgba(75, 82, 213, 0.22) !important;
+}
+
+.auth-submit:hover:not(:disabled),
+.member-button--primary:hover:not(:disabled),
+.member-button--coral:hover:not(:disabled),
+:is(.app-content, .admin-atlas-content) button[class*="primary"]:hover:not(:disabled),
+:is(.app-content, .admin-atlas-content) a[class*="primary"]:hover {
+  filter: brightness(1.10) saturate(1.08);
+  box-shadow: 0 12px 30px rgba(24, 210, 197, 0.23), 0 0 28px rgba(75, 82, 213, 0.27) !important;
+}
+
+.member-app-frame,
+.admin-atlas-shell,
+.admin-atlas-main,
+.admin-shell,
+.member-main-column {
+  background: transparent !important;
+}
+
+.member-app-frame,
+.admin-atlas-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.member-sidebar,
+.admin-atlas-sidebar,
+.admin-sidebar {
+  border-right: 1px solid rgba(172, 190, 221, 0.20) !important;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(24, 210, 197, 0.11), transparent 43%),
+    linear-gradient(180deg, rgba(6, 20, 34, 0.95), rgba(4, 15, 27, 0.92)) !important;
+  box-shadow: var(--sidebar-shadow) !important;
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+}
+
+.member-topbar,
+.admin-atlas-topbar,
+.admin-topbar,
+.admin-header,
+[class*="admin-"][class*="topbar"],
+[class*="admin-"][class*="header"] {
+  border-color: rgba(172, 190, 221, 0.22) !important;
+  background: rgba(5, 18, 31, 0.78) !important;
+  box-shadow: 0 8px 24px rgba(0, 5, 16, 0.18);
+  backdrop-filter: blur(20px) saturate(1.18);
+  -webkit-backdrop-filter: blur(20px) saturate(1.18);
+}
+
+.admin-atlas-content,
+.app-content {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  color: var(--color-text) !important;
+}
+
+.admin-atlas-identity {
+  border: 1px solid var(--glass-border) !important;
+  background: rgba(13, 29, 49, 0.66) !important;
+  backdrop-filter: blur(14px);
+}
+
+.admin-atlas-link[aria-current="page"],
+.member-nav-link.is-active,
+.member-more-links .member-nav-link.is-active {
+  border-color: rgba(24, 210, 197, 0.26) !important;
+  background: linear-gradient(100deg, rgba(24, 210, 197, 0.15), rgba(67, 114, 222, 0.18), rgba(153, 89, 228, 0.12)) !important;
+  color: #FFFFFF !important;
+}
+
+.admin-atlas-link[aria-current="page"]::before,
+.member-nav-link.is-active::before,
+.member-nav-active-mark,
+.member-online-dot,
+.member-eyebrow i,
+.member-live-tag i {
+  background: var(--neon-cyan) !important;
+  box-shadow: 0 0 12px rgba(24, 210, 197, 0.52);
+}
+
+.member-nav-link.is-active .member-nav-glyph {
+  border-color: rgba(24, 210, 197, 0.46) !important;
+  background: rgba(24, 210, 197, 0.12) !important;
+  color: var(--neon-turquoise) !important;
+}
+
+.member-sidebar-avatar,
+.member-profile-avatar,
+.admin-atlas-avatar,
+.admin-atlas-identity > span {
+  border: 1px solid rgba(169, 221, 255, 0.35);
+  background: linear-gradient(145deg, #145A79, #3458BA 58%, #633BC4) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 18px rgba(67, 114, 222, 0.20);
+}
+
+.member-unread-count {
+  background: var(--neon-cyan) !important;
+  color: #04121B !important;
+  box-shadow: 0 0 12px rgba(24, 210, 197, 0.35);
+}
+
+.member-page-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Apply shared glass material to both the member and administrator content roots. */
+:is(.app-content, .admin-atlas-content) :is(
+  [class*="card"], [class*="panel"], [class*="dialog"], [class*="sheet"],
+  [class*="modal"], [class*="surface"], [role="dialog"], [role="menu"], [role="listbox"]
+) {
+  border-color: var(--glass-border) !important;
+  background: var(--glass-surface) !important;
+  color: var(--color-text);
+  box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.12);
+}
+
+:is(.app-content, .admin-atlas-content) :is(.member-page-state, [class*="empty-state"], [class*="loading-state"]) {
+  border-color: var(--glass-border) !important;
+  background: var(--glass-surface-strong) !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.member-dashboard-hero,
+:is(.app-content, .admin-atlas-content) [class*="dashboard-hero"],
+:is(.app-content, .admin-atlas-content) [class*="summary-hero"],
+:is(.app-content, .admin-atlas-content) [class*="featured-card"] {
+  border-color: rgba(182, 205, 241, 0.42) !important;
+  background:
+    radial-gradient(ellipse at 9% 100%, rgba(24, 210, 197, 0.24), transparent 43%),
+    radial-gradient(ellipse at 95% 0%, rgba(153, 89, 228, 0.30), transparent 42%),
+    linear-gradient(128deg, rgba(9, 26, 45, 0.96), rgba(20, 48, 90, 0.92) 56%, rgba(53, 40, 112, 0.86)) !important;
+  box-shadow: 0 18px 48px rgba(0, 5, 16, 0.38), 0 0 34px rgba(67, 114, 222, 0.10) !important;
+}
+
+:is(.app-content, .admin-atlas-content) input:not([type="checkbox"]):not([type="radio"]),
+:is(.app-content, .admin-atlas-content) select,
+:is(.app-content, .admin-atlas-content) textarea,
+.auth-field input,
+.auth-phone-control input,
+.auth-password-control input,
+.auth-phone-control select {
+  border-color: rgba(172, 190, 221, 0.31) !important;
+  background: rgba(4, 16, 29, 0.78) !important;
+  color: #F3F7FF !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+:is(.app-content, .admin-atlas-content) input::placeholder,
+:is(.app-content, .admin-atlas-content) textarea::placeholder,
+.auth-field input::placeholder {
+  color: #9CB0C8 !important;
+  opacity: 1;
+}
+
+:is(.app-content, .admin-atlas-content) input:focus,
+:is(.app-content, .admin-atlas-content) select:focus,
+:is(.app-content, .admin-atlas-content) textarea:focus,
+.auth-field input:focus,
+.auth-phone-control input:focus,
+.auth-password-control input:focus {
+  border-color: var(--neon-cyan) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+:is(.app-content, .admin-atlas-content) select option {
+  background: #0B1A2D;
+  color: #F3F7FF;
+}
+
+:is(.app-content, .admin-atlas-content) table {
+  border-color: var(--color-border-subtle) !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(7, 20, 35, 0.88) !important;
+  color: #EAF1FC !important;
+}
+
+:is(.app-content, .admin-atlas-content) thead,
+:is(.app-content, .admin-atlas-content) thead tr {
+  background: rgba(17, 38, 64, 0.95) !important;
+}
+
+:is(.app-content, .admin-atlas-content) th,
+:is(.app-content, .admin-atlas-content) td {
+  border-color: rgba(172, 190, 221, 0.18) !important;
+  color: inherit;
+}
+
+:is(.app-content, .admin-atlas-content) tbody tr:hover {
+  background: rgba(24, 210, 197, 0.075) !important;
+}
+
+:is(.app-content, .admin-atlas-content) [role="tablist"] {
+  border-color: rgba(172, 190, 221, 0.20);
+  background: rgba(5, 17, 31, 0.64);
+  backdrop-filter: blur(12px);
+}
+
+:is(.app-content, .admin-atlas-content) [role="tab"][aria-selected="true"],
+:is(.app-content, .admin-atlas-content) [aria-current="page"] {
+  border-color: rgba(24, 210, 197, 0.34) !important;
+  background: linear-gradient(100deg, rgba(24, 210, 197, 0.16), rgba(67, 114, 222, 0.20)) !important;
+  color: #F7FAFF !important;
+}
+
+.member-more-sheet,
+.app-mobile-nav,
+.pwa-install-banner,
+.pwa-update-banner,
+[class*="pwa-install"],
+[class*="pwa-update"] {
+  border-color: var(--glass-border) !important;
+  background: rgba(6, 20, 35, 0.92) !important;
+  color: #F3F7FF !important;
+  box-shadow: 0 -12px 42px rgba(0, 5, 16, 0.36) !important;
+  backdrop-filter: blur(22px) saturate(1.18);
+  -webkit-backdrop-filter: blur(22px) saturate(1.18);
+}
+
+.member-more-scrim,
+.admin-atlas-scrim {
+  background: rgba(1, 7, 15, 0.74) !important;
+  backdrop-filter: blur(5px);
+}
+
+.auth-feedback--error,
+:is(.app-content, .admin-atlas-content) [class*="notice--error"],
+:is(.app-content, .admin-atlas-content) [class*="alert--error"] {
+  border-color: rgba(255, 120, 140, 0.40) !important;
+  background: rgba(231, 83, 112, 0.14) !important;
+  color: #FF9AA8 !important;
+}
+
+.auth-feedback--success,
+:is(.app-content, .admin-atlas-content) [class*="notice--success"],
+:is(.app-content, .admin-atlas-content) [class*="alert--success"] {
+  border-color: rgba(101, 217, 161, 0.35) !important;
+  background: rgba(26, 174, 119, 0.14) !important;
+  color: #81E6B4 !important;
+}
+
+.auth-feedback--warning,
+:is(.app-content, .admin-atlas-content) [class*="notice--warning"],
+:is(.app-content, .admin-atlas-content) [class*="alert--warning"] {
+  border-color: rgba(255, 210, 122, 0.35) !important;
+  background: rgba(236, 178, 67, 0.14) !important;
+  color: #FFD98D !important;
+}
+
+:is(.app-content, .admin-atlas-content) .task-media-frame {
+  border-color: rgba(172, 190, 221, 0.28) !important;
+  background: #020B12 !important;
+  box-shadow: 0 16px 42px rgba(0, 5, 16, 0.45) !important;
+}
+
+:is(.app-content, .admin-atlas-content) .task-media-frame video {
+  background: #020B12 !important;
+}
+
+:is(.app-content, .admin-atlas-content) button:disabled,
+:is(.app-content, .admin-atlas-content) [aria-disabled="true"],
+.auth-submit:disabled {
+  filter: saturate(0.55);
+  opacity: 0.62;
+}
+
+@media (max-width: 850px) {
+  #root::before { opacity: 0.58; }
+  #root::after { opacity: 0.35; }
+  .member-topbar,
+  .admin-atlas-topbar { background: rgba(5, 18, 31, 0.86) !important; }
+  .app-mobile-nav { background: rgba(6, 20, 35, 0.94) !important; }
+}
+
+@media (max-width: 560px) {
+  #root::before { opacity: 0.42; }
+  .auth-form-card { border-radius: 20px !important; }
+  :is(.app-content, .admin-atlas-content) :is([class*="card"], [class*="panel"]) { backdrop-filter: blur(12px); }
+  :is(.app-content, .admin-atlas-content) table { min-width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root::before { animation: none !important; }
+}

@@ -118,7 +118,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <aside className="member-sidebar" aria-label="Main navigation">
         <Link className="member-brand" to="/dashboard" aria-label="Pacecraft home">
-          <img src="/assets/pacecraft-mark-ivory-harbor.png" alt="" />
+          <img src="/assets/pacecraft-mark-neon.png" alt="" />
           <span><strong>Pacecraft</strong><small>MEMBER WORKSPACE</small></span>
         </Link>
         <div className="member-sidebar-user">

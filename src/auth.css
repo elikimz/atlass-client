@@ -17,7 +17,7 @@
   overflow: hidden;
   padding: 30px clamp(28px, 5vw, 76px);
   background: var(--bg-sidebar);
-  color: #F4F7F8;
+  color: #FFFFFF;
 }
 
 .auth-showcase-brand,
@@ -66,14 +66,14 @@
   height: 8px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #C0835D;
-  box-shadow: 0 0 0 4px rgba(192, 131, 93, 0.18);
+  background: rgba(24, 210, 197, 0.18);
+  box-shadow: 0 0 0 4px rgba(24, 210, 197, 0.18);
 }
 
 .auth-showcase-copy h1 {
   max-width: 11ch;
   margin: 22px 0 16px;
-  color: #F7F8F8;
+  color: #FFFFFF;
   font-size: clamp(42px, 5.2vw, 72px);
   font-weight: 760;
   letter-spacing: -0.065em;
@@ -89,7 +89,7 @@
 .auth-showcase-copy > p {
   max-width: 430px;
   margin: 0;
-  color: #D4E0E4;
+  color: #C1D1E8;
   font-size: 15px;
   line-height: 1.7;
 }
@@ -108,7 +108,7 @@
   gap: 12px;
   min-height: 48px;
   padding: 9px 12px;
-  border: 1px solid rgba(220, 230, 234, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 11px;
   background: rgba(255, 255, 255, 0.045);
 }
@@ -119,13 +119,13 @@
 }
 
 .auth-journey-step strong {
-  color: #F4F7F8;
+  color: #FFFFFF;
   font-size: 13px;
   font-weight: 700;
 }
 
 .auth-journey-step small {
-  color: #C9D6DB;
+  color: #C1D1E8;
   font-size: 12px;
   text-align: right;
 }
@@ -135,8 +135,8 @@
   justify-content: space-between;
   gap: 12px;
   padding-top: 18px;
-  border-top: 1px solid rgba(220, 230, 234, 0.2);
-  color: #D4E0E4;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: #C1D1E8;
   font-size: 12px;
   font-weight: 600;
 }
@@ -190,7 +190,7 @@
 .auth-mode-switch button.is-active {
   background: var(--color-surface);
   color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(23, 43, 56, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 5, 16, 0.1);
 }
 
 .auth-form-heading {
@@ -367,7 +367,7 @@
 .auth-submit:hover:not(:disabled) {
   transform: translateY(-1px);
   background: var(--color-primary-hover);
-  box-shadow: 0 7px 16px rgba(36, 69, 88, 0.18);
+  box-shadow: 0 7px 16px rgba(67, 114, 222, 0.18);
 }
 
 .auth-submit:disabled {
@@ -382,7 +382,7 @@
   place-items: center;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.15);
-  color: #F1E4D5;
+  color: #FFF1D4;
   font-size: 19px;
 }
 
@@ -403,9 +403,9 @@
 }
 
 .auth-feedback--error {
-  border-color: #EAC6C8;
+  border-color: rgba(255, 120, 140, 0.36);
   background: var(--color-danger-bg);
-  color: #81383D;
+  color: #FF8196;
 }
 
 .auth-feedback--success {

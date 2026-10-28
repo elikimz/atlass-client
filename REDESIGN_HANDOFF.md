@@ -1,35 +1,32 @@
-# PACECRAFT frontend redesign handoff
+# PACECRAFT dark glass redesign handoff
 
-**Remote branch:** `main` in `elikimz/pacecraft-client`
+**Reference:** The user-supplied PACECRAFT visual reference in this conversation (912×607 image), applied as the visual direction across the existing site.
 
-**Local review branch:** `redesign/pacecraft-visual-audit`
+**Review branch:** `redesign/pacecraft-vivid-palette`
 
-**Pushed commit:** `cbb4b3c` (`feat: refresh Pacecraft frontend design system`)
+**Base:** `main` at `0c53cb1` (`docs: record frontend redesign main push`)
 
-**Deployment:** The push may trigger hosting deployment; deployment status was not independently checked.
+**Publication:** This revision is local and uncommitted. It has not been pushed to `main` or deployed.
 
-## Change summary
+## What changed
 
-- Consolidated the shared palette into Harbor Blue / Warm Copper tokens, neutral surfaces, consistent typography, focus states, reduced-motion handling, and more readable shared controls.
-- Added a dedicated `src/auth.css` for the desktop sign-in split layout and mobile form-first layout. Added contrast-matched light and dark Pacecraft marks and new palette-aligned PWA launcher icons without overwriting the original artwork.
-- Aligned Tailwind and PWA theme metadata with the new system, versioned the service-worker cache, and precached both logo variants.
-- Improved the shared member/admin shell styling and small-text/touch-target sizing. Corrected the `/payments` page title to **Wallet**.
-- Replaced the blank direct M-Pesa deep-link state with a recovery view that explains the missing payment context and safely returns the user to Add funds. No payment action is started from that state.
+The prior light lavender/white palette is replaced with a dark navy glass system, luminous turquoise/cyan, royal blue, indigo and violet, with small magenta highlights. Shared CSS creates restrained ambient spheres and rings, frosted glass panels, translucent navigation, readable dark forms and tables, high-contrast focus states, and gradient primary actions.
 
-## Pages reviewed
+The theme is applied to public sign-in/register/recovery, the member workspace, the separate admin shell and page surfaces, task-player and referral-network styles, PWA banners, and shared forms, tables, dialogs, badges, and controls. Existing route structure, authentication, API calls, financial actions, and product copy are preserved; the reference's unrelated stock/payment content is not copied into Pacecraft.
 
-A read-only route and visual pass on the live preview covered sign-in, dashboard, tasks, wallet, payment history, referrals, plans, training, settings, Add funds, payout, and M-Pesa. No deposit, withdrawal, purchase, settings save, or other financial/account mutation was submitted. The Admin shell and its shared styles were reviewed in source; authenticated Admin routes were not end-to-end tested.
+New non-destructive gradient wordmark and dark-navy launcher icon variants are wired into the app, browser metadata, manifest, install prompt, and versioned service-worker shell. The former vivid assets remain untouched.
 
 ## Validation
 
-- `npm run build` — passes (TypeScript and Vite production build).
+- `npm run build` — passes after the final generated assets.
 - `git diff --check` — passes.
-- No test script is configured in `package.json`.
-- `npm run lint` — still reports **42 errors and 5 warnings**, the same count recorded on the unmodified baseline. Findings are pre-existing lint debt, primarily `any` types and hook-order/dependency checks.
+- All 8 active CSS files parse; no invalid gradient/background-color assignments or retired palette literals remain in active CSS/TSX.
+- PWA icon paths resolve, and the local preview loads the new transparent gradient marks.
+- Login rendered at desktop 1280×900 and phone 390×844; the phone layout has no horizontal overflow.
+- `npm run lint` — reports 42 errors and 5 warnings, the same totals as the captured `main` baseline; no findings were reported in the files changed for the palette.
 
-## Outstanding gaps
+## Verification limits
 
-- The local browser was available at its default 1280×1100 viewport; the authored phone breakpoints were not captured at a true handset viewport. They should receive a device-width visual check before release.
-- Several live member routes showed loading/empty states or did not expose stable backend records during the read-only review. Their API-backed populated states should be checked in a staging environment with a representative test account.
-- Admin routes need a separate authorized Admin test account and end-to-end visual pass.
-- The redesign has been pushed to remote `main`. Deployment status was not manually verified. No changes were made to backend behavior or API contracts.
+This pass visually verified the public auth route at desktop and phone sizes. Member/admin layout coverage was applied through the shared shells and page-surface rules, but authenticated, API-populated member and admin routes were not end-to-end re-tested with production records in this revision. The separate admin experience should receive a representative staging-account visual pass before deployment.
+
+No backend code, API contract, route, permission, mutation, validation rule, or financial action was changed in this revision. The production branch remains unchanged pending explicit approval to publish.

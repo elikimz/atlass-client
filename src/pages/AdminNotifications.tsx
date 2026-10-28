@@ -203,7 +203,7 @@ export default function AdminNotifications() {
                   padding: '8px 16px',
                   borderRadius: '8px',
                   border: selectedUserId === null ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
-                  backgroundColor: selectedUserId === null ? 'rgba(232, 214, 194, 0.1)' : 'transparent',
+                  backgroundColor: selectedUserId === null ? 'rgba(255, 200, 87, 0.1)' : 'transparent',
                   color: selectedUserId === null ? 'var(--accent-primary)' : 'var(--text-main)',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -219,7 +219,7 @@ export default function AdminNotifications() {
                   padding: '8px 16px',
                   borderRadius: '8px',
                   border: selectedUserId !== null && selectedUserId !== -1 ? '2px solid var(--accent-primary)' : '1px solid var(--border-main)',
-                  backgroundColor: selectedUserId !== null && selectedUserId !== -1 ? 'rgba(232, 214, 194, 0.1)' : 'transparent',
+                  backgroundColor: selectedUserId !== null && selectedUserId !== -1 ? 'rgba(255, 200, 87, 0.1)' : 'transparent',
                   color: selectedUserId !== null && selectedUserId !== -1 ? 'var(--accent-primary)' : 'var(--text-main)',
                   cursor: 'pointer',
                   fontWeight: 600,
@@ -301,7 +301,7 @@ export default function AdminNotifications() {
                             padding: '10px 12px',
                             cursor: 'pointer',
                             borderBottom: '1px solid var(--border-main)',
-                            backgroundColor: selectedUserId === user.id ? 'rgba(232, 214, 194, 0.1)' : 'transparent',
+                            backgroundColor: selectedUserId === user.id ? 'rgba(255, 200, 87, 0.1)' : 'transparent',
                             transition: 'background-color 0.2s'
                           }}
                         >
@@ -329,7 +329,7 @@ export default function AdminNotifications() {
                 border: '1px solid rgba(34, 197, 94, 0.2)',
                 borderRadius: '8px',
                 fontSize: '13px',
-                color: '#166534',
+                color: '#72E0AA',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
@@ -340,7 +340,7 @@ export default function AdminNotifications() {
                 <button 
                   type="button"
                   onClick={() => setSelectedUserId(-1)}
-                  style={{ background: 'none', border: 'none', color: '#166534', cursor: 'pointer', fontWeight: 700 }}
+                  style={{ background: 'none', border: 'none', color: '#72E0AA', cursor: 'pointer', fontWeight: 700 }}
                 >
                   Change
                 </button>
@@ -477,9 +477,9 @@ export default function AdminNotifications() {
               style={{
                 padding: '8px 14px',
                 borderRadius: '8px',
-                border: '1px solid #fecaca',
-                backgroundColor: '#fef2f2',
-                color: '#991b1b',
+                border: '1px solid rgba(255, 120, 140, 0.36)',
+                backgroundColor: 'rgba(231, 83, 112, 0.15)',
+                color: '#FF9AA8',
                 fontSize: '13px',
                 fontWeight: 600,
                 cursor: 'pointer'
@@ -527,7 +527,7 @@ export default function AdminNotifications() {
                   padding: '14px 16px',
                   borderRadius: '10px',
                   border: '1px solid var(--border-main)',
-                  backgroundColor: notif.is_read ? 'var(--bg-main)' : 'rgba(232, 214, 194, 0.04)',
+                  backgroundColor: notif.is_read ? 'var(--bg-main)' : 'rgba(255, 200, 87, 0.04)',
                   transition: 'background-color 0.2s'
                 }}
               >
@@ -536,9 +536,9 @@ export default function AdminNotifications() {
                     <span style={{ fontSize: '14px' }}>{formatTypeIcon(notif.type)}</span>
                     <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-heading)' }}>{notif.title}</span>
                     {notif.user_id === null ? (
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#E8D6C2', backgroundColor: 'rgba(232, 214, 194,0.1)', padding: '2px 8px', borderRadius: '6px' }}>Global</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#18D2C5', backgroundColor: 'rgba(255, 200, 87, 0.1)', padding: '2px 8px', borderRadius: '6px' }}>Global</span>
                     ) : (
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#059669', backgroundColor: 'rgba(5,150,105,0.1)', padding: '2px 8px', borderRadius: '6px' }}>Targeted</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#72E0AA', backgroundColor: 'rgba(5,150,105,0.1)', padding: '2px 8px', borderRadius: '6px' }}>Targeted</span>
                     )}
                     {notif.is_read ? (
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Read</span>
@@ -560,9 +560,9 @@ export default function AdminNotifications() {
                     width: '32px',
                     height: '32px',
                     borderRadius: '8px',
-                    border: '1px solid #fecaca',
-                    backgroundColor: '#fef2f2',
-                    color: '#dc2626',
+                    border: '1px solid rgba(255, 120, 140, 0.36)',
+                    backgroundColor: 'rgba(231, 83, 112, 0.15)',
+                    color: '#FF8196',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -571,8 +571,8 @@ export default function AdminNotifications() {
                     flexShrink: 0,
                     transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fecaca')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FFECEF')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#FFECEF')}
                 >
                   🗑
                 </button>

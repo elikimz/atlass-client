@@ -5,35 +5,36 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#31566D",
-          hover: "#244558",
-          soft: "#E7EFF3",
+          DEFAULT: "#18D2C5",
+          hover: "#3D9CFF",
+          soft: "rgba(42, 113, 221, 0.20)",
         },
         accent: {
-          DEFAULT: "#8C5D3D",
-          soft: "#E8D6C2",
+          DEFAULT: "#9755E9",
+          soft: "#15E5C9",
         },
         sidebar: {
-          DEFAULT: "#1D3341",
-          hover: "#284454",
-          active: "#31566D",
+          DEFAULT: "#061522",
+          hover: "#102A44",
+          active: "#215CC0",
         },
-        background: "#F4F6F5",
-        card: "#FFFFFF",
+        background: "#05121B",
+        subtle: "#0F1D38",
+        card: "#0B192B",
         text: {
-          primary: "#1D2931",
-          secondary: "#50616A",
-          muted: "#5F7078",
+          primary: "#F3F7FF",
+          secondary: "#C0CEE3",
+          muted: "#9CB0C8",
         },
-        success: "#2F6A55",
-        warning: "#7C5A30",
-        danger: "#984A4F",
+        success: "#65D9A1",
+        warning: "#FFD27A",
+        danger: "#FF788C",
       },
       fontFamily: {
         sans: ["Inter", "Aptos", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 8px 24px rgba(23,43,56,0.055)",
+        card: "0 18px 48px rgba(0,5,16,0.34)",
       },
       borderRadius: {
         xl: "0.75rem",

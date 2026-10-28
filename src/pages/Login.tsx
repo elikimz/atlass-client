@@ -86,8 +86,9 @@ function getRegistrationError(error: unknown): string {
 }
 
 function BrandMark({ onDark = false }: { onDark?: boolean }) {
-  const source = onDark ? '/assets/pacecraft-mark-ivory-harbor.png' : '/assets/pacecraft-mark-harbor.png'
-  return <img className="auth-brand-mark" src={source} alt="" />
+  const source = '/assets/pacecraft-mark-neon.png'
+  const style = onDark ? { filter: 'drop-shadow(0 0 14px rgba(24, 210, 197, 0.28))' } : undefined
+  return <img className="auth-brand-mark" src={source} alt="" style={style} />
 }
 
 export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () => Promise<void> }) {

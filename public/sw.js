@@ -1,5 +1,5 @@
-const CACHE_NAME = 'pacecraft-shell-v5-harbor'
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/assets/pacecraft-mark-harbor.png', '/assets/pacecraft-mark-ivory-harbor.png', '/assets/pacecraft-icon-192-harbor.png']
+const CACHE_NAME = 'pacecraft-shell-v7-neon-glass'
+const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/assets/pacecraft-mark-neon.png', '/assets/pacecraft-icon-192-neon.png', '/assets/pacecraft-icon-512-neon.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -334,8 +334,8 @@ export default function MpesaPayment() {
           {/* M-Pesa branding */}
           <div style={{
             display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px',
-            padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '10px',
-            border: '1px solid #bbf7d0'
+            padding: '12px', backgroundColor: 'rgba(26, 174, 119, 0.15)', borderRadius: '10px',
+            border: '1px solid rgba(101, 217, 161, 0.34)'
           }}>
             <div style={{
               width: '40px', height: '40px', backgroundColor: '#00AC4F', borderRadius: '8px',
@@ -343,8 +343,8 @@ export default function MpesaPayment() {
               fontSize: '18px', fontWeight: 900, color: 'white', flexShrink: 0
             }}>M</div>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#166534' }}>M-PESA STK Push</div>
-              <div style={{ fontSize: '12px', color: '#15803d' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#72E0AA' }}>M-PESA STK Push</div>
+              <div style={{ fontSize: '12px', color: '#72E0AA' }}>
                 You'll receive a payment prompt on your phone
               </div>
             </div>
@@ -384,7 +384,7 @@ export default function MpesaPayment() {
               }}
             />
             {phoneError && (
-              <div style={{ fontSize: '12px', color: '#ef4444', marginTop: '6px', fontWeight: 500 }}>
+              <div style={{ fontSize: '12px', color: '#FF8196', marginTop: '6px', fontWeight: 500 }}>
                 {phoneError}
               </div>
             )}
@@ -397,8 +397,8 @@ export default function MpesaPayment() {
           {error && (
             <div style={{
               padding: '12px 16px', borderRadius: '10px', marginBottom: '16px',
-              backgroundColor: '#fef2f2', border: '1px solid #fecaca',
-              color: '#991b1b', fontSize: '13px', fontWeight: 500, lineHeight: '1.5'
+              backgroundColor: 'rgba(231, 83, 112, 0.15)', border: '1px solid rgba(255, 120, 140, 0.36)',
+              color: '#FF9AA8', fontSize: '13px', fontWeight: 500, lineHeight: '1.5'
             }}>
               ⚠️ {error}
             </div>
@@ -476,7 +476,7 @@ export default function MpesaPayment() {
           {/* Animated phone icon */}
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
-            backgroundColor: '#f0fdf4', border: '3px solid #00AC4F',
+            backgroundColor: 'rgba(26, 174, 119, 0.15)', border: '3px solid #00AC4F',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 20px',
             animation: 'pulse 2s ease-in-out infinite'
@@ -501,10 +501,10 @@ export default function MpesaPayment() {
 
           {/* Amount reminder */}
           <div style={{
-            backgroundColor: '#f0fdf4', borderRadius: '10px', padding: '12px 16px',
-            marginBottom: '20px', border: '1px solid #bbf7d0'
+            backgroundColor: 'rgba(26, 174, 119, 0.15)', borderRadius: '10px', padding: '12px 16px',
+            marginBottom: '20px', border: '1px solid rgba(101, 217, 161, 0.34)'
           }}>
-            <div style={{ fontSize: '13px', color: '#166534', fontWeight: 600 }}>
+            <div style={{ fontSize: '13px', color: '#72E0AA', fontWeight: 600 }}>
               Amount to pay: <strong>KES {initiateData.amount_kes.toLocaleString()}</strong>
             </div>
           </div>
@@ -557,11 +557,11 @@ export default function MpesaPayment() {
         }}>
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
-            backgroundColor: '#fffbeb', border: '3px solid #f59e0b',
+            backgroundColor: 'rgba(236, 178, 67, 0.15)', border: '3px solid #f59e0b',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 20px', fontSize: '40px'
           }}>⏳</div>
-          <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#92400e', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#FFD27A', marginBottom: '8px' }}>
             Deposit Under Review
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
@@ -570,13 +570,13 @@ export default function MpesaPayment() {
             whether the M-Pesa attempt succeeded or failed.
           </p>
           <div style={{
-            backgroundColor: '#fffbeb', borderRadius: '10px', padding: '12px 16px',
+            backgroundColor: 'rgba(236, 178, 67, 0.15)', borderRadius: '10px', padding: '12px 16px',
             marginBottom: '20px', border: '1px solid #fde68a', textAlign: 'left'
           }}>
-            <div style={{ fontSize: '12px', color: '#92400e' }}>
+            <div style={{ fontSize: '12px', color: '#FFD27A' }}>
               Reference: <strong style={{ fontFamily: 'monospace' }}>{initiateData.reference}</strong>
             </div>
-            <div style={{ fontSize: '12px', color: '#92400e', marginTop: '4px' }}>
+            <div style={{ fontSize: '12px', color: '#FFD27A', marginTop: '4px' }}>
               Amount: <strong>KES {initiateData.amount_kes.toLocaleString()} (${initiateData.amount_usd.toFixed(2)})</strong>
             </div>
           </div>
@@ -603,14 +603,14 @@ export default function MpesaPayment() {
         }}>
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
-            backgroundColor: '#f0fdf4', border: '3px solid #00AC4F',
+            backgroundColor: 'rgba(26, 174, 119, 0.15)', border: '3px solid #00AC4F',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 20px', fontSize: '40px'
           }}>
             ✅
           </div>
 
-          <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#166534', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#72E0AA', marginBottom: '8px' }}>
             Payment Successful!
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
@@ -622,23 +622,23 @@ export default function MpesaPayment() {
 
           {statusData?.mpesa_receipt && (
             <div style={{
-              backgroundColor: '#f0fdf4', borderRadius: '10px', padding: '12px 16px',
-              marginBottom: '20px', border: '1px solid #bbf7d0'
+              backgroundColor: 'rgba(26, 174, 119, 0.15)', borderRadius: '10px', padding: '12px 16px',
+              marginBottom: '20px', border: '1px solid rgba(101, 217, 161, 0.34)'
             }}>
-              <div style={{ fontSize: '12px', color: '#166534' }}>
+              <div style={{ fontSize: '12px', color: '#72E0AA' }}>
                 M-Pesa Receipt: <strong style={{ fontFamily: 'monospace' }}>{statusData.mpesa_receipt}</strong>
               </div>
             </div>
           )}
 
           <div style={{
-            backgroundColor: '#f0fdf4', borderRadius: '10px', padding: '12px 16px',
-            marginBottom: '20px', border: '1px solid #bbf7d0'
+            backgroundColor: 'rgba(26, 174, 119, 0.15)', borderRadius: '10px', padding: '12px 16px',
+            marginBottom: '20px', border: '1px solid rgba(101, 217, 161, 0.34)'
           }}>
-            <div style={{ fontSize: '12px', color: '#166534' }}>
+            <div style={{ fontSize: '12px', color: '#72E0AA' }}>
               Reference: <strong style={{ fontFamily: 'monospace' }}>{statusData?.reference}</strong>
             </div>
-            <div style={{ fontSize: '12px', color: '#166534', marginTop: '4px' }}>
+            <div style={{ fontSize: '12px', color: '#72E0AA', marginTop: '4px' }}>
               Amount: <strong>${statusData?.amount_usd?.toFixed(2) || '0.00'}</strong>
             </div>
           </div>
@@ -662,20 +662,20 @@ export default function MpesaPayment() {
           backgroundColor: 'var(--bg-card)',
           borderRadius: '16px',
           padding: '32px 24px',
-          border: '1px solid #fecaca',
+          border: '1px solid rgba(255, 120, 140, 0.36)',
           textAlign: 'center',
           boxShadow: 'var(--card-shadow)'
         }}>
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
-            backgroundColor: '#fef2f2', border: '3px solid #ef4444',
+            backgroundColor: 'rgba(231, 83, 112, 0.15)', border: '3px solid #ef4444',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 20px', fontSize: '40px'
           }}>
             ❌
           </div>
 
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#991b1b', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#FF9AA8', marginBottom: '8px' }}>
             {timeoutReached ? 'Payment Timed Out' : 'Payment Not Completed'}
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>

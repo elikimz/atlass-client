@@ -89,8 +89,8 @@ export default function AdminInvites() {
         <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>View and manage referral codes and relationships</p>
       </div>
 
-      {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', color: '#DC2626', fontSize: '14px' }}>{error}</div>}
-      {success && <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '12px 16px', color: '#166534', fontSize: '14px' }}>{success}</div>}
+      {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(255, 120, 140, 0.36)', borderRadius: '8px', padding: '12px 16px', color: '#FF8196', fontSize: '14px' }}>{error}</div>}
+      {success && <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(101, 217, 161, 0.34)', borderRadius: '8px', padding: '12px 16px', color: '#72E0AA', fontSize: '14px' }}>{success}</div>}
 
       <div style={{ display: 'flex', gap: '12px', borderBottom: '1px solid var(--border-main)' }}>
         <button onClick={() => setTab('codes')} style={{ padding: '12px 16px', backgroundColor: 'transparent', color: tab === 'codes' ? 'var(--accent-primary)' : 'var(--text-muted)', border: 'none', borderBottom: tab === 'codes' ? '2px solid var(--accent-primary)' : 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>Referral Codes</button>
@@ -120,7 +120,7 @@ export default function AdminInvites() {
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>{code.trained_count}</td>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>${code.earned_amount.toFixed(2)}</td>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>${code.task_rebate_amount.toFixed(2)}</td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><button onClick={() => handleDeleteCode(code.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><button onClick={() => handleDeleteCode(code.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#FF8196', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></td>
                 </tr>
               ))}
             </tbody>
@@ -148,7 +148,7 @@ export default function AdminInvites() {
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-muted)' }}>{rel.referrer_id}</td>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)' }}><code style={{ backgroundColor: 'var(--bg-main)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', color: 'var(--text-main)' }}>{rel.referral_code_used || 'N/A'}</code></td>
                   <td style={{ padding: '12px 16px', fontSize: '13px', color: 'var(--text-muted)' }}>{new Date(rel.created_at).toLocaleDateString()}</td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><button onClick={() => handleDeleteRelationship(rel.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><button onClick={() => handleDeleteRelationship(rel.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#FF8196', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></td>
                 </tr>
               ))}
             </tbody>

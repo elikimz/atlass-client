@@ -27,7 +27,7 @@ export default function PaymentMethodMaintenance() {
         </div>
         <p style={{ margin: '0 0 8px', color: 'var(--accent-primary)', fontSize: '12px', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Payment method</p>
         <h1 style={{ margin: '0 0 22px', color: 'var(--text-heading)', fontSize: '30px', fontWeight: 800 }}>{provider.name}</h1>
-        <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', color: '#9a3412', borderRadius: '16px', padding: '18px', fontSize: '15px', lineHeight: 1.6, fontWeight: 600 }}>{maintenanceMessage}</div>
+        <div style={{ backgroundColor: 'rgba(236, 178, 67, 0.15)', border: '1px solid rgba(255, 210, 122, 0.34)', color: '#FFD27A', borderRadius: '16px', padding: '18px', fontSize: '15px', lineHeight: 1.6, fontWeight: 600 }}>{maintenanceMessage}</div>
         <button onClick={() => navigate('/payments/recharge')} style={{ width: '100%', marginTop: '24px', padding: '15px 20px', border: 'none', borderRadius: '14px', backgroundColor: 'var(--accent-primary)', color: 'white', fontSize: '15px', fontWeight: 800, cursor: 'pointer' }}>Return to recharge</button>
       </section>
     </main>

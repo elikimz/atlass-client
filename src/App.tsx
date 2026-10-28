@@ -107,7 +107,7 @@ function AppContent() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div className="loading-container">
           <div className="pulse-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <img src="/assets/pacecraft-mark-harbor.png" alt="" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+            <img src="/assets/pacecraft-mark-neon.png" alt="" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
             <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)' }}>Pacecraft</span>
           </div>
           <div className="loading-bar-bg">

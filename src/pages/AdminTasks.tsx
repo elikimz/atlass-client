@@ -176,7 +176,7 @@ export default function AdminTasks() {
         <button onClick={() => setShowForm(!showForm)} style={{ padding: '10px 20px', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}>{showForm ? 'Cancel' : '+ Add Task'}</button>
       </div>
 
-      {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', color: '#DC2626', fontSize: '14px' }}>{error}</div>}
+      {error && <div style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(255, 120, 140, 0.36)', borderRadius: '8px', padding: '12px 16px', color: '#FF8196', fontSize: '14px' }}>{error}</div>}
 
       {showForm && (
         <div style={{ backgroundColor: 'var(--bg-card)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border-main)', boxShadow: 'var(--card-shadow)' }}>
@@ -239,7 +239,7 @@ export default function AdminTasks() {
                     )}
                   </label>
                   {formData.video_url && !uploading && (
-                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#72E0AA', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span>✅</span>
                       <span style={{ wordBreak: 'break-all' }}>Current video: {formData.video_url}</span>
                     </div>
@@ -261,7 +261,7 @@ export default function AdminTasks() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{task.title}</h3>
               {task.plan && (
-                <span style={{ padding: '2px 8px', backgroundColor: 'rgba(232, 214, 194, 0.1)', color: '#E8D6C2', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
+                <span style={{ padding: '2px 8px', backgroundColor: 'rgba(255, 200, 87, 0.1)', color: '#18D2C5', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
                   {task.plan.name}
                 </span>
               )}
@@ -271,7 +271,7 @@ export default function AdminTasks() {
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent-primary)' }}>Reward: ${(task.reward_amount || 0).toFixed(2)}</span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => handleEdit(task)} style={{ padding: '6px 12px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Edit</button>
-                <button onClick={() => handleDelete(task.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button>
+                <button onClick={() => handleDelete(task.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#FF8196', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button>
               </div>
             </div>
           </div>

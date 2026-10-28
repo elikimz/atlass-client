@@ -237,7 +237,7 @@ export default function AdminTraining() {
                     )}
                   </label>
                   {formData.video_url && !uploading && (
-                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#10B981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ marginTop: '8px', fontSize: '12px', color: '#72E0AA', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span>✅</span>
                       <span style={{ wordBreak: 'break-all' }}>Current video: {formData.video_url}</span>
                     </div>
@@ -257,7 +257,7 @@ export default function AdminTraining() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}><h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{cert.name}</h3><span style={{ padding: '4px 8px', backgroundColor: cert.is_active ? 'rgba(34, 197, 94, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: cert.is_active ? '#166534' : '#DC2626', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>{cert.is_active ? 'Active' : 'Inactive'}</span></div>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{cert.description || 'No description'}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px', color: 'var(--text-muted)' }}><div>⏱️ {cert.estimated_time || 'N/A'}</div><div>📚 {cert.steps_count} Steps</div></div>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-main)' }}><button onClick={() => handleEdit(cert)} style={{ flex: 1, padding: '6px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Edit</button><button onClick={() => setShowConfirm(cert.id)} style={{ flex: 1, padding: '6px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></div>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-main)' }}><button onClick={() => handleEdit(cert)} style={{ flex: 1, padding: '6px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Edit</button><button onClick={() => setShowConfirm(cert.id)} style={{ flex: 1, padding: '6px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#FF8196', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></div>
           </div>
         ))}
       </div>
