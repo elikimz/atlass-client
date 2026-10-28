@@ -1,8 +1,12 @@
 # PACECRAFT frontend redesign handoff
 
-**Branch:** `redesign/pacecraft-visual-audit` (local review branch; not pushed)
+**Remote branch:** `main` in `elikimz/pacecraft-client`
 
-**Deployment:** Not deployed. Changes are in the sandbox checkout.
+**Local review branch:** `redesign/pacecraft-visual-audit`
+
+**Pushed commit:** `cbb4b3c` (`feat: refresh Pacecraft frontend design system`)
+
+**Deployment:** The push may trigger hosting deployment; deployment status was not independently checked.
 
 ## Change summary
 
@@ -28,4 +32,4 @@ A read-only route and visual pass on the live preview covered sign-in, dashboard
 - The local browser was available at its default 1280×1100 viewport; the authored phone breakpoints were not captured at a true handset viewport. They should receive a device-width visual check before release.
 - Several live member routes showed loading/empty states or did not expose stable backend records during the read-only review. Their API-backed populated states should be checked in a staging environment with a representative test account.
 - Admin routes need a separate authorized Admin test account and end-to-end visual pass.
-- This branch has not been pushed or deployed. No changes were made to backend behavior or API contracts.
+- The redesign has been pushed to remote `main`. Deployment status was not manually verified. No changes were made to backend behavior or API contracts.
