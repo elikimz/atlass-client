@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import './TaskPlayer.css'
 
 type TaskData = {
   id: number
@@ -58,13 +59,15 @@ export default function TaskPlayer() {
     },
     onError: (error) => setSessionError(detailFrom(error, 'The task session could not be started. Check your connection and try again.')),
   })
+  const taskIdForSession = task?.id
+  const startTaskSession = startSession.mutate
 
   useEffect(() => {
-    if (task && startedFor.current !== task.id) {
-      startedFor.current = task.id
-      startSession.mutate(task.id)
+    if (taskIdForSession !== undefined && startedFor.current !== taskIdForSession) {
+      startedFor.current = taskIdForSession
+      startTaskSession(taskIdForSession)
     }
-  }, [task?.id])
+  }, [taskIdForSession, startTaskSession])
 
   useEffect(() => {
     if (!sessionReady || secondsLeft <= 0) return
