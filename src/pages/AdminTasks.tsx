@@ -261,7 +261,7 @@ export default function AdminTasks() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-heading)', margin: 0 }}>{task.title}</h3>
               {task.plan && (
-                <span style={{ padding: '2px 8px', backgroundColor: 'rgba(214, 138, 155, 0.1)', color: '#D68A9B', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
+                <span style={{ padding: '2px 8px', backgroundColor: 'rgba(197, 223, 85, 0.1)', color: '#C5DF55', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
                   {task.plan.name}
                 </span>
               )}

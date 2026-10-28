@@ -1,40 +1,37 @@
-# Kinetiq login-first redesign — implementation report
+# Pacecraft rebrand and workspace update
 
-**Updated:** 27 October 2026
+**Updated:** 28 October 2026
 
-## Latest requested changes
+## Identity
 
-The public marketing landing page and its stylesheet were removed. A guest visiting `/` now sees the sign-in/create-account screen; an authenticated member visiting `/` returns to the dashboard. The existing `/login` path remains available. The installed app now starts at `/` as well.
+The member platform’s visible identity is now **Pacecraft**. The new symbol is a clean forward-moving path mark with a citrus signal point; the compact launcher icon uses the same geometry. The assets are used across sign-in, member/admin navigation, browser/PWA metadata, the install prompt, and email. The server project title and outgoing email sender default are also Pacecraft. Old Kinetiq launcher artwork has been removed. Payment-provider reference strings and cache namespaces that remain are internal integration identifiers, not app branding, and were not renamed to avoid breaking existing contracts.
 
-The dashboard no longer renders the **“ACCOUNT OVERVIEW / VERIFIED DATA”** hero, the “Your at a glance” copy, its browse-tasks CTA, or the active-plan/no-active-plan card. Members land directly on separate withdrawal/deposit balances, the API-backed seven-day task-earnings chart and account activity panels.
+The previous Rosewood/claret palette was replaced with **Evergreen, Ivory & Citrus**: forest `#174D43`, dark green `#132F2A`, warm ivory `#F7F4EA`, ink `#192723`, and citrus `#C5DF55`. These colors now define the shared member, authentication, admin, wallet, referral and public-entry styling. Semantic success, warning and error states remain distinct.
 
-The previous slate/cobalt/teal treatment was replaced with **Rosewood & Porcelain**: rich claret `#8F354C`, dusty rose `#D68A9B`, deep ink `#2B2024`, and warm porcelain `#FAF6F5`. Shared member, authentication, public, referral, payment and admin styling was brought onto the new palette while preserving semantic success, warning and error colors. The Kinetiq SVG mark, favicon and installed-app PNG icons were recolored without changing the mark silhouette or maskable safe area.
+The public marketing landing page remains removed: guests at `/` see sign-in/create-account, while authenticated members go to the dashboard. `/login` continues to work; the PWA starts at `/`. The service-worker cache version has advanced and precaches the current Pacecraft mark and icon, while clearing old AdPulseAI and Kinetiq shell caches.
 
-## Preserved experience and behavior
+## Workspace changes
 
-- **Registration and sign-in:** phone, email and password remain the account credentials; the referral code is optional. Referral prefill, server-side phone normalization, exact API errors, and token persistence before `/auth/me` remain intact.
-- **Member workspace:** deposit and withdrawal balances stay separate. The earnings chart uses `/dashboard/summary.earnings_history`; period totals, progress counts, earnings breakdown and recent task activity remain API-backed. Tasks, task review, training, learning, plans, referral sharing, payment history, recharge, payout, withdrawal destinations and settings retain their routes and API contracts.
-- **Plans and referrals:** plan comparison and final confirmation retain the existing purchase/upgrade contracts and server eligibility; referral code provisioning, network totals and commission ledger remain API-backed.
-- **Recharge and payout:** M-Pesa/crypto and proof-upload routes remain. Recharge requires final review and reports deposits as pending administrator review rather than credited. Payout copy reflects the configured server window and admin-review stage; `under_review` payouts remain in-flight and block duplicate requests.
-- **Administration and performance:** the responsive operations shell and admin actions remain in place. Route-level lazy loading is retained; the deleted landing-page bundle is no longer imported.
+- **Dashboard:** Removed the exact account-overview/verified-data hero and active-plan card the user objected to. Removed duplicate deposit/withdrawal balances as well; the dashboard now opens with task earnings, period totals, task activity and the in-flow install card, using server-sourced history.
+- **Wallet:** The dedicated Money Desk at `/payments` is now the only member home for deposit and withdrawal balances. It shows server profile balances, wallet actions, earnings breakdown and real payment history. Deposit funds and cashable payout earnings stay separate; action status language remains faithful to server/admin-review stages.
+- **More:** “More” is a normal member route rather than a transient popover. Its grouped destinations are available at phone and desktop widths. The static route manifest now includes `/more`.
+- **PWA and email:** The manifest and browser theme use evergreen; generated launcher sizes are optimized. Withdrawal and password-reset messages now use the Pacecraft mark and matching forest/ivory treatment. The reset logo is inline PNG with the updated attachment path/content type.
 
-## Backend integrity
+## Preserved behavior
 
-No backend files or business rules were changed in this visual follow-up. Earlier hardening remains: task eligibility/session timing and reward idempotency are enforced server-side; migrations add duplicate guards without deleting/reconciling existing rows; notification read/dismiss state is member-scoped; withdrawal schedule and payment review labels follow server configuration/statuses. Email/certificate branding changes preserve their existing authorization and lifecycle behavior.
+Registration remains phone/email/password, with the referral code optional. Auth token ordering, authentication guards, server API routes, plan eligibility, payments, payout/recharge review, account setup, task timing/reward integrity and notification ownership were not changed in this follow-up. The wallet uses existing profile, dashboard and payment-history endpoints; it adds no financial write behavior.
 
 ## Verification
 
-- `npm run build` passed (TypeScript plus Vite production build). The main JavaScript chunk is approximately **349.39 kB raw / 111.66 kB gzip**.
-- Focused ESLint passed for `src/App.tsx`, `src/pages/Dashboard.tsx` and `src/pages/Login.tsx`. An expanded run over every changed TSX file also reports legacy hook-order and `any`-type lint findings in `AdminNotifications.tsx`, `AdminTasks.tsx` and `AdminUsers.tsx`; this follow-up changed only color literals in those three pages, not their logic.
-- The isolated Chromium suite passed: guest root opens sign-in; authenticated root redirects to the dashboard; the removed hero is absent; registration, plan activation/upgrade, referrals, 390px/320px layouts, tablet PWA install, recharge final review, payment-history status, duplicate-payout blocking and withdrawal-account dialog all passed.
-- **63 API calls were intercepted by local fixtures.** No live API calls, unexpected external requests, account writes or payout submissions occurred. No browser JavaScript exceptions or console errors were observed.
-- PWA manifest JSON validates with `start_url: "/"`, theme color `#8F354C`, and all three referenced icons present. `git diff --check` passed.
-- Earlier backend regression verification: **39 passed, 1 skipped** using in-memory SQLite and a disposable signing secret; no backend test was rerun for this frontend-only follow-up.
+- `npm run build`: **passed** (TypeScript and Vite production build; route-level lazy loading remains enabled).
+- Focused ESLint on the modified routing, shell, dashboard, wallet and login modules: **passed**.
+- Backend regression suite: **39 passed, 1 skipped**, using in-memory SQLite and a disposable test-only JWT secret. Existing Pydantic/FastAPI deprecation warnings remain.
+- Isolated Chromium regression suite: **passed** for guest/authenticated root routing, registration payload shape, hero/balance removal, seven-point earnings history, a dedicated More route, dedicated live wallet balance display, plans, referrals, 390px/320px layouts, tablet install, recharge final review, payment-history review status, duplicate-payout blocking and withdrawal-account dialog.
+- **64 API requests were intercepted by local fixtures**; no live API requests, external requests, account writes or payout submission occurred. The mock fixture covers the existing deposit review path only. No browser JavaScript exceptions or console errors were reported.
+- Manifest and all referenced icons resolve; the service-worker shell precache URLs resolve to files in `public`. `git diff --check` is required again before commit.
 
-## Deployment status and safety
+## Name availability and release status
 
-Frontend commit **`22a6f2c`** was pushed to `main`; the corresponding Vercel Production deployment (**7358441960**) reports **success**. Read-only checks against `https://atlass-client.vercel.app/` returned HTTP 200 and the new sign-in title, Rosewood CSS, root-start PWA manifest and recolored icons. A production Chromium smoke test confirmed the guest root displays the sign-in form at 390px, uses `#8F354C`, has no landing component and has no horizontal overflow. Azure API readiness remains unconfirmed by these frontend-only checks.
+Public-web screening was saved in [`brand-name-check.md`](../brand-name-check.md) while comparing name candidates. Search checks are not legal advice, domain availability confirmation or trademark clearance; **Pacecraft still needs a formal trademark/domain review before broader commercial launch**.
 
-All browser/API regression fixtures were local or intercepted. No production signup, plan purchase, recharge, payout or withdrawal-account mutation was attempted.
-
-Screenshots in the task workspace: `kinetiq-login-root-mobile.png`, `kinetiq-live-login-root-mobile.png`, `kinetiq-redesign-signup-mobile.png`, `kinetiq-redesign-dashboard-desktop.png`, `kinetiq-redesign-dashboard-mobile.png`, `kinetiq-redesign-plans-after.png`, `kinetiq-redesign-referrals-desktop.png`, `kinetiq-recharge-pending-review.png`, `kinetiq-payout-under-review.png` and `kinetiq-admin-dashboard-mobile.png`.
+These changes are prepared for the already-authorized `main`-branch push. The earlier Vercel deployment was verified, but this new set of visual assets and wallet/More changes must not be described as live until its own deployment is confirmed. Azure readiness should be verified independently; this browser suite is local and does not establish production API readiness.

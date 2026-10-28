@@ -56,7 +56,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
     <a className="skip-link" href="#main-content">Skip to content</a>
     {isMobile && isMenuOpen && <button className="admin-atlas-scrim" type="button" aria-label="Close administration navigation" onClick={() => setIsMenuOpen(false)} />}
     <aside className={`admin-atlas-sidebar${isMobile ? ' is-mobile' : ''}${isMenuOpen ? ' is-open' : ''}`} aria-label="Administration navigation" aria-hidden={isMobile && !isMenuOpen}>
-      <Link className="admin-atlas-brand" to="/admin" aria-label="Kinetiq administration home" onClick={() => setIsMenuOpen(false)}><img src="/assets/kinetiq-mark.svg" alt="" /><span><strong>Kinetiq</strong><small>OPERATIONS ATLAS</small></span><i>ADMIN</i></Link>
+      <Link className="admin-atlas-brand" to="/admin" aria-label="Pacecraft administration home" onClick={() => setIsMenuOpen(false)}><img src="/assets/pacecraft-mark.png" alt="" /><span><strong>Pacecraft</strong><small>OPERATIONS ATLAS</small></span><i>ADMIN</i></Link>
       <div className="admin-atlas-identity"><span>{initials}</span><div><strong>{adminName}</strong><small>Administrator access</small></div><b aria-label="Account active" /></div>
       <nav className="admin-atlas-nav">{adminGroups.map((group) => <section key={group.title} aria-label={group.title}><h2>{group.title}</h2>{group.items.map((item) => <Link key={item.path} to={item.path} onClick={() => setIsMenuOpen(false)} aria-current={activePath(item.path) ? 'page' : undefined} className={`admin-atlas-link${activePath(item.path) ? ' is-active' : ''}`}><span>{item.code}</span><strong>{item.label}</strong>{activePath(item.path) && <i aria-hidden="true" />}</Link>)}</section>)}</nav>
       <footer className="admin-atlas-footer"><span>CONTROL DESK / 01</span><button type="button" onClick={handleSignOut}>Sign out <b aria-hidden="true">↗</b></button></footer>
@@ -64,7 +64,7 @@ export default function AdminLayout({ setIsAuthenticated }: AdminLayoutProps) {
 
     <div className="admin-atlas-main">
       <header className="admin-atlas-topbar">
-        <div className="admin-atlas-topbar-start">{isMobile && <button type="button" className="admin-atlas-menu-button" onClick={() => setIsMenuOpen(true)} aria-label="Open administration navigation" aria-expanded={isMenuOpen}>☰</button>}<div><span>CONTROL ROOM / KINETIQ</span><h1>{activeItem?.label || 'Operations'}</h1></div></div>
+        <div className="admin-atlas-topbar-start">{isMobile && <button type="button" className="admin-atlas-menu-button" onClick={() => setIsMenuOpen(true)} aria-label="Open administration navigation" aria-expanded={isMenuOpen}>☰</button>}<div><span>CONTROL ROOM / PACECRAFT</span><h1>{activeItem?.label || 'Operations'}</h1></div></div>
         <div className="admin-atlas-topbar-end"><span className="admin-atlas-live"><i /> ADMIN SESSION</span><button type="button" onClick={() => window.open('/dashboard', '_blank', 'noopener,noreferrer')}>Open member workspace <b aria-hidden="true">↗</b></button><span className="admin-atlas-avatar" aria-label={`${adminName} administrator`}>{initials}</span></div>
       </header>
       <main className="admin-atlas-content" id="main-content"><Outlet /></main>

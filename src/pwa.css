@@ -104,7 +104,7 @@
   gap: 14px;
   width: min(calc(100% - 32px), 460px);
   padding: 12px 14px;
-  border: 1px solid rgba(214, 138, 155, .45);
+  border: 1px solid rgba(197, 223, 85, .45);
   border-radius: 8px;
   background: var(--color-surface, #3B2930);
   color: var(--color-text, #fff);
@@ -113,7 +113,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
 }
 .pwa-update-banner span { flex: 1; }
-.pwa-update-banner button { min-height: 34px; padding: 7px 12px; border: 0; border-radius: 5px; background: var(--color-primary, #8F354C); color: #fff; cursor: pointer; font-weight: 700; white-space: nowrap; }
+.pwa-update-banner button { min-height: 34px; padding: 7px 12px; border: 0; border-radius: 5px; background: var(--color-primary, #174D43); color: #fff; cursor: pointer; font-weight: 700; white-space: nowrap; }
 .pwa-update-banner button:hover { filter: brightness(1.08); }
 
 @media (max-width: 640px) {

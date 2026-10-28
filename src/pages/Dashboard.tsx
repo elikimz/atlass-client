@@ -5,12 +5,6 @@ import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 import { PWAInstallCard } from '../components/PWAInstall'
 
-type User = {
-  first_name?: string | null
-  deposit_wallet_balance?: number
-  withdrawal_wallet_balance?: number
-}
-
 type EarningsPoint = { day: string; value: number }
 type RecentActivity = { id: number; description: string; amount: string; status: string }
 type Summary = {
@@ -89,11 +83,9 @@ function EarningsChart({ points }: { points: EarningsPoint[] }) {
 }
 
 export default function Dashboard() {
-  const [orientation, setOrientation] = useState(() => localStorage.getItem('kinetiq-orientation-dismissed') !== 'yes')
-  const user = useQuery({ queryKey: queryKeys.auth.currentUser, queryFn: async () => (await api.get<User>('/auth/me')).data, staleTime: 60_000 })
+  const [orientation, setOrientation] = useState(() => localStorage.getItem('pacecraft-orientation-dismissed') !== 'yes')
   const summary = useQuery({ queryKey: queryKeys.dashboard.summary, queryFn: async () => (await api.get<Summary>('/dashboard/summary')).data, staleTime: 30_000 })
   const referrals = useQuery({ queryKey: queryKeys.referrals.summary, queryFn: async () => (await api.get<Referrals>('/referrals/summary')).data, staleTime: 60_000 })
-  const person = user.data
   const data = summary.data
   const history = Array.isArray(data?.earnings_history) ? data.earnings_history : []
   const recentActivity = Array.isArray(data?.recent_activity) ? data.recent_activity : []
@@ -102,21 +94,8 @@ export default function Dashboard() {
   return <div className="member-dashboard">
     {orientation && <section className="dashboard-orientation">
       <div><strong>Welcome to your workspace</strong><p>Review your account, task activity and learning tools. Community links are optional and do not record membership.</p></div>
-      <button className="member-button member-button--outline" type="button" onClick={() => { localStorage.setItem('kinetiq-orientation-dismissed', 'yes'); setOrientation(false) }}>Dismiss</button>
+      <button className="member-button member-button--outline" type="button" onClick={() => { localStorage.setItem('pacecraft-orientation-dismissed', 'yes'); setOrientation(false) }}>Dismiss</button>
     </section>}
-
-    <section className="member-balance-strip" aria-label="Wallet balances">
-      <article className="member-balance-item member-balance-item--primary">
-        <span className="member-balance-index">01</span>
-        <div><small>WITHDRAWAL WALLET</small><strong>{user.isError || !person ? '—' : money(person.withdrawal_wallet_balance)}</strong><span>Cashable earnings · account source</span></div>
-        <Link to="/payments/payout">Review payout <span aria-hidden="true">→</span></Link>
-      </article>
-      <article className="member-balance-item">
-        <span className="member-balance-index">02</span>
-        <div><small>DEPOSIT WALLET</small><strong>{user.isError || !person ? '—' : money(person.deposit_wallet_balance)}</strong><span>Recharge funds only · account source</span></div>
-        <Link to="/payments/recharge">Add funds <span aria-hidden="true">→</span></Link>
-      </article>
-    </section>
 
     <section className="dashboard-overview-grid" aria-label="Earnings and account overview">
       <article className="member-panel dashboard-earnings-panel">

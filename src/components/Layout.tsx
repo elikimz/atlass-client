@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -34,12 +34,15 @@ const inviteItem: NavItem = { label: 'Referrals', path: '/referrals', glyph: '�
 const walletItem: NavItem = { label: 'Wallet', path: '/payments', glyph: '◈' }
 const settingsItem: NavItem = { label: 'Settings', path: '/settings', glyph: '⚙' }
 const adminItem: NavItem = { label: 'Admin', path: '/admin', glyph: '⋯' }
+const moreItem: NavItem = { label: 'More', path: '/more', glyph: '⋯' }
 
 function isItemActive(pathname: string, path: string) {
   return pathname === path || (path !== '/dashboard' && pathname.startsWith(`${path}/`))
 }
 
 function titleForPath(pathname: string) {
+  if (pathname === '/more') return 'More destinations'
+  if (pathname === '/dashboard') return 'Dashboard'
   if (pathname.startsWith('/payments/recharge')) return 'Add funds'
   if (pathname.startsWith('/payments/history')) return 'Payment activity'
   if (pathname.startsWith('/payments/payout') || pathname.startsWith('/withdrawal-accounts')) return 'Withdraw earnings'
@@ -58,8 +61,6 @@ function titleForPath(pathname: string) {
 export default function Layout({ setIsAuthenticated }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [moreMenuPath, setMoreMenuPath] = useState<string | null>(null)
-  const isMoreOpen = moreMenuPath === location.pathname
   const userQuery = useQuery({
     queryKey: queryKeys.auth.currentUser,
     queryFn: async () => (await api.get<UserData>('/auth/me')).data,
@@ -91,8 +92,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     { title: 'Money', items: [walletItem] },
     { title: 'Account', items: isAdminUser ? [settingsItem, adminItem] : [settingsItem] },
   ]
-  const mobileItems = [homeItem, tasksItem, plansItem, inviteItem, walletItem]
-  const moreItems = [trainingItem, settingsItem, ...(isAdminUser ? [adminItem] : [])]
+  const mobileItems = [homeItem, tasksItem, plansItem, inviteItem, walletItem, moreItem]
 
   const renderNavLink = (item: NavItem, mobile = false) => {
     const active = isItemActive(location.pathname, item.path)
@@ -103,7 +103,6 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
         to={item.path}
         aria-current={active ? 'page' : undefined}
         className={`member-nav-link${active ? ' is-active' : ''}${mobile ? ' member-nav-link--mobile' : ''}`}
-        onClick={() => setMoreMenuPath(null)}
       >
         <span className="member-nav-glyph" aria-hidden="true">{item.glyph}</span>
         <span className="member-nav-label">{label}</span>
@@ -117,9 +116,9 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
     <div className="site-shell member-app-frame">
       <a className="skip-link" href="#main-content">Skip to content</a>
       <aside className="member-sidebar" aria-label="Main navigation">
-        <Link className="member-brand" to="/dashboard" aria-label="Kinetiq home">
-          <img src="/assets/kinetiq-mark.svg" alt="" />
-          <span><strong>Kinetiq</strong><small>MEMBER WORKSPACE</small></span>
+        <Link className="member-brand" to="/dashboard" aria-label="Pacecraft home">
+          <img src="/assets/pacecraft-mark.png" alt="" />
+          <span><strong>Pacecraft</strong><small>MEMBER WORKSPACE</small></span>
         </Link>
         <div className="member-sidebar-user">
           <span className="member-sidebar-avatar" aria-hidden="true">{initials}</span>
@@ -163,22 +162,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
 
       <nav className="app-mobile-nav" aria-label="Primary mobile navigation">
         {mobileItems.map((item) => renderNavLink(item, true))}
-        <button className={`member-nav-link member-nav-link--mobile member-more-button${isMoreOpen ? ' is-active' : ''}`} type="button" onClick={() => setMoreMenuPath((path) => path === location.pathname ? null : location.pathname)} aria-expanded={isMoreOpen} aria-controls="member-more-menu">
-          <span className="member-nav-glyph" aria-hidden="true">···</span><span className="member-nav-label">More</span>
-        </button>
       </nav>
-
-      {isMoreOpen && (
-        <div className="member-more-overlay">
-          <button className="member-more-scrim" type="button" aria-label="Close more menu" onClick={() => setMoreMenuPath(null)} />
-          <section className="member-more-sheet" id="member-more-menu" role="dialog" aria-modal="true" aria-labelledby="member-more-title">
-            <div className="member-more-grip" aria-hidden="true" />
-            <div className="member-more-heading"><div><span>MORE DESTINATIONS</span><h2 id="member-more-title">Keep moving.</h2></div><button type="button" aria-label="Close menu" onClick={() => setMoreMenuPath(null)}>×</button></div>
-            <div className="member-more-links">{moreItems.map((item) => renderNavLink(item))}</div>
-            <button className="member-signout member-signout--mobile" type="button" onClick={handleSignOut}><span aria-hidden="true">↪</span> Sign out</button>
-          </section>
-        </div>
-      )}
     </div>
   )
 }

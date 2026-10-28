@@ -92,7 +92,7 @@ export function PWAInstallButton({ compact = false }: { compact?: boolean }) {
 
   return (
     <>
-      <button type="button" className={compact ? 'pwa-install-button pwa-install-button--compact' : 'pwa-install-button'} onClick={() => void installApp()} aria-label="Install Kinetiq App">
+      <button type="button" className={compact ? 'pwa-install-button pwa-install-button--compact' : 'pwa-install-button'} onClick={() => void installApp()} aria-label="Install Pacecraft App">
         <span aria-hidden="true">↓</span>
         <span>Install App</span>
       </button>
@@ -100,15 +100,15 @@ export function PWAInstallButton({ compact = false }: { compact?: boolean }) {
         <div className="pwa-modal-backdrop" role="presentation" onMouseDown={closeHelp}>
           <section className="pwa-modal" role="dialog" aria-modal="true" aria-labelledby="pwa-install-title" onMouseDown={(event) => event.stopPropagation()}>
             <div className="pwa-modal__icon" aria-hidden="true">↓</div>
-            <h2 id="pwa-install-title">Install Kinetiq App</h2>
-            <p>Get faster access to Kinetiq directly from your device.</p>
+            <h2 id="pwa-install-title">Install Pacecraft App</h2>
+            <p>Get faster access to Pacecraft directly from your device.</p>
             <ol>
               {platform === 'ios' && <li>Tap the <strong>Share</strong> button in Safari.</li>}
               {platform === 'ios' && <li>Choose <strong>Add to Home Screen</strong>, then confirm.</li>}
               {platform === 'android' && <li>Open your browser menu.</li>}
               {platform === 'android' && <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>}
               {platform === 'desktop' && <li>Select the <strong>Install</strong> icon in your browser address bar.</li>}
-              {platform === 'desktop' && <li>If it is not visible, open the browser menu and choose <strong>Install Kinetiq</strong>.</li>}
+              {platform === 'desktop' && <li>If it is not visible, open the browser menu and choose <strong>Install Pacecraft</strong>.</li>}
             </ol>
             {!nativeInstallAvailable && <p className="pwa-modal__note">Your browser does not offer a direct install prompt right now, so use the steps above.</p>}
             <button type="button" className="pwa-modal__close" onClick={closeHelp}>Close</button>
@@ -129,7 +129,7 @@ export function PWAInstallCard() {
         <div className="pwa-install-card__copy">
           <div className="pwa-install-card__icon" aria-hidden="true">↓</div>
           <div>
-            <h2 id="pwa-card-title">Keep Kinetiq close</h2>
+            <h2 id="pwa-card-title">Keep Pacecraft close</h2>
             <p>Add the workspace to your home screen for quick, direct access.</p>
           </div>
         </div>
@@ -139,14 +139,14 @@ export function PWAInstallCard() {
         <div className="pwa-modal-backdrop" role="presentation" onMouseDown={closeHelp}>
           <section className="pwa-modal" role="dialog" aria-modal="true" aria-labelledby="pwa-card-modal-title" onMouseDown={(event) => event.stopPropagation()}>
             <div className="pwa-modal__icon" aria-hidden="true">↓</div>
-            <h2 id="pwa-card-modal-title">Install Kinetiq App</h2>
-            <p>Get faster access to Kinetiq directly from your device.</p>
+            <h2 id="pwa-card-modal-title">Install Pacecraft App</h2>
+            <p>Get faster access to Pacecraft directly from your device.</p>
             <ol>
               {platform === 'ios' && <li>Tap <strong>Share</strong> in Safari, then choose <strong>Add to Home Screen</strong>.</li>}
               {platform === 'android' && <li>Open the browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>}
               {platform === 'desktop' && <li>Use the <strong>Install</strong> icon in the address bar or browser menu.</li>}
             </ol>
-            {!nativeInstallAvailable && <p className="pwa-modal__note">The browser install prompt is not available yet. You can still install Kinetiq using these instructions.</p>}
+            {!nativeInstallAvailable && <p className="pwa-modal__note">The browser install prompt is not available yet. You can still install Pacecraft using these instructions.</p>}
             <button type="button" className="pwa-modal__close" onClick={closeHelp}>Close</button>
           </section>
         </div>
@@ -172,7 +172,7 @@ export function OfflineStatus() {
   if (!offline) return null
   return (
     <div className="pwa-offline-banner" role="status">
-      <strong>You are offline.</strong> Kinetiq is showing the app shell only. Do not submit payments or other actions until your connection returns.
+      <strong>You are offline.</strong> Pacecraft is showing the app shell only. Do not submit payments or other actions until your connection returns.
     </div>
   )
 }
@@ -225,7 +225,7 @@ export function AppUpdatePrompt() {
 
   return (
     <div className="pwa-update-banner" role="status">
-      <span><strong>New version available.</strong> Refresh to use the latest Kinetiq updates.</span>
+      <span><strong>New version available.</strong> Refresh to use the latest Pacecraft updates.</span>
       <button type="button" onClick={() => waitingWorker?.postMessage({ type: 'SKIP_WAITING' })}>Reload</button>
     </div>
   )

@@ -102,7 +102,7 @@ export default function Settings({ setIsAuthenticated }: { setIsAuthenticated: (
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
       const anchor = document.createElement('a')
       anchor.href = url
-      anchor.download = 'Kinetiq_Certificate.pdf'
+      anchor.download = 'Pacecraft_Certificate.pdf'
       document.body.appendChild(anchor)
       anchor.click()
       anchor.remove()

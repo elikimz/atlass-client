@@ -86,7 +86,7 @@ function getRegistrationError(error: unknown): string {
 }
 
 function BrandMark() {
-  return <img className="auth-brand-mark" src="/assets/kinetiq-mark.svg" alt="" />
+  return <img className="auth-brand-mark" src="/assets/pacecraft-mark.png" alt="" />
 }
 
 export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () => Promise<void> }) {
@@ -247,13 +247,13 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
 
   return (
     <main className="auth-scene">
-      <section className="auth-showcase" aria-label="About Kinetiq">
-        <Link className="auth-showcase-brand" to="/" aria-label="Kinetiq sign in"><BrandMark /><span>Kinetiq</span></Link>
+      <section className="auth-showcase" aria-label="About Pacecraft">
+        <Link className="auth-showcase-brand" to="/" aria-label="Pacecraft sign in"><BrandMark /><span>Pacecraft</span></Link>
         <div className="auth-showcase-copy">
           <span className="auth-kicker"><span className="auth-kicker-dot" /> A workspace built around your momentum</span>
           <h1>Make room<br />for your next<br /><em>big move.</em></h1>
           <p>Learn a skill. Take on meaningful tasks. See your progress add up—all from one focused workspace.</p>
-          <div className="auth-journey-steps" aria-label="How Kinetiq works">
+          <div className="auth-journey-steps" aria-label="How Pacecraft works">
             <div className="auth-journey-step"><span>01</span><strong>Learn a skill</strong><small>Practice with a clear path.</small></div>
             <div className="auth-journey-step"><span>02</span><strong>Choose real work</strong><small>Browse tasks when ready.</small></div>
             <div className="auth-journey-step"><span>03</span><strong>Track your progress</strong><small>Keep activity and earnings visible.</small></div>
@@ -263,7 +263,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
       </section>
 
       <section className="auth-workspace">
-        <Link className="auth-mobile-brand" to="/" aria-label="Kinetiq sign in"><BrandMark /><span>Kinetiq</span></Link>
+        <Link className="auth-mobile-brand" to="/" aria-label="Pacecraft sign in"><BrandMark /><span>Pacecraft</span></Link>
         <div className="auth-form-card">
           <div className="auth-mode-switch" role="tablist" aria-label="Account access">
             <button type="button" role="tab" aria-selected={!isRegistering && recoveryStage === 0} className={!isRegistering && recoveryStage === 0 ? 'is-active' : ''} onClick={() => changeMode(false)}>Sign in</button>

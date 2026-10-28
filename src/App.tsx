@@ -31,6 +31,7 @@ const MpesaPayment = lazy(() => import('./pages/MpesaPayment'))
 const PaymentMethodMaintenance = lazy(() => import('./pages/PaymentMethodMaintenance'))
 const Placeholder = lazy(() => import('./pages/Placeholder'))
 const PaymentHistory = lazy(() => import('./pages/PaymentHistory'))
+const More = lazy(() => import('./pages/More'))
 import Layout from './components/Layout'
 import AdminLayout from './components/AdminLayout'
 import { AppUpdatePrompt, OfflineStatus } from './components/PWAInstall'
@@ -106,8 +107,8 @@ function AppContent() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--bg-main)' }}>
         <div className="loading-container">
           <div className="pulse-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <img src="/assets/kinetiq-mark.svg" alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '12px' }} />
-            <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)' }}>Kinetiq</span>
+            <img src="/assets/pacecraft-mark.png" alt="" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+            <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-heading)' }}>Pacecraft</span>
           </div>
           <div className="loading-bar-bg">
             <div className="loading-bar-fill"></div>
@@ -145,6 +146,7 @@ function AppContent() {
               <Route path="/payments/payout" element={<WithdrawFunds />} />
               <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
               <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
+              <Route path="/more" element={<More isAdmin />} />
             </Route>
           <Route element={<AdminLayout setIsAuthenticated={checkAuth} />}>
             <Route path="/admin" element={<AdminDashboard />} />
@@ -189,6 +191,7 @@ function AppContent() {
             <Route path="/payments/periods" element={<Placeholder title="Earning Periods" />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
+            <Route path="/more" element={<More />} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Route>
         ) : (
