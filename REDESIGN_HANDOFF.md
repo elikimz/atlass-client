@@ -8,7 +8,7 @@
 
 **Published branch:** `origin/main`
 
-**Publication:** The push was verified at `22521f1`. The downstream hosting deployment status was not independently checked.
+**Publication:** Implementation commit `22521f1` and handoff follow-up `9d16995` were pushed to `origin/main`; the remote head was verified. Downstream hosting deployment status was not independently checked.
 
 ## What changed
 
@@ -16,7 +16,7 @@ The prior light lavender/white palette is replaced with a dark navy glass system
 
 The theme is applied to public sign-in/register/recovery, the member workspace, the separate admin shell and page surfaces, task-player and referral-network styles, PWA banners, and shared forms, tables, dialogs, badges, and controls. Existing route structure, authentication, API calls, financial actions, and product copy are preserved; the reference's unrelated stock/payment content is not copied into Pacecraft.
 
-New non-destructive gradient wordmark and dark-navy launcher icon variants are wired into the app, browser metadata, manifest, install prompt, and versioned service-worker shell. The former vivid assets remain untouched.
+New non-destructive gradient wordmark and dark-navy launcher icon variants are wired into the app, browser metadata, manifest, install prompt, and versioned service-worker shell. The original source artwork remains untouched; unused interim palette variants are not included.
 
 ## Validation
 
