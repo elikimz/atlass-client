@@ -35,7 +35,6 @@ export default function TaskPlayer() {
   const [secondsLeft, setSecondsLeft] = useState(0)
   const [sessionReady, setSessionReady] = useState(false)
   const [sessionError, setSessionError] = useState('')
-  const [memberAttestation, setMemberAttestation] = useState(false)
   const [completeError, setCompleteError] = useState('')
   const [accepted, setAccepted] = useState(false)
   const startedFor = useRef<number | null>(null)
@@ -62,6 +61,18 @@ export default function TaskPlayer() {
   })
   const taskIdForSession = task?.id
   const startTaskSession = startSession.mutate
+
+  const youtubeEmbedUrl = (url: string) => {
+    try {
+      const parsed = new URL(url)
+      const videoId = parsed.hostname.includes('youtu.be')
+        ? parsed.pathname.slice(1).split('/')[0]
+        : parsed.searchParams.get('v') || parsed.pathname.match(/\/embed\/([^/]+)/)?.[1]
+      return videoId ? `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1` : null
+    } catch {
+      return null
+    }
+  }
 
   useEffect(() => {
     if (taskIdForSession !== undefined && startedFor.current !== taskIdForSession) {
@@ -104,8 +115,11 @@ export default function TaskPlayer() {
   if (taskQuery.isError) return <section className="member-page-state member-page-state--error" role="alert"><h2>Task details are unavailable.</h2><p>No completion or reward was submitted.</p><button className="member-button member-button--primary" onClick={() => void taskQuery.refetch()}>Retry</button><Link className="member-inline-route" to="/tasks">Back to queue</Link></section>
   if (!task) return <section className="member-page-state" role="status"><h2>Task not found in your current queue.</h2><p>The task may no longer be eligible for your account.</p><Link className="member-button member-button--primary" to="/tasks">Return to task queue</Link></section>
 
-  const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(task.video_url || '')
-  const canSubmit = sessionReady && secondsLeft === 0 && memberAttestation && !completeTask.isPending && !accepted
+  const youtubeUrl = task.video_url ? youtubeEmbedUrl(task.video_url) : null
+  const canSubmit = sessionReady && secondsLeft === 0 && !completeTask.isPending && !accepted
+  const autoSubmit = () => {
+    if (canSubmit) completeTask.mutate()
+  }
 
   return (
     <main className="task-session-page">
@@ -115,13 +129,13 @@ export default function TaskPlayer() {
       <div className="task-session-layout">
         <section className="task-session-main" aria-label="Task media and criteria">
           <div className="task-media-frame">
-            {task.video_url ? isYouTube ? (
-              <div className="task-media-external"><span className="task-media-stamp">EXTERNAL MEDIA</span><h2>Open the task reference</h2><p>We cannot verify playback or viewing on another site.</p><a href={task.video_url} target="_blank" rel="noreferrer" className="member-button member-button--primary">Open media in a new tab ↗</a></div>
-            ) : (
-              <video controls src={task.video_url} aria-label={`${task.title} media`} />
-            ) : <div className="task-media-external"><span className="task-media-stamp">NO MEDIA LINK</span><h2>Review the written criteria</h2><p>No media URL was supplied by the task service.</p></div>}
+            {youtubeUrl ? (
+              <iframe src={youtubeUrl} title={`${task.title} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+            ) : task.video_url ? (
+              <video controls playsInline src={task.video_url} aria-label={`${task.title} video`} onEnded={autoSubmit} />
+            ) : <div className="task-media-external"><span className="task-media-stamp">NO VIDEO</span><h2>Video unavailable</h2><p>This task has no playable video. Please return to the task queue.</p></div>}
           </div>
-          <section className="task-criteria-panel"><span className="member-eyebrow">SUBMISSION BASIS</span><h2>What the service will record</h2><p>Submitting asks the account service to accept this task. The service checks your plan, task eligibility, daily limit, duplicate state and session elapsed time before posting any reward.</p><p className="task-candid-note">An elapsed session is not proof that a person watched the media. Only submit after you have reviewed the available task materials.</p></section>
+          <section className="task-criteria-panel"><span className="member-eyebrow">WATCH IN THIS PAGE</span><h2>Watch the video, then submit</h2><p>Keep the video open here. After 10 seconds, the submit button unlocks. Uploaded videos submit automatically when playback ends; embedded videos can be submitted with the button.</p></section>
         </section>
 
         <aside className="task-session-rail" aria-label="Task session status">
@@ -130,9 +144,8 @@ export default function TaskPlayer() {
           <p>{startSession.isPending ? 'Recording your session start…' : !sessionReady ? 'Waiting for the task service' : secondsLeft > 0 ? 'Minimum elapsed session in progress' : 'Minimum elapsed time reached'}</p>
           {sessionError && <div className="member-notice member-notice--error" role="alert">{sessionError}<button type="button" className="task-session-retry" onClick={() => task && startSession.mutate(task.id)} disabled={startSession.isPending}>Retry session start</button></div>}
           <div className="task-session-reward"><small>CATALOG REWARD</small><strong>{formatCash(task.reward_amount)}</strong><span>Credited only if accepted by the server.</span></div>
-          <label className="task-attestation"><input type="checkbox" checked={memberAttestation} onChange={(event) => setMemberAttestation(event.target.checked)} disabled={!sessionReady || accepted} /><span>I have reviewed the task criteria and available media.</span></label>
           {completeError && <p className="member-notice member-notice--error" role="alert">{completeError}</p>}
-          {accepted ? <div className="member-notice member-notice--success" role="status">Task accepted by the service. Wallet and activity records are refreshing.</div> : <button className="member-button member-button--primary task-submit-button" type="button" disabled={!canSubmit} onClick={() => completeTask.mutate()}>{completeTask.isPending ? 'Submitting…' : secondsLeft > 0 ? `Wait ${secondsLeft}s` : 'Submit for server acceptance'}</button>}
+          {accepted ? <div className="member-notice member-notice--success" role="status">Task accepted by the service. Wallet and activity records are refreshing.</div> : <button className="member-button member-button--primary task-submit-button" type="button" disabled={!canSubmit} onClick={() => completeTask.mutate()}>{completeTask.isPending ? 'Submitting…' : secondsLeft > 0 ? `Watch ${secondsLeft}s more` : 'Submit task'}</button>}
           <span className="task-session-disclaimer">No reward is shown as paid until confirmed by your account record.</span>
         </aside>
       </div>
