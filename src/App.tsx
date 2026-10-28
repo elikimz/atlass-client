@@ -28,7 +28,6 @@ const WithdrawFunds = lazy(() => import('./pages/WithdrawFunds'))
 const WithdrawalAccounts = lazy(() => import('./pages/WithdrawalAccounts'))
 const Recharge = lazy(() => import('./pages/Recharge'))
 const MpesaPayment = lazy(() => import('./pages/MpesaPayment'))
-const PaymentMethodMaintenance = lazy(() => import('./pages/PaymentMethodMaintenance'))
 const Placeholder = lazy(() => import('./pages/Placeholder'))
 const PaymentHistory = lazy(() => import('./pages/PaymentHistory'))
 const More = lazy(() => import('./pages/More'))
@@ -142,7 +141,6 @@ function AppContent() {
               <Route path="/payments/history" element={<PaymentHistory />} />
               <Route path="/payments/recharge" element={<Recharge />} />
               <Route path="/payments/mpesa" element={<MpesaPayment />} />
-              <Route path="/payments/maintenance/:method" element={<PaymentMethodMaintenance />} />
               <Route path="/payments/payout" element={<WithdrawFunds />} />
               <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
               <Route path="/settings" element={<Settings setIsAuthenticated={setAuthenticationState} />} />
@@ -180,7 +178,6 @@ function AppContent() {
             <Route path="/payments/history" element={<PaymentHistory />} />
             <Route path="/payments/recharge" element={<Recharge />} />
             <Route path="/payments/mpesa" element={<MpesaPayment />} />
-            <Route path="/payments/maintenance/:method" element={<PaymentMethodMaintenance />} />
             <Route path="/payments/payout" element={<WithdrawFunds />} />
             <Route path="/withdrawal-accounts" element={<WithdrawalAccounts />} />
             <Route path="/payments/withdrawal" element={<Placeholder title="Withdrawal Accounts" />} />

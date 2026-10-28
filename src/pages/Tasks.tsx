@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import { formatCash } from '../services/money'
 
 type Task = { id: number; title: string; description?: string; video_url?: string; reward_amount: number; status: string }
 type Summary = { active_tasks?: number; completed_tasks?: number; pending_videos?: number }
-const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
+const money = (value: number) => formatCash(value)
 
 export default function Tasks() {
   const available = useQuery({ queryKey: queryKeys.tasks.available, queryFn: async () => (await api.get<Task[]>('/tasks/available')).data, staleTime: 30000 })

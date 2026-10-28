@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import { formatCash } from '../services/money'
 import { PWAInstallCard } from '../components/PWAInstall'
 
 type EarningsPoint = { day: string; value: number }
@@ -28,11 +29,9 @@ type Summary = {
 
 type Referrals = { total_invites?: number; active_invites?: number; earnings?: number }
 
-const money = (value?: number) => Number.isFinite(value)
-  ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value as number)
-  : '—'
+const money = (value?: number) => formatCash(value)
 
-const shortMoney = (value: number) => `$${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)}`
+const shortMoney = (value: number) => formatCash(value, 1)
 
 function EarningsChart({ points }: { points: EarningsPoint[] }) {
   const safePoints = points.filter((point) => point && typeof point.day === 'string' && Number.isFinite(point.value) && point.value >= 0)

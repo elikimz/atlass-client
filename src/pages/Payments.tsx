@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import { formatCash } from '../services/money'
 
 type User = { deposit_wallet_balance?: number; withdrawal_wallet_balance?: number }
 type Summary = {
@@ -25,9 +26,7 @@ type PaymentRecord = {
   period?: string | null
 }
 
-const money = (value?: number) => Number.isFinite(value)
-  ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value as number)
-  : '—'
+const money = (value?: number) => formatCash(value)
 
 function statusLabel(payment: PaymentRecord) {
   const status = (payment.status || '').toLowerCase()

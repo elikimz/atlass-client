@@ -24,6 +24,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../services/api'
+import { formatCash } from '../services/money'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -152,7 +153,7 @@ export default function MpesaPayment() {
 
       if (httpStatus === 503) {
         // PesaFlux provider error or timeout
-        errorMsg = typeof detail === 'string' ? detail : 'M-Pesa payment is temporarily unavailable. Please try again later or use Crypto (USDT) to recharge.'
+        errorMsg = typeof detail === 'string' ? detail : 'M-Pesa payment is temporarily unavailable. Please try again later.'
       } else if (httpStatus === 403) {
         // Account not verified or auth issue from PesaFlux
         errorMsg = typeof detail === 'string' ? detail : 'M-Pesa payment is not available. Please contact support.'
@@ -234,7 +235,7 @@ export default function MpesaPayment() {
     ? Math.round(plan.price * 130)
     : Math.round((rechargeAmount || 0) * 130)
 
-  const displayUSD = plan ? plan.price : (rechargeAmount || 0)
+  const displayCash = plan ? plan.price : (rechargeAmount || 0)
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -288,7 +289,7 @@ export default function MpesaPayment() {
                 <div style={{ fontSize: '22px', fontWeight: 800, color: '#00AC4F' }}>
                   KES {displayAmount.toLocaleString()}
                 </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>≈ ${displayUSD.toFixed(2)} USD</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>≈ {formatCash(displayCash)}</div>
               </div>
             </div>
             <div style={{
@@ -310,7 +311,7 @@ export default function MpesaPayment() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Recharge Amount</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-heading)' }}>${displayUSD.toFixed(2)} USD</div>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-heading)' }}>{formatCash(displayCash)}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>KES Equivalent</div>
@@ -577,7 +578,7 @@ export default function MpesaPayment() {
               Reference: <strong style={{ fontFamily: 'monospace' }}>{initiateData.reference}</strong>
             </div>
             <div style={{ fontSize: '12px', color: '#FFD27A', marginTop: '4px' }}>
-              Amount: <strong>KES {initiateData.amount_kes.toLocaleString()} (${initiateData.amount_usd.toFixed(2)})</strong>
+              Amount: <strong>KES {initiateData.amount_kes.toLocaleString()} · {formatCash(initiateData.amount_usd)}</strong>
             </div>
           </div>
           <button
@@ -615,7 +616,7 @@ export default function MpesaPayment() {
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
             {isRechargeMode
-              ? `Your account has been recharged with $${displayUSD.toFixed(2)}.`
+              ? `Your account has been recharged with ${formatCash(displayCash)}.`
               : `Your ${statusData?.plan_name || plan?.name || 'plan'} has been activated.`
             }
           </p>
@@ -639,7 +640,7 @@ export default function MpesaPayment() {
               Reference: <strong style={{ fontFamily: 'monospace' }}>{statusData?.reference}</strong>
             </div>
             <div style={{ fontSize: '12px', color: '#72E0AA', marginTop: '4px' }}>
-              Amount: <strong>${statusData?.amount_usd?.toFixed(2) || '0.00'}</strong>
+              Amount: <strong>{formatCash(statusData?.amount_usd)}</strong>
             </div>
           </div>
 

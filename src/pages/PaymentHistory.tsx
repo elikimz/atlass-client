@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import { formatCash } from '../services/money'
 
 type Payment = {
   id: number
@@ -42,7 +43,7 @@ const statusTone = (status: string) => {
   }
 }
 
-const money = (value: number) => Number.isFinite(value) ? `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'
+const money = (value: number) => formatCash(value)
 
 export default function PaymentHistory() {
   const navigate = useNavigate()

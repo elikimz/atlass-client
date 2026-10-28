@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
+import { formatCash } from '../services/money'
 import './TaskPlayer.css'
 
 type TaskData = {
@@ -128,7 +129,7 @@ export default function TaskPlayer() {
           <div className={`task-session-clock${sessionReady && secondsLeft === 0 ? ' is-ready' : ''}`} role="status">{!sessionReady ? '—:—' : `00:${String(secondsLeft).padStart(2, '0')}`}</div>
           <p>{startSession.isPending ? 'Recording your session start…' : !sessionReady ? 'Waiting for the task service' : secondsLeft > 0 ? 'Minimum elapsed session in progress' : 'Minimum elapsed time reached'}</p>
           {sessionError && <div className="member-notice member-notice--error" role="alert">{sessionError}<button type="button" className="task-session-retry" onClick={() => task && startSession.mutate(task.id)} disabled={startSession.isPending}>Retry session start</button></div>}
-          <div className="task-session-reward"><small>CATALOG REWARD</small><strong>${Number(task.reward_amount).toFixed(2)}</strong><span>Credited only if accepted by the server.</span></div>
+          <div className="task-session-reward"><small>CATALOG REWARD</small><strong>{formatCash(task.reward_amount)}</strong><span>Credited only if accepted by the server.</span></div>
           <label className="task-attestation"><input type="checkbox" checked={memberAttestation} onChange={(event) => setMemberAttestation(event.target.checked)} disabled={!sessionReady || accepted} /><span>I have reviewed the task criteria and available media.</span></label>
           {completeError && <p className="member-notice member-notice--error" role="alert">{completeError}</p>}
           {accepted ? <div className="member-notice member-notice--success" role="status">Task accepted by the service. Wallet and activity records are refreshing.</div> : <button className="member-button member-button--primary task-submit-button" type="button" disabled={!canSubmit} onClick={() => completeTask.mutate()}>{completeTask.isPending ? 'Submitting…' : secondsLeft > 0 ? `Wait ${secondsLeft}s` : 'Submit for server acceptance'}</button>}
