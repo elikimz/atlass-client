@@ -7,6 +7,7 @@ import './member-redesign.css'
 import './auth.css'
 import App from './App.tsx'
 import './neon-glass.css'
+import './pages/Payments.css'
 import { queryClient } from './services/queryClient'
 
 if ('serviceWorker' in navigator) {

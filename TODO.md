@@ -8,16 +8,17 @@
 ## [x] Apply the visual language to existing PACECRAFT routes and shared components
 - Keep the product's real pages and features; apply the design to login/registration, member dashboard, tasks and task detail, training, plans/referrals, payments, settings, admin/team/user management, notifications, forms, tables, dropdowns, navigation, modals, and other existing shared components.
 - Use stronger glass effects for navigation, dashboard panels, overlays, and floating controls; keep dense tables, task lists, and forms sufficiently opaque and legible.
+- Wallet hierarchy: keep deposit and withdrawal balances as the focal point, pair them with compact contextual actions, place earnings and recent transactions beneath, and avoid duplicate oversized quick-action cards while keeping payment-history and payout-account routes available.
 - Preserve existing authentication, API calls, routing, data structures, and business actions.
 
 ## [ ] Complete responsive and accessible verification across all route families
 - The layout must work on desktop, laptop, tablet, and mobile; smaller screens rearrange existing content logically and do not force the desktop reference composition.
 - Text remains readable on translucent surfaces; inputs, focus indicators, disabled/error/success states, keyboard navigation, and reduced-motion preferences remain usable.
 - Decorative spheres/rings use lightweight CSS/SVG where practical; effects do not cause horizontal overflow or block controls.
-- Evidence so far: local auth preview rendered at 1280×900 and 390×844 with no horizontal overflow. Open: tablet-width check and authenticated, API-populated member/admin routes in staging.
+- Evidence so far: local auth preview rendered at 1280×900 and 390×844 with no horizontal overflow; wallet preview rendered at 1440×1100 and 390×844 using synthetic balances. Open: tablet-width check and authenticated, API-populated member/admin routes in staging.
 
 ## [ ] Complete representative authenticated workflow review before production release
 - Confirm existing primary member and admin workflows remain present and operable with representative staging data; preserve auth, API, route, data, and business-action behavior.
-- Build and source checks pass: `npm run build` passes; all 8 active CSS files parse; no invalid gradient/background-color assignments or retired palette literals remain; PWA icon references resolve; `git diff --check` passes.
+- Build and source checks pass: `npm run build` passes; Vite parses all 9 active CSS files; no invalid gradient/background-color assignments or retired palette literals remain; PWA icon references resolve; `git diff --check` passes.
 - `npm run lint` reports 42 errors and 5 warnings, the same totals as the captured `main` baseline; changed TypeScript files have no lint findings.
-- The user approved the push to `main`; implementation commit `22521f1` was pushed and the remote head was verified. Hosting deployment status has not been checked. Keep the authenticated staging review open before treating all route families as fully verified.
+- The user explicitly authorized the wallet refinement to be pushed to `main`. Hosting deployment status has not been checked. Keep the authenticated staging review open before treating all route families as fully verified.

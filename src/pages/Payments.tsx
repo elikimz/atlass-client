@@ -63,6 +63,8 @@ function BalanceCard({
   description,
   action,
   to,
+  secondaryAction,
+  secondaryTo,
   onRetry,
 }: {
   kind: 'deposit' | 'withdrawal'
@@ -73,16 +75,24 @@ function BalanceCard({
   description: string
   action: string
   to: string
+  secondaryAction?: string
+  secondaryTo?: string
   onRetry: () => void
 }) {
   return (
     <article className={`wallet-balance-card wallet-balance-card--${kind}`}>
-      <div className="wallet-balance-card-top"><span className="wallet-balance-symbol" aria-hidden="true">{kind === 'deposit' ? '＋' : '↗'}</span><span className="wallet-balance-classification">{kind === 'deposit' ? 'ACCOUNT 01' : 'ACCOUNT 02'}</span></div>
-      <div className="wallet-balance-label"><span>{title}</span><small>{kind === 'deposit' ? 'PLAN & DEPOSIT BALANCE' : 'CASHABLE EARNINGS'}</small></div>
+      <div className="wallet-balance-card-top">
+        <span className="wallet-balance-symbol" aria-hidden="true">{kind === 'deposit' ? '＋' : '↗'}</span>
+        <span className="wallet-balance-classification">{kind === 'deposit' ? 'FUNDING BALANCE' : 'CASHABLE EARNINGS'}</span>
+      </div>
+      <div className="wallet-balance-label"><span>{title}</span><small>{kind === 'deposit' ? 'PLAN & DEPOSIT BALANCE' : 'AVAILABLE FOR PAYOUT'}</small></div>
       <strong className="wallet-balance-value">{error ? '—' : loading ? 'Loading…' : money(value)}</strong>
       <p>{description}</p>
-      {error && <button className="wallet-retry-link" type="button" onClick={onRetry}>Retry balance</button>}
-      <Link className="wallet-balance-action" to={to}>{action}<span aria-hidden="true">→</span></Link>
+      <footer className="wallet-balance-footer">
+        <Link className="wallet-balance-action" to={to}>{action}<span aria-hidden="true">→</span></Link>
+        {secondaryAction && secondaryTo && <Link className="wallet-balance-secondary" to={secondaryTo}>{secondaryAction}</Link>}
+        {error && <button className="wallet-retry-link" type="button" onClick={onRetry}>Retry balance</button>}
+      </footer>
     </article>
   )
 }
@@ -123,8 +133,11 @@ export default function Payments() {
   return (
     <div className="wallet-page">
       <header className="wallet-page-heading">
-        <div><span className="member-eyebrow">PACECRAFT / MONEY DESK</span><h2>Your money, clearly split.</h2><p>Deposit funds and cashable earnings stay in separate account balances.</p></div>
-        <Link className="wallet-heading-link" to="/payments/history">Payment activity <span aria-hidden="true">↗</span></Link>
+        <div>
+          <span className="member-eyebrow">PACECRAFT / MONEY DESK</span>
+          <h2>Wallet</h2>
+          <p>Balances, earnings, and payment activity—clearly separated.</p>
+        </div>
       </header>
 
       <section className="wallet-balance-grid" aria-label="Wallet balances">
@@ -134,7 +147,7 @@ export default function Payments() {
           value={user?.deposit_wallet_balance}
           loading={userQuery.isLoading}
           error={userQuery.isError}
-          description="Used for plan purchases. A new deposit is added only after administrator approval."
+          description="For plan purchases. Deposits credit after administrator approval."
           action="Add funds"
           to="/payments/recharge"
           onRetry={() => void userQuery.refetch()}
@@ -145,33 +158,38 @@ export default function Payments() {
           value={user?.withdrawal_wallet_balance}
           loading={userQuery.isLoading}
           error={userQuery.isError}
-          description="Cashable earnings. A payout request is not complete until the service marks it paid."
+          description="Cashable earnings. A payout is complete when the service marks it paid."
           action="Request payout"
           to="/payments/payout"
+          secondaryAction="Payout accounts"
+          secondaryTo="/withdrawal-accounts"
           onRetry={() => void userQuery.refetch()}
         />
       </section>
 
-      <section className="wallet-action-section" aria-label="Wallet actions">
-        <div className="wallet-section-title"><div><span className="member-eyebrow">QUICK ROUTES / 01</span><h3>What would you like to do?</h3></div></div>
-        <div className="wallet-action-grid">
-          <Link className="wallet-action-card" to="/payments/recharge"><span className="wallet-action-icon" aria-hidden="true">＋</span><span><strong>Add funds</strong><small>Start a deposit request</small></span><i aria-hidden="true">→</i></Link>
-          <Link className="wallet-action-card" to="/payments/payout"><span className="wallet-action-icon" aria-hidden="true">↗</span><span><strong>Request payout</strong><small>Review eligibility and submit</small></span><i aria-hidden="true">→</i></Link>
-          <Link className="wallet-action-card" to="/withdrawal-accounts"><span className="wallet-action-icon" aria-hidden="true">◇</span><span><strong>Payout accounts</strong><small>Manage withdrawal destinations</small></span><i aria-hidden="true">→</i></Link>
-          <Link className="wallet-action-card" to="/payments/history"><span className="wallet-action-icon" aria-hidden="true">≡</span><span><strong>All activity</strong><small>Check recorded payment stages</small></span><i aria-hidden="true">→</i></Link>
-        </div>
-      </section>
-
       <section className="wallet-insights-grid" aria-label="Earnings and payment activity">
         <article className="wallet-insight-panel wallet-earnings-panel">
-          <header className="wallet-panel-heading"><div><span className="member-eyebrow">EARNINGS RECORD / 02</span><h3>Progress by period</h3><p>Reported earnings exclude recharges and locked refunds.</p></div><span className="wallet-panel-mark" aria-hidden="true">02</span></header>
+          <header className="wallet-panel-heading">
+            <div>
+              <span className="member-eyebrow">EARNINGS SUMMARY / 01</span>
+              <h3>Earnings by period</h3>
+              <p>Recorded earnings exclude deposits and locked refunds.</p>
+            </div>
+          </header>
           {summaryQuery.isError ? <div className="wallet-query-error" role="alert">Earnings summary is unavailable. <button type="button" onClick={() => void summaryQuery.refetch()}>Retry</button></div> : <div className="wallet-period-strip">{periods.map((period) => <div key={period.label}><span>{period.label}</span><strong>{summaryQuery.isLoading ? '—' : money(period.value)}</strong></div>)}</div>}
           <div className="wallet-breakdown-heading"><span>Recorded sources</span><Link to="/dashboard">Dashboard details →</Link></div>
           {summaryQuery.isError ? <div className="wallet-query-error" role="alert">Earning categories are unavailable. <button type="button" onClick={() => void summaryQuery.refetch()}>Retry sources</button></div> : <dl className="wallet-breakdown-list">{breakdown.map((item) => <div className={item.pending ? 'is-pending' : ''} key={item.label}><dt>{item.label}</dt><dd>{item.source.isLoading ? '—' : money(item.value)}</dd></div>)}</dl>}
         </article>
 
         <article className="wallet-insight-panel wallet-activity-panel">
-          <header className="wallet-panel-heading"><div><span className="member-eyebrow">SERVICE RECORDS / 03</span><h3>Recent payment activity</h3><p>Each stage is shown as recorded by the payment service.</p></div><Link to="/payments/history" aria-label="View all payment activity">All <span aria-hidden="true">↗</span></Link></header>
+          <header className="wallet-panel-heading">
+            <div>
+              <span className="member-eyebrow">PAYMENT ACTIVITY / 02</span>
+              <h3>Recent transactions</h3>
+              <p>Latest deposit and payout requests with their recorded status.</p>
+            </div>
+            <Link to="/payments/history" aria-label="View all payment activity">View all <span aria-hidden="true">↗</span></Link>
+          </header>
           {historyQuery.isLoading ? <p className="wallet-activity-empty" role="status">Loading payment records…</p> : historyQuery.isError ? <div className="wallet-query-error" role="alert">Payment activity is unavailable. <button type="button" onClick={() => void historyQuery.refetch()}>Retry</button></div> : payments.length ? <ul className="wallet-activity-list">{payments.map((payment) => {
             const status = (payment.status || '').toLowerCase()
             return <li key={payment.id}>

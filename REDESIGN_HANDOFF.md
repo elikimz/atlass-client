@@ -8,7 +8,7 @@
 
 **Published branch:** `origin/main`
 
-**Publication:** Implementation commit `22521f1` and handoff follow-up `9d16995` were pushed to `origin/main`; the remote head was verified. Downstream hosting deployment status was not independently checked.
+**Publication:** The base redesign is on `origin/main`. The wallet refinement was pushed to `main` with the user's explicit approval, and the remote head was verified afterward. Downstream hosting deployment status was not independently checked.
 
 ## What changed
 
@@ -16,16 +16,19 @@ The prior light lavender/white palette is replaced with a dark navy glass system
 
 The theme is applied to public sign-in/register/recovery, the member workspace, the separate admin shell and page surfaces, task-player and referral-network styles, PWA banners, and shared forms, tables, dialogs, badges, and controls. Existing route structure, authentication, API calls, financial actions, and product copy are preserved; the reference's unrelated stock/payment content is not copied into Pacecraft.
 
+The wallet now leads with deposit and withdrawal balances paired with compact contextual actions, followed by earnings and recent transactions. The duplicate oversized quick-action row was removed; payment history and payout-account routes remain available, and all queries and payment behavior are unchanged.
+
 New non-destructive gradient wordmark and dark-navy launcher icon variants are wired into the app, browser metadata, manifest, install prompt, and versioned service-worker shell. The original source artwork remains untouched; unused interim palette variants are not included.
 
 ## Validation
 
-- `npm run build` — passes after the final generated assets.
+- `npm run build` — passes after the wallet refinement; Vite parses all 9 active CSS files.
 - `git diff --check` — passes.
-- All 8 active CSS files parse; no invalid gradient/background-color assignments or retired palette literals remain in active CSS/TSX.
+- No invalid gradient/background-color assignments or retired palette literals remain in active CSS/TSX.
 - PWA icon paths resolve, and the local preview loads the new transparent gradient marks.
 - Login rendered at desktop 1280×900 and phone 390×844; the phone layout has no horizontal overflow.
-- `npm run lint` — reports 42 errors and 5 warnings, the same totals as the captured `main` baseline; no findings were reported in the files changed for the palette.
+- Wallet rendered with synthetic data at desktop 1440×1100 and phone 390×844; compact actions and stacked mobile balances were visually checked.
+- `npm run lint` — reports 42 errors and 5 warnings, the same totals as the captured `main` baseline; no findings were reported in the wallet TypeScript or entrypoint files.
 
 ## Verification limits
 
