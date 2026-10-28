@@ -33,7 +33,7 @@ export default function Recharge() {
   const proceed = () => {
     setError('')
     if (!validAmount) {
-      setError('Select one of the available cash amounts to continue.')
+      setError('Select one of the available KSh amounts to continue.')
       return
     }
     navigate('/payments/mpesa', { state: { rechargeAmount: amount } })
@@ -42,11 +42,11 @@ export default function Recharge() {
   return <main className="recharge-page">
     <header className="recharge-header"><button type="button" onClick={() => navigate(-1)} aria-label="Go back">←</button><div><span className="member-eyebrow">WALLET / ADD FUNDS</span><h1>Recharge wallet</h1></div><button type="button" onClick={() => navigate('/payments/history')}>Activity</button></header>
 
-    <section className="recharge-balance"><span className="member-eyebrow">DEPOSIT WALLET · SERVER BALANCE</span><strong>{balance === undefined ? '—' : formatCash(balance)}</strong><small>{userQuery.isError ? 'Balance unavailable; retry your account request.' : userQuery.isFetching ? 'Refreshing account response…' : 'Deposit funds are separate from cashable earnings.'}</small>{userQuery.isError && <button type="button" onClick={() => void userQuery.refetch()}>Retry balance</button>}</section>
+    <section className="recharge-balance"><span className="member-eyebrow">DEPOSIT WALLET · SERVER BALANCE</span><strong>{balance === undefined ? '—' : formatCash(balance)}</strong><small>{userQuery.isError ? 'Balance unavailable; retry your account request.' : userQuery.isFetching ? 'Refreshing account response…' : 'Deposit funds are separate from withdrawable earnings.'}</small>{userQuery.isError && <button type="button" onClick={() => void userQuery.refetch()}>Retry balance</button>}</section>
 
-    <div className="recharge-columns"><section className="recharge-card"><div className="recharge-step">01 / AMOUNT & ROUTE</div><h2>Choose cash amount</h2><p className="recharge-copy">Select the amount to send through M-Pesa. The server applies its final minimum check before starting the payment.</p>
-      <div className="recharge-amounts" role="listbox" aria-label="Cash deposit amount">{AMOUNTS.map((value) => <button type="button" key={value} aria-selected={selectedAmount === value} className={selectedAmount === value ? 'is-selected' : ''} onClick={() => { setSelectedAmount(value); setError('') }}>{formatCash(value, 0)}</button>)}</div>
-      <p className="recharge-minimum">Choose the exact Cash amount you want to send through M-Pesa. No conversion is applied.</p>
+    <div className="recharge-columns"><section className="recharge-card"><div className="recharge-step">01 / AMOUNT & ROUTE</div><h2>Choose KSh amount</h2><p className="recharge-copy">Select the amount to send through M-Pesa. The server applies its final minimum check before starting the payment.</p>
+      <div className="recharge-amounts" role="listbox" aria-label="KSh deposit amount">{AMOUNTS.map((value) => <button type="button" key={value} aria-selected={selectedAmount === value} className={selectedAmount === value ? 'is-selected' : ''} onClick={() => { setSelectedAmount(value); setError('') }}>{formatCash(value, 0)}</button>)}</div>
+      <p className="recharge-minimum">Choose the exact KSh amount you want to send through M-Pesa. No conversion is applied.</p>
       <div className="recharge-methods" role="group" aria-label="Deposit method"><button type="button" className="is-selected" disabled><span className="recharge-method-mark is-persimmon">M</span><span><strong>M-Pesa</strong><small>STK prompt · payment attempt submitted to admin review</small></span><span className="recharge-radio" aria-hidden="true">✓</span></button></div>
       {error && <p className="recharge-error" role="alert">{error}</p>}
       <button type="button" className="member-button member-button--primary recharge-proceed" disabled={!validAmount} onClick={proceed}>Continue to M-Pesa <span aria-hidden="true">→</span></button>

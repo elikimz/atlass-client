@@ -1,5 +1,5 @@
 export function formatCash(value?: number | null, fractionDigits = 2): string {
   return Number.isFinite(value)
-    ? `Cash ${Number(value).toLocaleString('en-US', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits })}`
+    ? `KSh ${Number(value).toLocaleString('en-US', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits })}`
     : '—'
 }

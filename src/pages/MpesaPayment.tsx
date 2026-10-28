@@ -237,7 +237,7 @@ export default function MpesaPayment() {
     ? Math.round(plan.price * 130)
     : Math.round(rechargeAmount || 0)
 
-  const displayCash = plan ? plan.price : (rechargeAmount || 0)
+  const displayKSh = plan ? plan.price : (rechargeAmount || 0)
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -289,9 +289,9 @@ export default function MpesaPayment() {
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Amount</div>
                 <div style={{ fontSize: '22px', fontWeight: 800, color: '#00AC4F' }}>
-                  KES {displayAmount.toLocaleString()}
+                  KSh {displayAmount.toLocaleString()}
                 </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>≈ {formatCash(displayCash)}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>≈ {formatCash(displayKSh)}</div>
               </div>
             </div>
             <div style={{
@@ -312,13 +312,13 @@ export default function MpesaPayment() {
           /* Recharge mode: show recharge amount */
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Cash deposit amount</div>
-              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-heading)' }}>{formatCash(displayCash)}</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>KSh deposit amount</div>
+              <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-heading)' }}>{formatCash(displayKSh)}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>M-Pesa amount</div>
               <div style={{ fontSize: '22px', fontWeight: 800, color: '#00AC4F' }}>
-                KES {displayAmount.toLocaleString()}
+                KSh {displayAmount.toLocaleString()}
               </div>
             </div>
           </div>
@@ -457,7 +457,7 @@ export default function MpesaPayment() {
             ) : (
               <>
                 <span style={{ fontSize: '18px' }}>📱</span>
-                Pay KES {displayAmount.toLocaleString()} via M-Pesa
+                Pay KSh {displayAmount.toLocaleString()} via M-Pesa
               </>
             )}
           </button>
@@ -508,7 +508,7 @@ export default function MpesaPayment() {
             marginBottom: '20px', border: '1px solid rgba(101, 217, 161, 0.34)'
           }}>
             <div style={{ fontSize: '13px', color: '#72E0AA', fontWeight: 600 }}>
-              Amount to pay: <strong>{formatCash(initiateData.amount_cash ?? (isRechargeMode ? rechargeAmount : initiateData.amount_usd), 0)} · KES {initiateData.amount_kes.toLocaleString()}</strong>
+              Amount to pay: <strong>{formatCash(initiateData.amount_cash ?? (isRechargeMode ? rechargeAmount : initiateData.amount_usd), 0)} · KSh {initiateData.amount_kes.toLocaleString()}</strong>
             </div>
           </div>
 
@@ -580,7 +580,7 @@ export default function MpesaPayment() {
               Reference: <strong style={{ fontFamily: 'monospace' }}>{initiateData.reference}</strong>
             </div>
             <div style={{ fontSize: '12px', color: '#FFD27A', marginTop: '4px' }}>
-              Amount: <strong>{formatCash(initiateData.amount_cash ?? (isRechargeMode ? rechargeAmount : initiateData.amount_usd), 0)} · KES {initiateData.amount_kes.toLocaleString()}</strong>
+              Amount: <strong>{formatCash(initiateData.amount_cash ?? (isRechargeMode ? rechargeAmount : initiateData.amount_usd), 0)} · KSh {initiateData.amount_kes.toLocaleString()}</strong>
             </div>
           </div>
           <button
@@ -618,7 +618,7 @@ export default function MpesaPayment() {
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '1.5' }}>
             {isRechargeMode
-              ? `Your account has been recharged with ${formatCash(displayCash)}.`
+              ? `Your account has been recharged with ${formatCash(displayKSh)}.`
               : `Your ${statusData?.plan_name || plan?.name || 'plan'} has been activated.`
             }
           </p>
