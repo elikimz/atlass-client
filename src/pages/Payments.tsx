@@ -136,7 +136,7 @@ export default function Payments() {
         <div>
           <span className="member-eyebrow">PACECRAFT / MONEY DESK</span>
           <h2>Wallet</h2>
-          <p>Balances, earnings, and payment activity—clearly separated.</p>
+          <p>Balances, earnings, and payment activity.</p>
         </div>
       </header>
 
