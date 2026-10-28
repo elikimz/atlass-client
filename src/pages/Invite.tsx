@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 import ReferralNetwork from '../components/ReferralNetwork'
+import { formatCash } from '../services/money'
 
 interface InvitedUser {
   name: string
@@ -38,7 +39,7 @@ interface CommissionHistoryEntry {
 }
 
 const INVITES_PER_PAGE = 10
-const money = (amount: number | null | undefined) => `$${(Number.isFinite(amount) ? Number(amount) : 0).toFixed(2)}`
+const money = (amount: number | null | undefined) => formatCash(amount)
 
 function sourceLabel(source: string) {
   return source.replace(/[_-]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())

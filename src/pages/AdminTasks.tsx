@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
+import { formatCash } from '../services/money'
 
 import toast from 'react-hot-toast'
 
@@ -268,7 +269,7 @@ export default function AdminTasks() {
             </div>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{task.description || 'No description'}</p>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px solid var(--border-main)' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent-primary)' }}>Reward: ${(task.reward_amount || 0).toFixed(2)}</span>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--accent-primary)' }}>Reward: {formatCash(task.reward_amount || 0)}</span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button onClick={() => handleEdit(task)} style={{ padding: '6px 12px', backgroundColor: 'var(--accent-light)', color: 'var(--accent-primary)', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Edit</button>
                 <button onClick={() => handleDelete(task.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#FF8196', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button>

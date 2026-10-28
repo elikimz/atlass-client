@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
+import { formatCash } from '../services/money'
 
 interface ReferralCode {
   id: number
@@ -118,8 +119,8 @@ export default function AdminInvites() {
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-muted)' }}>{code.user_id}</td>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>{code.signups_count}</td>
                   <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>{code.trained_count}</td>
-                  <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>${code.earned_amount.toFixed(2)}</td>
-                  <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>${code.task_rebate_amount.toFixed(2)}</td>
+                  <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>{formatCash(code.earned_amount)}</td>
+                  <td style={{ padding: '12px 16px', fontSize: '14px', color: 'var(--text-main)', textAlign: 'center', fontWeight: 600 }}>{formatCash(code.task_rebate_amount)}</td>
                   <td style={{ padding: '12px 16px', textAlign: 'center' }}><button onClick={() => handleDeleteCode(code.id)} style={{ padding: '6px 12px', backgroundColor: 'rgba(220, 38, 38, 0.1)', color: '#FF8196', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}>Delete</button></td>
                 </tr>
               ))}

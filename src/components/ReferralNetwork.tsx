@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import api from '../services/api'
 import { queryKeys } from '../services/queryClient'
 import './ReferralNetwork.css'
+import { formatCash } from '../services/money'
 
 type TierKey = 'A' | 'B' | 'C'
 
@@ -55,7 +56,7 @@ const TIER_META: Record<TierKey, { label: string; description: string }> = {
 const PAGE_SIZE = 8
 
 function money(value: number) {
-  return `$${value.toFixed(2)}`
+  return formatCash(value)
 }
 
 function date(value: string | null) {

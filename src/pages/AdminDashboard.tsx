@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
+import { formatCash } from '../services/money'
 
 interface DashboardStats {
   total_users: number
@@ -78,8 +79,8 @@ export default function AdminDashboard() {
   const statCards = [
     { label: 'Total members', value: stats.total_users, code: '01' },
     { label: 'Payments awaiting review', value: stats.pending_payments, code: '02' },
-    { label: 'Payouts recorded', value: `$${stats.total_payouts.toLocaleString()}`, code: '03' },
-    { label: 'Deposits recorded', value: `$${stats.total_deposits.toLocaleString()}`, code: '04' },
+    { label: 'Payouts recorded', value: formatCash(stats.total_payouts, 0), code: '03' },
+    { label: 'Deposits recorded', value: formatCash(stats.total_deposits, 0), code: '04' },
   ]
 
   return (

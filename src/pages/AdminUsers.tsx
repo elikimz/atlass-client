@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
 import toast from 'react-hot-toast'
+import { formatCash } from '../services/money'
 
 interface User {
   id: number
@@ -210,8 +211,8 @@ export default function AdminUsers() {
                     </div>
                   ) : (
                     <>
-                      <div>Deposit: ${(user.deposit_wallet_balance || 0).toFixed(2)}</div>
-                      <div>Withdrawal: ${(user.withdrawal_wallet_balance || 0).toFixed(2)}</div>
+                      <div>Deposit: {formatCash(user.deposit_wallet_balance || 0)}</div>
+                      <div>Withdrawal: {formatCash(user.withdrawal_wallet_balance || 0)}</div>
                     </>
                   )}
                 </td>

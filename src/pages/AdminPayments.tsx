@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import api from '../services/api'
+import { formatCash } from '../services/money'
 
 interface Payment {
   id: number
@@ -94,7 +95,7 @@ export default function AdminPayments() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
               <div style={{ padding: '12px', backgroundColor: 'var(--bg-main)', borderRadius: '8px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Amount</div>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>${reviewingPayment.amount.toFixed(2)}</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-heading)' }}>{formatCash(reviewingPayment.amount)}</div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div><div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Method</div><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{reviewingPayment.payment_method}</div></div>
@@ -159,7 +160,7 @@ export default function AdminPayments() {
             {filteredPayments.map((payment) => (
               <tr key={payment.id} style={{ borderBottom: '1px solid var(--border-main)' }}>
                 <td style={{ padding: '16px' }}><div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>{payment.user?.first_name} {payment.user?.last_name}</div><div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{payment.user?.email}</div></td>
-                <td style={{ padding: '16px', fontSize: '14px', fontWeight: 700, color: activeTab === 'deposit' ? '#059669' : '#DC2626' }}>{activeTab === 'deposit' ? '+' : '-'}${payment.amount.toFixed(2)}</td>
+                <td style={{ padding: '16px', fontSize: '14px', fontWeight: 700, color: activeTab === 'deposit' ? '#059669' : '#DC2626' }}>{activeTab === 'deposit' ? '+' : '-'}{formatCash(payment.amount)}</td>
                 <td style={{ padding: '16px' }}><div style={{ fontSize: '14px', color: 'var(--text-main)' }}>{payment.payment_method}</div><div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{payment.network || 'N/A'}</div></td>
                 <td style={{ padding: '16px' }}><span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, backgroundColor: payment.status === 'paid' ? 'rgba(34, 197, 94, 0.1)' : ['pending', 'under_review'].includes(payment.status) ? 'rgba(245, 158, 11, 0.1)' : 'rgba(220, 38, 38, 0.1)', color: payment.status === 'paid' ? '#166534' : ['pending', 'under_review'].includes(payment.status) ? '#80520B' : '#991B1B' }}>{payment.type === 'deposit' && ['pending', 'under_review'].includes(payment.status) ? 'UNDER REVIEW' : payment.status.toUpperCase()}</span></td>
                 <td style={{ padding: '16px', fontSize: '13px', color: 'var(--text-muted)' }}>{new Date(payment.created_at).toLocaleDateString()}</td>
