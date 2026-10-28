@@ -2,11 +2,13 @@
 
 **Reference:** The user-supplied PACECRAFT visual reference in this conversation (912×607 image), applied as the visual direction across the existing site.
 
-**Review branch:** `redesign/pacecraft-vivid-palette`
+**Source branch:** `redesign/pacecraft-vivid-palette`
 
-**Base:** `main` at `0c53cb1` (`docs: record frontend redesign main push`)
+**Implementation commit:** `22521f1` (`feat: apply Pacecraft neon glass reference design`)
 
-**Publication:** This revision is local and uncommitted. It has not been pushed to `main` or deployed.
+**Published branch:** `origin/main`
+
+**Publication:** The push was verified at `22521f1`. The downstream hosting deployment status was not independently checked.
 
 ## What changed
 
@@ -29,4 +31,4 @@ New non-destructive gradient wordmark and dark-navy launcher icon variants are w
 
 This pass visually verified the public auth route at desktop and phone sizes. Member/admin layout coverage was applied through the shared shells and page-surface rules, but authenticated, API-populated member and admin routes were not end-to-end re-tested with production records in this revision. The separate admin experience should receive a representative staging-account visual pass before deployment.
 
-No backend code, API contract, route, permission, mutation, validation rule, or financial action was changed in this revision. The production branch remains unchanged pending explicit approval to publish.
+No backend code, API contract, route, permission, mutation, validation rule, or financial action was changed in this revision. The user authorized publication to `main`; downstream deployment status remains unchecked.
