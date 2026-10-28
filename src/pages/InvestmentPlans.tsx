@@ -170,13 +170,14 @@ export default function InvestmentPlans() {
                     : !hasEnoughBalance ? `Need ${money(shortfall)} more`
                       : plan.name === 'Intern' ? 'Activate free trial'
                         : hasCurrentPlan ? `Upgrade to ${plan.name}` : `Choose ${plan.name}`
+              const isLocked = !canPurchase && !isActive
               return (
-                <article className={`plan-comparison-row${isActive ? ' is-current' : ''}${!canPurchase && !isActive ? ' is-unavailable' : ''}`} key={plan.id}>
+                <article className={`plan-comparison-row plan-tone-${index % 5}${isActive ? ' is-current' : ''}${isLocked ? ' is-unavailable' : ''}`} key={plan.id}>
                   <div className="plan-cell plan-program-cell" data-label="Program"><span className="plan-row-number">{String(index + 1).padStart(2, '0')}</span><div><div className="plan-program-title"><h4>{plan.name}</h4>{isActive && <span className="plan-state-badge">ACTIVE</span>}{plan.name === 'Intern' && !isActive && <span className="plan-trial-badge">FREE TRIAL</span>}</div><p>{plan.description || 'Plan details were not supplied.'}</p></div></div>
                   <div className="plan-cell" data-label="Price"><strong>{money(plan.price)}</strong><small>KSh</small></div>
                   <div className="plan-cell" data-label="Daily activity"><strong>{money(plan.daily_earnings)}</strong><small>{plan.daily_tasks_limit} tasks / day</small></div>
                   <div className="plan-cell" data-label="Term"><strong>{plan.validity_days}</strong><small>days</small></div>
-                  <div className="plan-cell plan-action-cell" data-label="Access"><button className="member-button member-button--primary plan-action-button" type="button" onClick={() => setReviewPlan(plan)} disabled={!canPurchase || actionLoading !== null}>{actionLabel}</button>{!isActive && !isLowerTier && !hasEnoughBalance && <small className="plan-action-note">Deposit Wallet is short by {money(shortfall)}.</small>}{plan.is_upgrade_only && <small className="plan-action-note">Upgrade-only eligibility is set by the catalogue.</small>}</div>
+                  <div className="plan-cell plan-action-cell" data-label="Access"><button className="member-button member-button--primary plan-action-button" type="button" onClick={() => setReviewPlan(plan)} disabled={!canPurchase || actionLoading !== null}><span className="plan-lock" aria-label={isLocked ? 'Plan locked' : 'Plan open'}>{isLocked ? '🔒' : '🔓'}</span>{actionLabel}</button>{!isActive && !isLowerTier && !hasEnoughBalance && <small className="plan-action-note">Deposit Wallet is short by {money(shortfall)}.</small>}{plan.is_upgrade_only && <small className="plan-action-note">Upgrade-only eligibility is set by the catalogue.</small>}</div>
                 </article>
               )
             })}
