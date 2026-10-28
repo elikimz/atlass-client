@@ -7,8 +7,7 @@ import { formatCash } from '../services/money'
 
 type Payment = { id: number; amount: number; type: string; status: string; payment_method: string | null; created_at: string | null; period: string }
 type CurrentUser = { deposit_wallet_balance?: number }
-const MIN_CASH_DEPOSIT = 20
-const AMOUNTS = [20, 50, 100, 150, 200]
+const AMOUNTS = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 5000]
 
 function depositStatus(status: string) {
   if (status === 'pending') return 'Awaiting admin review'
@@ -23,19 +22,18 @@ export default function Recharge() {
   const navigate = useNavigate()
   const userQuery = useQuery({ queryKey: queryKeys.auth.currentUser, queryFn: async () => (await api.get<CurrentUser>('/auth/me')).data, staleTime: 0 })
   const historyQuery = useQuery({ queryKey: queryKeys.payments.history(1, 50), queryFn: async () => (await api.get<Payment[]>('/payments/history', { params: { page: 1, limit: 50 } })).data ?? [], staleTime: 0 })
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(20)
-  const [customAmount, setCustomAmount] = useState('')
+  const [selectedAmount, setSelectedAmount] = useState<number>(AMOUNTS[0])
   const [error, setError] = useState('')
 
   const balance = userQuery.isError ? undefined : userQuery.data?.deposit_wallet_balance
   const payments = (Array.isArray(historyQuery.data) ? historyQuery.data : []).filter((payment) => payment.type === 'deposit').slice(0, 5)
-  const amount = customAmount.trim() ? Number(customAmount) : selectedAmount ?? 0
-  const validAmount = Number.isFinite(amount) && amount >= MIN_CASH_DEPOSIT
+  const amount = selectedAmount
+  const validAmount = AMOUNTS.includes(amount)
 
   const proceed = () => {
     setError('')
     if (!validAmount) {
-      setError(`The minimum deposit is ${formatCash(MIN_CASH_DEPOSIT)}.`)
+      setError('Select one of the available cash amounts to continue.')
       return
     }
     navigate('/payments/mpesa', { state: { rechargeAmount: amount } })
@@ -47,9 +45,8 @@ export default function Recharge() {
     <section className="recharge-balance"><span className="member-eyebrow">DEPOSIT WALLET · SERVER BALANCE</span><strong>{balance === undefined ? '—' : formatCash(balance)}</strong><small>{userQuery.isError ? 'Balance unavailable; retry your account request.' : userQuery.isFetching ? 'Refreshing account response…' : 'Deposit funds are separate from cashable earnings.'}</small>{userQuery.isError && <button type="button" onClick={() => void userQuery.refetch()}>Retry balance</button>}</section>
 
     <div className="recharge-columns"><section className="recharge-card"><div className="recharge-step">01 / AMOUNT & ROUTE</div><h2>Choose cash amount</h2><p className="recharge-copy">Select the amount to send through M-Pesa. The server applies its final minimum check before starting the payment.</p>
-      <div className="recharge-amounts">{AMOUNTS.map((value) => <button type="button" key={value} className={selectedAmount === value && !customAmount ? 'is-selected' : ''} onClick={() => { setSelectedAmount(value); setCustomAmount(''); setError('') }}>{formatCash(value, 0)}</button>)}</div>
-      <label className="recharge-field" htmlFor="recharge-custom-amount"><span>Custom cash amount</span><input id="recharge-custom-amount" type="number" min={MIN_CASH_DEPOSIT} step="0.01" inputMode="decimal" value={customAmount} placeholder="Enter amount" onChange={(event) => { setCustomAmount(event.target.value); setSelectedAmount(null); setError('') }} /></label>
-      <p className="recharge-minimum">Minimum: {formatCash(MIN_CASH_DEPOSIT)}.</p>
+      <div className="recharge-amounts" role="listbox" aria-label="Cash deposit amount">{AMOUNTS.map((value) => <button type="button" key={value} aria-selected={selectedAmount === value} className={selectedAmount === value ? 'is-selected' : ''} onClick={() => { setSelectedAmount(value); setError('') }}>{formatCash(value, 0)}</button>)}</div>
+      <p className="recharge-minimum">Choose the exact Cash amount you want to send through M-Pesa. No conversion is applied.</p>
       <div className="recharge-methods" role="group" aria-label="Deposit method"><button type="button" className="is-selected" disabled><span className="recharge-method-mark is-persimmon">M</span><span><strong>M-Pesa</strong><small>STK prompt · payment attempt submitted to admin review</small></span><span className="recharge-radio" aria-hidden="true">✓</span></button></div>
       {error && <p className="recharge-error" role="alert">{error}</p>}
       <button type="button" className="member-button member-button--primary recharge-proceed" disabled={!validAmount} onClick={proceed}>Continue to M-Pesa <span aria-hidden="true">→</span></button>

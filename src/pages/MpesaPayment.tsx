@@ -42,6 +42,7 @@ interface InitiateResponse {
   transaction_request_id: string
   amount_kes: number
   amount_usd: number
+  amount_cash?: number
   plan_name: string
   message: string
   review_payment_id?: number
@@ -52,6 +53,7 @@ interface StatusResponse {
   status: 'pending' | 'under_review' | 'completed' | 'failed'
   plan_name: string | null
   amount_usd: number
+  amount_cash?: number
   amount_kes?: number
   mpesa_receipt?: string | null
   message?: string
@@ -233,7 +235,7 @@ export default function MpesaPayment() {
 
   const displayAmount = plan
     ? Math.round(plan.price * 130)
-    : Math.round((rechargeAmount || 0) * 130)
+    : Math.round(rechargeAmount || 0)
 
   const displayCash = plan ? plan.price : (rechargeAmount || 0)
 
@@ -310,11 +312,11 @@ export default function MpesaPayment() {
           /* Recharge mode: show recharge amount */
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Recharge Amount</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>Cash deposit amount</div>
               <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-heading)' }}>{formatCash(displayCash)}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>KES Equivalent</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>M-Pesa amount</div>
               <div style={{ fontSize: '22px', fontWeight: 800, color: '#00AC4F' }}>
                 KES {displayAmount.toLocaleString()}
               </div>
@@ -506,7 +508,7 @@ export default function MpesaPayment() {
             marginBottom: '20px', border: '1px solid rgba(101, 217, 161, 0.34)'
           }}>
             <div style={{ fontSize: '13px', color: '#72E0AA', fontWeight: 600 }}>
-              Amount to pay: <strong>KES {initiateData.amount_kes.toLocaleString()}</strong>
+              Amount to pay: <strong>{formatCash(initiateData.amount_cash ?? (isRechargeMode ? rechargeAmount : initiateData.amount_usd), 0)} · KES {initiateData.amount_kes.toLocaleString()}</strong>
             </div>
           </div>
 
@@ -578,7 +580,7 @@ export default function MpesaPayment() {
               Reference: <strong style={{ fontFamily: 'monospace' }}>{initiateData.reference}</strong>
             </div>
             <div style={{ fontSize: '12px', color: '#FFD27A', marginTop: '4px' }}>
-              Amount: <strong>KES {initiateData.amount_kes.toLocaleString()} · {formatCash(initiateData.amount_usd)}</strong>
+              Amount: <strong>{formatCash(initiateData.amount_cash ?? (isRechargeMode ? rechargeAmount : initiateData.amount_usd), 0)} · KES {initiateData.amount_kes.toLocaleString()}</strong>
             </div>
           </div>
           <button
@@ -640,7 +642,7 @@ export default function MpesaPayment() {
               Reference: <strong style={{ fontFamily: 'monospace' }}>{statusData?.reference}</strong>
             </div>
             <div style={{ fontSize: '12px', color: '#72E0AA', marginTop: '4px' }}>
-              Amount: <strong>{formatCash(statusData?.amount_usd)}</strong>
+              Amount: <strong>{formatCash(statusData?.amount_cash ?? (isRechargeMode ? rechargeAmount : statusData?.amount_usd), 0)}</strong>
             </div>
           </div>
 
