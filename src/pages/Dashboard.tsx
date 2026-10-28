@@ -7,7 +7,7 @@ import { formatCash } from '../services/money'
 import { PWAInstallCard } from '../components/PWAInstall'
 
 type EarningsPoint = { day: string; value: number }
-type RecentActivity = { id: number; description: string; amount: string; status: string }
+type RecentActivity = { id: number; description: string; amount: number | string; status: string }
 type Summary = {
   today_earnings?: number
   this_week_earnings?: number
@@ -32,6 +32,11 @@ type Referrals = { total_invites?: number; active_invites?: number; earnings?: n
 const money = (value?: number) => formatCash(value)
 
 const shortMoney = (value: number) => formatCash(value, 1)
+
+const activityMoney = (value: number | string) => {
+  const numericValue = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]+/g, ''))
+  return formatCash(numericValue)
+}
 
 function EarningsChart({ points }: { points: EarningsPoint[] }) {
   const safePoints = points.filter((point) => point && typeof point.day === 'string' && Number.isFinite(point.value) && point.value >= 0)
@@ -135,7 +140,7 @@ export default function Dashboard() {
       <article className="member-panel dashboard-recent-panel">
         <div className="dashboard-overview-heading"><div><span className="member-eyebrow">RECENT TASK ACTIVITY / 04</span><h3>Latest completed work</h3></div><Link to="/tasks">Open tasks →</Link></div>
         {summary.isLoading ? <div className="dashboard-chart-empty" role="status">Loading recent activity…</div> : summary.isError ? <div className="dashboard-chart-error" role="alert">Recent activity is unavailable. <button type="button" onClick={retrySummary}>Retry</button></div> : recentActivity.length ? <ul className="dashboard-activity-list">
-          {recentActivity.map((item) => <li key={item.id}><span className="dashboard-activity-mark" aria-hidden="true">✓</span><span className="dashboard-activity-copy"><strong>{item.description}</strong><small>{item.status}</small></span><span className="dashboard-activity-amount">{item.amount}</span></li>)}
+          {recentActivity.map((item) => <li key={item.id}><span className="dashboard-activity-mark" aria-hidden="true">✓</span><span className="dashboard-activity-copy"><strong>{item.description}</strong><small>{item.status}</small></span><span className="dashboard-activity-amount">{activityMoney(item.amount)}</span></li>)}
         </ul> : <p className="dashboard-no-activity">No completed task activity has been returned yet.</p>}
       </article>
     </section>
