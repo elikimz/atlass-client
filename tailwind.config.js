@@ -1,38 +1,44 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#5B5FFF",
-          hover: "#4A4ED9",
+          DEFAULT: "#31566D",
+          hover: "#244558",
+          soft: "#E7EFF3",
+        },
+        accent: {
+          DEFAULT: "#8C5D3D",
+          soft: "#E8D6C2",
         },
         sidebar: {
-          DEFAULT: "#0B1120",
-          hover: "#1E293B",
-          active: "#1E293B",
+          DEFAULT: "#1D3341",
+          hover: "#284454",
+          active: "#31566D",
         },
-        background: "#F8FAFC",
+        background: "#F4F6F5",
         card: "#FFFFFF",
         text: {
-          primary: "#0F1729",
-          secondary: "#64748B",
-        }
+          primary: "#1D2931",
+          secondary: "#50616A",
+          muted: "#5F7078",
+        },
+        success: "#2F6A55",
+        warning: "#7C5A30",
+        danger: "#984A4F",
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+        sans: ["Inter", "Aptos", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        'card': '0 8px 30px rgb(0,0,0,0.04)',
+        card: "0 8px 24px rgba(23,43,56,0.055)",
       },
       borderRadius: {
-        'xl': '0.75rem',
-        '2xl': '1rem',
-      }
+        xl: "0.75rem",
+        "2xl": "1rem",
+      },
     },
   },
   plugins: [],

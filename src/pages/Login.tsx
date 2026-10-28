@@ -85,8 +85,9 @@ function getRegistrationError(error: unknown): string {
   return 'We could not create your account. Check your details or try signing in if you may already have an account.'
 }
 
-function BrandMark() {
-  return <img className="auth-brand-mark" src="/assets/pacecraft-mark.png" alt="" />
+function BrandMark({ onDark = false }: { onDark?: boolean }) {
+  const source = onDark ? '/assets/pacecraft-mark-ivory-harbor.png' : '/assets/pacecraft-mark-harbor.png'
+  return <img className="auth-brand-mark" src={source} alt="" />
 }
 
 export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () => Promise<void> }) {
@@ -248,7 +249,7 @@ export default function Login({ setIsAuthenticated }: { setIsAuthenticated: () =
   return (
     <main className="auth-scene">
       <section className="auth-showcase" aria-label="About Pacecraft">
-        <Link className="auth-showcase-brand" to="/" aria-label="Pacecraft sign in"><BrandMark /><span>Pacecraft</span></Link>
+        <Link className="auth-showcase-brand" to="/" aria-label="Pacecraft sign in"><BrandMark onDark /><span>Pacecraft</span></Link>
         <div className="auth-showcase-copy">
           <span className="auth-kicker"><span className="auth-kicker-dot" /> A workspace built around your momentum</span>
           <h1>Make room<br />for your next<br /><em>big move.</em></h1>

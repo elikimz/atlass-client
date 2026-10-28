@@ -106,7 +106,7 @@ export default function AndroidAppPrompt() {
         aria-describedby="android-app-prompt-description"
       >
         <div className="android-app-prompt-brand" aria-hidden="true">
-          <img src="/assets/pacecraft-icon-192.png" alt="" />
+          <img src="/assets/pacecraft-icon-192-harbor.png" alt="" />
           <span>Pacecraft</span>
         </div>
         <p className="android-app-prompt-overline">Choose how to continue</p>

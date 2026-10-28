@@ -217,7 +217,18 @@ export default function MpesaPayment() {
     }
   }
 
-  if (!plan && !isRechargeMode) return null
+  if (!plan && !isRechargeMode) {
+    return (
+      <section className="mpesa-context-recovery" role="status" aria-labelledby="mpesa-context-title">
+        <span className="member-eyebrow">M-PESA / PAYMENT CONTEXT</span>
+        <h2 id="mpesa-context-title">Payment details not found</h2>
+        <p>This step needs an amount from your add-funds flow or a plan selected from the catalogue. No payment has been started.</p>
+        <button className="member-button member-button--primary" type="button" onClick={() => navigate('/payments/recharge')}>
+          Return to add funds <span aria-hidden="true">→</span>
+        </button>
+      </section>
+    )
+  }
 
   const displayAmount = plan
     ? Math.round(plan.price * 130)

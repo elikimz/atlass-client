@@ -43,6 +43,7 @@ function isItemActive(pathname: string, path: string) {
 function titleForPath(pathname: string) {
   if (pathname === '/more') return 'More destinations'
   if (pathname === '/dashboard') return 'Dashboard'
+  if (pathname === '/payments') return 'Wallet'
   if (pathname.startsWith('/payments/recharge')) return 'Add funds'
   if (pathname.startsWith('/payments/history')) return 'Payment activity'
   if (pathname.startsWith('/payments/payout') || pathname.startsWith('/withdrawal-accounts')) return 'Withdraw earnings'
@@ -117,7 +118,7 @@ export default function Layout({ setIsAuthenticated }: LayoutProps) {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <aside className="member-sidebar" aria-label="Main navigation">
         <Link className="member-brand" to="/dashboard" aria-label="Pacecraft home">
-          <img src="/assets/pacecraft-mark.png" alt="" />
+          <img src="/assets/pacecraft-mark-ivory-harbor.png" alt="" />
           <span><strong>Pacecraft</strong><small>MEMBER WORKSPACE</small></span>
         </Link>
         <div className="member-sidebar-user">
