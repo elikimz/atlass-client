@@ -33,10 +33,12 @@ export default function TaskPlayer() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [secondsLeft, setSecondsLeft] = useState(0)
+  const [requiredSeconds, setRequiredSeconds] = useState(10)
   const [sessionReady, setSessionReady] = useState(false)
   const [sessionError, setSessionError] = useState('')
   const [completeError, setCompleteError] = useState('')
   const [accepted, setAccepted] = useState(false)
+  const [confirmedReward, setConfirmedReward] = useState<number | null>(null)
   const startedFor = useRef<number | null>(null)
   const id = Number(taskId || 0)
 
@@ -53,6 +55,7 @@ export default function TaskPlayer() {
       const startMs = Date.parse(session.started_at)
       const serverMs = Date.parse(session.server_time)
       const elapsed = Number.isFinite(startMs) && Number.isFinite(serverMs) ? Math.max(0, (serverMs - startMs) / 1000) : 0
+      setRequiredSeconds(session.required_session_seconds)
       setSecondsLeft(Math.max(0, Math.ceil(session.required_session_seconds - elapsed)))
       setSessionReady(true)
       setSessionError('')
@@ -88,9 +91,10 @@ export default function TaskPlayer() {
   }, [sessionReady, secondsLeft])
 
   const completeTask = useMutation({
-    mutationFn: async () => api.post<{ message: string; reward_amount: number }>('/tasks/complete', { video_task_id: id }),
+    mutationFn: async () => (await api.post<{ message: string; reward_amount: number; already_completed?: boolean }>('/tasks/complete', { video_task_id: id })).data,
     onMutate: () => setCompleteError(''),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      setConfirmedReward(result.reward_amount)
       setAccepted(true)
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.tasks.available }),
@@ -117,6 +121,7 @@ export default function TaskPlayer() {
 
   const youtubeUrl = task.video_url ? youtubeEmbedUrl(task.video_url) : null
   const canSubmit = sessionReady && secondsLeft === 0 && !completeTask.isPending && !accepted
+  const progressPercent = sessionReady ? Math.min(100, Math.max(0, ((requiredSeconds - secondsLeft) / requiredSeconds) * 100)) : 0
   const autoSubmit = () => {
     if (canSubmit) completeTask.mutate()
   }
@@ -141,11 +146,13 @@ export default function TaskPlayer() {
         <aside className="task-session-rail" aria-label="Task session status">
           <span className="member-eyebrow">SESSION / SERVER TIMED</span>
           <div className={`task-session-clock${sessionReady && secondsLeft === 0 ? ' is-ready' : ''}`} role="status">{!sessionReady ? '—:—' : `00:${String(secondsLeft).padStart(2, '0')}`}</div>
+          <div className="task-session-progress" aria-label={`Task progress ${Math.round(progressPercent)} percent`}><span style={{ width: `${progressPercent}%` }} /></div>
+          <div className="task-session-progress-label"><span>{sessionReady && secondsLeft === 0 ? 'Ready to submit' : 'Server-timed progress'}</span><strong>{Math.round(progressPercent)}%</strong></div>
           <p>{startSession.isPending ? 'Recording your session start…' : !sessionReady ? 'Waiting for the task service' : secondsLeft > 0 ? 'Minimum elapsed session in progress' : 'Minimum elapsed time reached'}</p>
           {sessionError && <div className="member-notice member-notice--error" role="alert">{sessionError}<button type="button" className="task-session-retry" onClick={() => task && startSession.mutate(task.id)} disabled={startSession.isPending}>Retry session start</button></div>}
           <div className="task-session-reward"><small>CATALOG REWARD</small><strong>{formatCash(task.reward_amount)}</strong><span>Credited only if accepted by the server.</span></div>
           {completeError && <p className="member-notice member-notice--error" role="alert">{completeError}</p>}
-          {accepted ? <div className="member-notice member-notice--success" role="status">Task accepted by the service. Wallet and activity records are refreshing.</div> : <button className="member-button member-button--primary task-submit-button" type="button" disabled={!canSubmit} onClick={() => completeTask.mutate()}>{completeTask.isPending ? 'Submitting…' : secondsLeft > 0 ? `Watch ${secondsLeft}s more` : 'Submit task'}</button>}
+          {accepted ? <div className="member-notice member-notice--success" role="status">Task verified. {confirmedReward === null ? 'Your reward is being recorded.' : `${formatCash(confirmedReward)} has been added to your earnings.`}</div> : <button className="member-button member-button--primary task-submit-button" type="button" disabled={!canSubmit} onClick={() => completeTask.mutate()}>{completeTask.isPending ? 'Submitting…' : secondsLeft > 0 ? `Watch ${secondsLeft}s more` : 'Submit task'}</button>}
           <span className="task-session-disclaimer">No reward is shown as paid until confirmed by your account record.</span>
         </aside>
       </div>
